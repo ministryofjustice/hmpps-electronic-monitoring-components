@@ -37,6 +37,8 @@ export default [
       'src/sandbox/index.ts',
       'src/jest.setup.ts',
       'src/**/*.test.{ts,js}',
+      'cypress/**/*.ts',
+      'cypress/**/*.js',
     ],
     rules: {
       'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
@@ -46,6 +48,8 @@ export default [
       'no-underscore-dangle': 'off',
       'no-new': 'off',
       'global-require': 'off',
+      'import/extensions': 'off',
+      'import/no-unresolved': 'off',
     },
   },
 ]
