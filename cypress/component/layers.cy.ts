@@ -120,7 +120,7 @@ describe('<moj-map> LocationsLayer', () => {
       const allTitles = map
         .getLayers()
         .getArray()
-        .map(l => l.get('title'))
+        .map(layerByTitle => layerByTitle.get('title'))
       expect(allTitles).to.not.include('locationsLayer')
     })
   })
@@ -179,7 +179,8 @@ describe('<moj-map> TracksLayer', () => {
       const allTitles = map
         .getLayers()
         .getArray()
-        .map(l => l.get('title'))
+        .map(layerByTitle => layerByTitle.get('title'))
+
       expect(allTitles).to.not.include('tracksLayer')
     })
   })
@@ -254,7 +255,7 @@ describe('<moj-map> NumberingLayer', () => {
       const allTitles = map
         .getLayers()
         .getArray()
-        .map(l => l.get('title'))
+        .map(layerByTitle => layerByTitle.get('title'))
       expect(allTitles).to.not.include('numberingLayer')
     })
   })
@@ -322,7 +323,7 @@ describe('<moj-map> CirclesLayer', () => {
       const allTitles = map
         .getLayers()
         .getArray()
-        .map(l => l.get('title'))
+        .map(layerByTitle => layerByTitle.get('title'))
       expect(allTitles).to.not.include('confidenceLayer')
     })
   })

@@ -34,7 +34,7 @@ export function findLayerByTitle(map: Map, title: string): BaseLayer | undefined
 }
 
 // Create a MapBrowserEvent.
-export function makeMapBrowserEvent(
+function makeMapBrowserEvent(
   type: string,
   map: Map,
   options: Partial<MapBrowserEvent<PointerEvent>> = {},
@@ -44,6 +44,22 @@ export function makeMapBrowserEvent(
     map,
     ...options,
   } as unknown as MapBrowserEvent<PointerEvent>
+}
+
+export function invokePointerHandler(
+  target: object,
+  method: string,
+  map: Map,
+  options: Partial<MapBrowserEvent<PointerEvent>> = {},
+): void {
+  const event = makeMapBrowserEvent('pointermove', map, options)
+  const handler = (target as any)[method]
+
+  if (typeof handler === 'function') {
+    handler.call(target, event)
+  } else {
+    throw new Error(`Target does not have a callable method named ${String(method)}`)
+  }
 }
 
 // Fire pointer events at a world coordinate on the OL canvas.

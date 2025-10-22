@@ -13,7 +13,15 @@ export default defineConfig({
         viteConfig: {
           build: { target: 'esnext' },
           optimizeDeps: {
-            include: ['ol/Map', 'ol/View', 'ol/interaction/*', 'ol/control/*'],
+            include: [
+              'ol/Map',
+              'ol/View',
+              'ol/layer/Vector',
+              'ol/source/Vector',
+              'ol/style',
+              'ol/style/Circle',
+              'ol/geom',
+            ],
           },
           resolve: {
             alias: {

@@ -1,9 +1,8 @@
 import Map from 'ol/Map'
 import View from 'ol/View'
-import type { MapBrowserEvent } from 'ol'
 import LocationDisplayControl from '@/scripts/map/controls/location-display-control'
 import MapPointerInteraction from '@/scripts/map/interactions/map-pointer-interaction'
-import { makeMapBrowserEvent } from '../support/helpers'
+import { invokePointerHandler } from '../support/helpers'
 
 describe('<moj-map> controls & cursor', () => {
   beforeEach(() => {
@@ -56,8 +55,6 @@ describe('LocationDisplayControl', () => {
     map.getView().setCenter([100000, 100000])
 
     const text = control.getText()
-
-    // Expect something like “0.00000°N 0.90000°E” or similar
     expect(text).to.include('°N')
     expect(text).to.include('°E')
     expect(text).to.match(/\d+\.\d+/)
@@ -67,14 +64,7 @@ describe('LocationDisplayControl', () => {
     const control = new LocationDisplayControl({ mode: 'dms', source: 'pointer' })
     map.addControl(control)
 
-    const event = makeMapBrowserEvent('pointermove', map, {
-      coordinate: [100000, 100000],
-    })
-
-    const pointerMoveInvoker = control as unknown as {
-      onPointerMove: (evt: MapBrowserEvent<PointerEvent>) => void
-    }
-    pointerMoveInvoker.onPointerMove(event)
+    invokePointerHandler(control, 'onPointerMove', map, { coordinate: [100000, 100000] })
 
     const text = control.getText()
     expect(text).to.include('N')
@@ -95,24 +85,26 @@ describe('MapPointerInteraction', () => {
   })
 
   it('sets cursor to grabbing on pointerdown', () => {
-    const event = makeMapBrowserEvent('pointerdown', mockMap as unknown as Map)
-    interaction.handleEvent.call(interaction, event)
+    invokePointerHandler(interaction, 'handleEvent', mockMap as unknown as Map, { type: 'pointerdown' })
     expect(viewport.style.cursor).to.equal('grabbing')
   })
 
   it('toggles between grab and grabbing on pointermove', () => {
-    const moveFree = makeMapBrowserEvent('pointermove', mockMap as unknown as Map, { dragging: false })
-    interaction.handleEvent.call(interaction, moveFree)
+    invokePointerHandler(interaction, 'handleEvent', mockMap as unknown as Map, {
+      type: 'pointermove',
+      dragging: false,
+    })
     expect(viewport.style.cursor).to.equal('grab')
 
-    const moveDrag = makeMapBrowserEvent('pointermove', mockMap as unknown as Map, { dragging: true })
-    interaction.handleEvent.call(interaction, moveDrag)
+    invokePointerHandler(interaction, 'handleEvent', mockMap as unknown as Map, {
+      type: 'pointermove',
+      dragging: true,
+    })
     expect(viewport.style.cursor).to.equal('grabbing')
   })
 
   it('resets to grab on pointerup', () => {
-    const event = makeMapBrowserEvent('pointerup', mockMap as unknown as Map)
-    interaction.handleEvent.call(interaction, event)
+    invokePointerHandler(interaction, 'handleEvent', mockMap as unknown as Map, { type: 'pointerup' })
     expect(viewport.style.cursor).to.equal('grab')
   })
 })
