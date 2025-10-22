@@ -12,6 +12,9 @@ export default defineConfig({
         bundler: 'vite',
         viteConfig: {
           build: { target: 'esnext' },
+          optimizeDeps: {
+            include: ['ol/Map', 'ol/View', 'ol/interaction/*', 'ol/control/*'],
+          },
           resolve: {
             alias: {
               '@': resolve(__dirname, '../src'),
@@ -20,7 +23,9 @@ export default defineConfig({
         },
       } as any),
     },
+    supportFile: 'cypress/support/component.ts',
     specPattern: 'cypress/component/**/*.cy.{js,ts}',
     indexHtmlFile: 'cypress/support/component-index.html',
+    fixturesFolder: 'src/fixtures',
   },
 })

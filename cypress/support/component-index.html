@@ -3,8 +3,49 @@
   <head>
     <meta charset="UTF-8" />
     <title>Cypress Component Test</title>
+    <style>
+      /* make sure the mount node has pixels */
+      #cypress-root {
+        width: 480px;
+        height: 480px;
+      }
+    </style>
   </head>
   <body>
     <div id="cypress-root"></div>
+  
+    <!-- Overlay templates for component testing -->
+    <template id="overlay-title-test-location">
+      <div><strong>Name (NOMIS ID): {{personName}} ({{personNomisId}})</strong></div>
+      <div><strong>Device ID: 604023935</strong></div>
+    </template>
+
+    <template id="overlay-body-test-location">
+      <div class="app-map__overlay-row">
+        <span class="app-map__overlay-label">Direction </span>
+        <span class="app-map__overlay-value">{{displayDirection}}</span>
+      </div>
+      <div class="app-map__overlay-row">
+        <span class="app-map__overlay-label">Geolocation Mechanism </span>
+        <span class="app-map__overlay-value">{{displayGeolocationMechanism}}</span>
+      </div>
+      <div class="app-map__overlay-row">
+        <span class="app-map__overlay-label">Recorded Date </span>
+        <span class="app-map__overlay-value">{{displayTimestamp}}</span>
+      </div>
+      <div class="app-map__overlay-row">
+        <span class="app-map__overlay-label">Confidence </span>
+        <span class="app-map__overlay-value">{{displayConfidence}}</span>
+      </div>
+      <div class="app-map__overlay-row">
+        <span class="app-map__overlay-label">Latitude </span>
+        <span class="app-map__overlay-value">{{displayLatitude}}</span>
+      </div>
+      <div class="app-map__overlay-row">
+        <span class="app-map__overlay-label">Longitude </span>
+        <span class="app-map__overlay-value">{{displayLongitude}}</span>
+      </div>
+    </template>
+
   </body>
 </html>

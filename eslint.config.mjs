@@ -44,6 +44,8 @@ export default [
       'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
       'no-console': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      'func-names': 'off',
       'max-classes-per-file': 'off',
       'no-underscore-dangle': 'off',
       'no-new': 'off',

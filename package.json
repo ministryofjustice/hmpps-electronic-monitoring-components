@@ -1,6 +1,6 @@
 {
   "name": "hmpps-open-layers-map",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "A native Web Component for displaying maps using OpenLayers.",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
@@ -16,7 +16,7 @@
     "test": "jest",
     "test:ci": "jest --runInBand",
     "test:component": "cypress run --component --config-file cypress/cypress.config.ts",
-    "test:component:ui": "cypress open --component --browser chrome --config-file cypress/cypress.config.ts",
+    "test:component-ui": "cypress open --component --browser chrome --config-file cypress/cypress.config.ts",
     "vite": "vite",
     "watch:css": "chokidar 'src/styles/**/*.scss' -c \"npm run build:css\"",
     "build:css": "sass --no-source-map --quiet-deps --load-path=node_modules src/styles/moj-map.scss src/styles/moj-map.raw.css",

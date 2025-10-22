@@ -41,7 +41,7 @@ export default class LocationDisplayControl extends Control {
     this.latLonDecimalPlaces = opts.latLonDecimalPlaces ?? 5
   }
 
-  setMap(map: Map | null): void {
+  public setMap(map: Map | null): void {
     if (this.mapRef) {
       this.mapRef.un('moveend', this.onMoveEnd)
       this.mapRef.un('pointermove', this.onPointerMove)
@@ -56,6 +56,14 @@ export default class LocationDisplayControl extends Control {
       map.on('moveend', this.onMoveEnd)
       this.onMoveEnd()
     }
+  }
+
+  public getElement(): HTMLDivElement {
+    return this.el
+  }
+
+  public getText(): string {
+    return this.el.textContent ?? ''
   }
 
   private onMoveEnd = () => {

@@ -43,7 +43,7 @@ export class LocationsLayer implements ComposableLayer<OLVecLayer> {
 
   attach(adapter: MapAdapter, layerStateOptions?: LayerStateOptions): void {
     if (adapter.mapLibrary !== 'openlayers') {
-      console.warn(`[TracksLayer] MapLibre support is not implemented yet (layer "${this.id}")`)
+      console.warn(`[LocationLayer] MapLibre support is not implemented yet (layer "${this.id}")`)
       return
     }
 
