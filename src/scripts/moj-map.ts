@@ -95,12 +95,36 @@ export class MojMap extends HTMLElement {
     return typeof layer.getNativeLayer === 'function' ? layer.getNativeLayer() : undefined
   }
 
-  public removeLayer(id: string) {
+  public removeLayer(idOrTitle: string): void {
     if (!this.adapter) return
-    const layer = this.layers.get(id)
+
+    // Try direct lookup by ID first
+    let layer = this.layers.get(idOrTitle)
+    let options: { title?: string } | undefined
+
+    // Otherwise, look for a layer whose options.title matches the given name
+    if (!layer) {
+      for (const existingLayer of this.layers.values()) {
+        const hasOptionsProperty =
+          typeof existingLayer === 'object' && existingLayer !== null && 'options' in existingLayer
+
+        if (hasOptionsProperty) {
+          options = (existingLayer as { options?: { title?: string } }).options
+        } else {
+          options = undefined
+        }
+
+        if (options?.title === idOrTitle) {
+          layer = existingLayer
+          break
+        }
+      }
+    }
+
     if (!layer) return
+
     layer.detach(this.adapter)
-    this.layers.delete(id)
+    this.layers.delete(layer.id)
   }
 
   public getLayer(id: string) {
@@ -184,13 +208,21 @@ export class MojMap extends HTMLElement {
     else if (rotateAttr === 'auto-hide') rotateOpt = { autoHide: true }
     else rotateOpt = { autoHide: false }
 
-    const explicitScale = this.getAttribute('scale-control') as 'bar' | 'line' | null
     const legacyScaleLine = this.hasAttribute('scale-line') && this.getAttribute('scale-line') !== 'false'
-    const scaleControl = explicitScale ?? (legacyScaleLine ? 'line' : undefined)
+    const scaleAttr = this.getAttribute('scale-control')
     const locationDisplay = (this.getAttribute('location-display') as 'dms' | 'latlon' | null) ?? undefined
     const locationDisplaySource = (this.getAttribute('location-source') as 'centre' | 'pointer' | null) ?? undefined
     const zoomSlider = parseBool('zoom-slider')
     const grabCursor = parseBool('grab-cursor')
+    let scaleControl: 'bar' | 'line' | undefined
+
+    if (scaleAttr === 'bar' || scaleAttr === 'line') {
+      scaleControl = scaleAttr
+    } else if (scaleAttr === 'false') {
+      scaleControl = undefined
+    } else if (legacyScaleLine) {
+      scaleControl = 'line'
+    }
 
     this.classList.toggle('has-rotate-control', rotateOpt !== false)
     this.classList.toggle('has-zoom-slider', zoomSlider)

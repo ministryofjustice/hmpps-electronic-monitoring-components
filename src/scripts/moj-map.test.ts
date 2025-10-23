@@ -124,7 +124,7 @@ describe('MojMap', () => {
     expect(mojMap.map).toBeDefined()
   })
 
-  it('addLayer attaches via adapter, and removeLayer detaches', async () => {
+  it('addLayer attaches via adapter, and removeLayer detaches by id or title', async () => {
     const mojMap = document.createElement('moj-map') as MojMap
     mojMap.setAttribute('renderer', 'openlayers')
     mojMap.setAttribute('vector-url', 'https://attr-vector')
@@ -138,15 +138,28 @@ describe('MojMap', () => {
 
     const attach = jest.fn()
     const detach = jest.fn()
-    const fakeLayer = { id: 'test', attach, detach }
 
-    mojMap.addLayer(fakeLayer)
+    // Remove by ID
+    const fakeLayerById = { id: 'test', attach, detach }
+    mojMap.addLayer(fakeLayerById)
     expect(attach).toHaveBeenCalledTimes(1)
     expect(attach.mock.calls[0][0]).toHaveProperty('mapLibrary', 'openlayers')
 
     mojMap.removeLayer('test')
     expect(detach).toHaveBeenCalledTimes(1)
     expect(detach.mock.calls[0][0]).toHaveProperty('mapLibrary', 'openlayers')
+
+    // Remove by title fallback
+    const fakeLayerByTitle = {
+      id: 'track',
+      attach,
+      detach,
+      options: { title: 'tracksLayer' },
+    }
+
+    mojMap.addLayer(fakeLayerByTitle)
+    mojMap.removeLayer('tracksLayer')
+    expect(detach).toHaveBeenCalledTimes(2) // Called twice for ID and title
   })
 
   it('closeOverlay delegates to featureOverlay.close()', () => {

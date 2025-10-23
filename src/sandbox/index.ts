@@ -6,8 +6,8 @@ import config from '../scripts/map/config'
 import '../styles/moj-map.scss'
 
 // Import some sample GeoJSON data for testing
-import emptyPositions from './fixtures/empty-positions.json'
-import positions from './fixtures/positions.json'
+import emptyPositions from '../fixtures/empty-positions.json'
+import positions from '../fixtures/positions.json'
 
 let positionData
 
@@ -71,8 +71,19 @@ positionData = positions
 const positionsScript = document.createElement('script')
 positionsScript.setAttribute('type', 'application/json')
 positionsScript.setAttribute('slot', 'position-data')
-positionsScript.textContent = JSON.stringify(positions)
+positionsScript.textContent = JSON.stringify(positionData)
 map.appendChild(positionsScript)
+
+// Alert slot for sandbox
+const alertsContainer = document.createElement('div')
+alertsContainer.setAttribute('slot', 'alerts')
+alertsContainer.className = 'moj-map__alerts'
+alertsContainer.innerHTML = `
+  <div class="moj-alert" role="alert">
+    <div class="moj-alert__content">Example alert: map data may be incomplete.</p>
+  </div>
+`
+// map.appendChild(alertsContainer)
 
 document.body.appendChild(map)
 
