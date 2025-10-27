@@ -69,7 +69,7 @@ if (config.redis.enabled) {
   redisClient.connect?.().catch((err: Error) => logger.error(`Error connecting to Redis`, err))
 }
 
-router.use(
+app.use(
   mojOrdnanceSurveyAuth({
     apiKey: process.env.OS_API_KEY!, // from Ordance Survey
     apiSecret: process.env.OS_API_SECRET!, // from Ordnance Survey

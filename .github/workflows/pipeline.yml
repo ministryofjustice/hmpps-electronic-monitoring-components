@@ -1,0 +1,16 @@
+name: Pipeline [build only]
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  node_build:
+    name: Node build
+    uses: ministryofjustice/hmpps-github-actions/.github/workflows/node_build.yml@v2
+    secrets: inherit
