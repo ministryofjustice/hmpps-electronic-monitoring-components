@@ -1,4 +1,4 @@
-# hmpps-open-layers-map-webcomponent-poc-ui
+# hmpps-electronic-monitoring-components
 
 A native Web Component for rendering maps with **OpenLayers** (default) or **MapLibre GL**.  
 Includes a small layer API for common overlays (locations, tracks, circles, numbering).
@@ -57,34 +57,27 @@ This package exports an Express middleware that securely proxies Ordnance Survey
 Mount it in your server app, e.g.:
 
 ```ts
-// server/os-vector.ts
+// server/app.ts
 import express from 'express'
-import { mojOrdnanceSurveyAuth } from 'hmpps-open-layers-map/server'
+import { CacheClient, mojOrdnanceSurveyAuth } from 'hmpps-open-layers-map/ordnance-survey-auth'
 
-const router = express.Router()
+const app = express()
+
+// Optional - connect Redis client for OS tile caching
+if (config.redis.enabled) {
+  const redisClient: CacheClient | undefined = createRedisClient()
+  redisClient.connect?.().catch((err: Error) => logger.error(`Error connecting to Redis`, err))
+}
 
 router.use(
   mojOrdnanceSurveyAuth({
-    apiKey: process.env.OS_API_KEY!, // from OS
-    apiSecret: process.env.OS_API_SECRET!, // from OS
+    apiKey: process.env.OS_API_KEY!, // from Ordance Survey
+    apiSecret: process.env.OS_API_SECRET!, // from Ordnance Survey
     // Optional: Redis cache + expiry override
-    // redisClient: connectedRedisClient, // connected redis client
+    // redisClient, // connected redis client
     // cacheExpiry: 3600, // seconds; default is 7 days in production, 0 in dev
   }),
 )
-
-export default router
-```
-
-Then mount that router in your app:
-
-```ts
-// server/app.ts
-import express from 'express'
-import osVector from './os-vector'
-
-const app = express()
-app.use(osVector)
 ```
 
 ### Notes
