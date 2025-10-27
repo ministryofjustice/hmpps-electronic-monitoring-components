@@ -19,3 +19,8 @@ jobs:
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/node_unit_tests.yml@v2
     needs: [node_build]
     secrets: inherit
+  node_integration_tests:
+    name: Node integration tests
+    uses: ministryofjustice/hmpps-github-actions/.github/workflows/node_integration_tests.yml@v2
+    needs: [node_build]
+    secrets: inherit
