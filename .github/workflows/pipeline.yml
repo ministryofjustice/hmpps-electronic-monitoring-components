@@ -34,7 +34,7 @@ jobs:
 
       - name: Verify build output
         run: |
-          ls -R dist/ || echo "⚠️ No dist folder found; ensure build job outputs were generated."
+          ls -R dist/ || echo "No dist folder found; ensure build job outputs were generated."
 
       - name: Publish to npm via OIDC
         run: npm publish --provenance --access public
