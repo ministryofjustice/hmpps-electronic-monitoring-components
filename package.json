@@ -1,12 +1,22 @@
 {
-  "name": "hmpps-open-layers-map",
-  "version": "0.8.8",
-  "description": "A native Web Component for displaying maps using OpenLayers or MapLibre.",
+  "name": "hmpps-electronic-monitoring-components",
+  "version": "0.0.1",
+  "description": "HMPPS Electronic Monitoring Frontend Components",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ministryofjustice/hmpps-electronic-monitoring-components.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ministryofjustice/hmpps-electronic-monitoring-components/issues"
+  },
+  "homepage": "https://github.com/ministryofjustice/hmpps-electronic-monitoring-components#readme",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
   "types": "./dist/types/index.d.ts",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "tag": "latest"
   },
   "scripts": {
     "prepare": "husky",
