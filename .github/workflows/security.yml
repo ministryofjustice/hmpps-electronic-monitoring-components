@@ -2,9 +2,6 @@ name: Security Scans
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - '**'
   schedule:
     - cron: '19 6 * * MON-FRI' # Every weekday morning
 
@@ -24,13 +21,6 @@ jobs:
   npm-dependencies:
     name: NPM dependency audit
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/security_npm_dependency.yml@v2
-    secrets: inherit
-    with:
-      channel_id: ${{ vars.SECURITY_ALERTS_SLACK_CHANNEL_ID || 'NO_SLACK' }}
-
-  trivy:
-    name: Trivy vulnerability scan
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/security_trivy.yml@v2
     secrets: inherit
     with:
       channel_id: ${{ vars.SECURITY_ALERTS_SLACK_CHANNEL_ID || 'NO_SLACK' }}
