@@ -1,4 +1,4 @@
-name: Pipeline [build only]
+name: Pipeline [build -> test]
 
 on:
   push:

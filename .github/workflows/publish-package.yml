@@ -1,0 +1,30 @@
+name: Publish package (skeleton)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  skeleton:
+    name: Verify workflow trigger and environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Confirm environment
+        run: |
+          node -v
+          npm -v
+          echo "✅ Publish skeleton job ran successfully!"
