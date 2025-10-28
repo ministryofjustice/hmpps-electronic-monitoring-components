@@ -1,5 +1,5 @@
 {
-  "name": "hmpps-electronic-monitoring-components",
+  "name": "@ministryofjustice/hmpps-electronic-monitoring-components",
   "version": "0.0.1",
   "description": "HMPPS Electronic Monitoring Frontend Components",
   "repository": {

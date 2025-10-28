@@ -1,27 +1,18 @@
-name: Publish package
+name: Pipeline [lint → build → test]
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - '**'
+  pull_request:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
-  node_build:
-    name: Node build
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/node_build.yml@v2
-    secrets: inherit
-
-  publish:
-    name: Publish to npm (via OIDC)
-    needs: [node_build]
+  node_lint:
+    name: Node lint
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    permissions:
-      contents: read
-      id-token: write
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,11 +21,27 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          registry-url: 'https://registry.npmjs.org'
 
-      - name: Verify build output
-        run: |
-          ls -R dist/ || echo "No dist folder found; ensure build job outputs were generated."
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Publish to npm via OIDC
-        run: npm publish --provenance --access public
+      - name: Run lint check
+        run: npm run lint
+
+  node_build:
+    name: Node build
+    uses: ministryofjustice/hmpps-github-actions/.github/workflows/node_build.yml@v2
+    needs: [node_lint]
+    secrets: inherit
+
+  node_unit_tests:
+    name: Node unit tests
+    uses: ministryofjustice/hmpps-github-actions/.github/workflows/node_unit_tests.yml@v2
+    needs: [node_build]
+    secrets: inherit
+
+  node_integration_tests:
+    name: Node integration tests
+    uses: ministryofjustice/hmpps-github-actions/.github/workflows/node_integration_tests.yml@v2
+    needs: [node_build]
+    secrets: inherit
