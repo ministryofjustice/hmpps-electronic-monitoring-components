@@ -101,14 +101,12 @@ nunjucks.configure(['<your-app-views>', 'node_modules/hmpps-open-layers-map/nunj
 Render the element with the macro:
 
 ```njk
-{% raw %}
 {% from "components/moj-map/macro.njk" import mojMap %}
 
 {{ mojMap({
-  alerts: params.alerts,
-  cspNonce: params.cspNonce
+  alerts: alerts,
+  cspNonce: cspNonce
 }) }}
-{% endraw %}
 ```
 
 Ensure the host element has a **non-zero height** (OpenLayers won’t render otherwise).
@@ -196,13 +194,12 @@ This configuration keeps security strict for scripts (the `script-src` directive
 ## Example (Nunjucks)
 
 ```njk
-{% raw %}
 {% from "components/moj-map/macro.njk" import mojMap %}
 
 {{ mojMap({
-  alerts: params.alerts,
-  cspNonce: params.cspNonce,
-  positions: params.positions,
+  alerts: alerts,
+  cspNonce: cspNonce,
+  positions: positions,
   usesInternalOverlays: true,
   renderer: 'maplibre',
   controls: {
@@ -214,7 +211,6 @@ This configuration keeps security strict for scripts (the `script-src` directive
   },
   enable3DBuildings: true
 }) }}
-{% endraw %}
 ```
 
 ---
@@ -247,18 +243,18 @@ Import layer classes from `hmpps-open-layers-map/layers`.
 
 Each layer accepts:
 
-- `geoJson` — your `FeatureCollection`
-- `visible?: boolean`
-- `zIndex?: number`
+- `positions` — an array of position objects (required)
+- `visible?: boolean` — whether the layer should be shown initially
+- `zIndex?: number` — draw order (higher numbers appear above lower ones)
 - Other layer-specific options
 
 ### Available layers
 
-- `LocationsLayer` — renders **Point** features as circles.
+- `LocationsLayer` — renders **Point** positions as circles.
 - `TracksLayer` — composite layer for **LineString** data:
   - lines (`LinesLayer`), and
   - optional arrows (`ArrowsLayer`) indicating direction.
-- `CirclesLayer` — renders **Point** features as **Circle** geometries with radius read from a property (e.g. `"confidence"`).
+- `CirclesLayer` — renders **Point** positions as **Circle** geometries with a radius derived from a property (e.g. `"confidence"`).
 - `NumberingLayer` — paints numbers as text labels next to points.
 
 ### Full example
@@ -275,16 +271,20 @@ await new Promise<void>(resolve => {
 })
 
 const map = mojMap.olMapInstance!
-const geoJson = mojMap.geojson // if your positions are exposed as GeoJSON
-if (!geoJson) throw new Error('No GeoJSON/positions provided to <moj-map>')
+const positions = mojMap.positions // your array of positions
+if (!positions?.length) throw new Error('No positions provided to <moj-map>')
 
 // 1) Locations
-const locationsLayer = mojMap.addLayer(new LocationsLayer({ geoJson }))!
+const locationsLayer = mojMap.addLayer(
+  new LocationsLayer({
+    positions,
+  }),
+)!
 
 // 2) Tracks (lines + arrows)
 const tracksLayer = mojMap.addLayer(
   new TracksLayer({
-    geoJson,
+    positions,
     visible: false,
     lines: {},
     arrows: { enabled: true },
@@ -294,7 +294,7 @@ const tracksLayer = mojMap.addLayer(
 // 3) Circles
 mojMap.addLayer(
   new CirclesLayer({
-    geoJson,
+    positions,
     id: 'confidence',
     title: 'Confidence circles',
     radiusProperty: 'confidence',
@@ -306,7 +306,7 @@ mojMap.addLayer(
 // 4) Numbering
 mojMap.addLayer(
   new NumberingLayer({
-    geoJson,
+    positions,
     numberProperty: 'sequenceNumber',
     title: 'Location numbering',
     visible: false,
@@ -338,7 +338,7 @@ if (source) {
 **zIndex**
 
 - Higher z-index draws above lower ones.
-- `TracksLayer` puts **arrows** at `zIndex + 1` so they render above lines.
+- `TracksLayer` places **arrows** at `zIndex + 1` so they render above lines.
 
 ---
 
@@ -346,16 +346,18 @@ if (source) {
 
 ### `LocationsLayer(options)`
 
-- `geoJson: FeatureCollection` (required)
+- `positions: Position[]` (required)
 - `id?: string` (default: `"locations"`)
 - `title?: string`
 - `visible?: boolean` (default: `true`)
 - `zIndex?: number`
-- `style?: { radius?: number; fill?: string; stroke?: { color?: string; width?: number } }`
+- `style?: { radius: number; fill: string; stroke: { color: string; width: number } }`
+
+---
 
 ### `TracksLayer(options)`
 
-- `geoJson: FeatureCollection` (required)
+- `positions: Position[]` (required)
 - `id?: string` (default: `"tracks"`)
 - `title?: string`
 - `visible?: boolean` (default: `true`)
@@ -365,9 +367,11 @@ if (source) {
 
 > Internally creates a `LayerGroup`. `addLayer()` returns that group.
 
+---
+
 ### `CirclesLayer(options)`
 
-- `geoJson: FeatureCollection` (required; **Point** features)
+- `positions: Position[]` (required; **Point** positions)
 - `id?: string` (default: `"circles"`)
 - `title?: string`
 - `visible?: boolean` (default: `false`)
@@ -375,15 +379,22 @@ if (source) {
 - `radiusProperty?: string` (default: `"confidence"`)
 - `style?: ol/style/Style` (optional custom style)
 
+---
+
 ### `NumberingLayer(options)`
 
-- `geoJson: FeatureCollection` (required; **Point** features)
+- `positions: Position[]` (required; **Point** positions)
 - `id?: string` (default: `"numbering"`)
 - `title?: string`
 - `visible?: boolean` (default: `false`)
 - `zIndex?: number`
 - `numberProperty?: string` (default: `"sequenceNumber"`)
 - `font?`, `fillColor?`, `strokeColor?`, `strokeWidth?`, `offsetX?`, `offsetY?`
+
+---
+
+**Note:** All layers are currently implemented for the OpenLayers renderer only.  
+MapLibre support is planned but not yet available.
 
 ---
 
