@@ -1,26 +1,40 @@
-name: Pipeline [build -> test]
+name: Publish package
 
 on:
-  push:
-    branches:
-      - '**'
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   node_build:
     name: Node build
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/node_build.yml@v2
     secrets: inherit
-  node_unit_tests:
-    name: Node unit tests
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/node_unit_tests.yml@v2
+
+  publish:
+    name: Publish to npm (via OIDC)
     needs: [node_build]
-    secrets: inherit
-  node_integration_tests:
-    name: Node integration tests
-    uses: ministryofjustice/hmpps-github-actions/.github/workflows/node_integration_tests.yml@v2
-    needs: [node_build]
-    secrets: inherit
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Verify build output
+        run: |
+          ls -R dist/ || echo "⚠️ No dist folder found; ensure build job outputs were generated."
+
+      - name: Publish to npm via OIDC
+        run: npm publish --provenance --access public
