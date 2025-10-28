@@ -26,6 +26,13 @@ export default [
       process.env.NODE_ENV === 'production'
         ? ['error', { allow: ['warn', 'error'] }]
         : 'off',
+      // Ignore unresolved errors for Vite raw imports like '?raw'
+      'import/no-unresolved': [
+        'error',
+        {
+          ignore: ['\\?raw$'],
+        },
+      ],
     },
   },
 
