@@ -4,7 +4,7 @@
   "description": "HMPPS Electronic Monitoring Frontend Components",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ministryofjustice/hmpps-electronic-monitoring-components.git"
+    "url": "https://github.com/ministryofjustice/hmpps-electronic-monitoring-components.git"
   },
   "bugs": {
     "url": "https://github.com/ministryofjustice/hmpps-electronic-monitoring-components/issues"
