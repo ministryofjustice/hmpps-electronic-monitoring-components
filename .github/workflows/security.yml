@@ -1,0 +1,26 @@
+name: Security Scans
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '19 6 * * MON-FRI' # Every weekday morning
+
+permissions:
+  contents: read
+  actions: read
+  security-events: write
+
+jobs:
+  codeql:
+    name: CodeQL scan
+    uses: ministryofjustice/hmpps-github-actions/.github/workflows/security_codeql_actions.yml@v2
+    secrets: inherit
+    with:
+      channel_id: ${{ vars.SECURITY_ALERTS_SLACK_CHANNEL_ID || 'NO_SLACK' }}
+
+  npm-dependencies:
+    name: NPM dependency audit
+    uses: ministryofjustice/hmpps-github-actions/.github/workflows/security_npm_dependency.yml@v2
+    secrets: inherit
+    with:
+      channel_id: ${{ vars.SECURITY_ALERTS_SLACK_CHANNEL_ID || 'NO_SLACK' }}

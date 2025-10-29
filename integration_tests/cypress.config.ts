@@ -31,9 +31,9 @@ export default defineConfig({
         },
       } as any),
     },
-    supportFile: 'cypress/support/component.ts',
-    specPattern: 'cypress/component/**/*.cy.{js,ts}',
-    indexHtmlFile: 'cypress/support/component-index.html',
+    supportFile: 'integration_tests/support/component.ts',
+    specPattern: 'integration_tests/component/**/*.cy.{js,ts}',
+    indexHtmlFile: 'integration_tests/support/component-index.html',
     fixturesFolder: 'src/fixtures',
   },
 })

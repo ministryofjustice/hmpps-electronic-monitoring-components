@@ -26,6 +26,13 @@ export default [
       process.env.NODE_ENV === 'production'
         ? ['error', { allow: ['warn', 'error'] }]
         : 'off',
+      // Ignore unresolved errors for Vite raw imports like '?raw'
+      'import/no-unresolved': [
+        'error',
+        {
+          ignore: ['\\?raw$'],
+        },
+      ],
     },
   },
 
@@ -37,8 +44,8 @@ export default [
       'src/sandbox/index.ts',
       'src/jest.setup.ts',
       'src/**/*.test.{ts,js}',
-      'cypress/**/*.ts',
-      'cypress/**/*.js',
+      'integration_tests/**/*.ts',
+      'integration_tests/**/*.js',
     ],
     rules: {
       'import/no-extraneous-dependencies': ['error', { devDependencies: true }],

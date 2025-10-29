@@ -1,12 +1,22 @@
 {
-  "name": "hmpps-open-layers-map",
-  "version": "0.8.5",
-  "description": "A native Web Component for displaying maps using OpenLayers.",
+  "name": "@ministryofjustice/hmpps-electronic-monitoring-components",
+  "version": "0.0.2",
+  "description": "HMPPS Electronic Monitoring Frontend Components",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ministryofjustice/hmpps-electronic-monitoring-components.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ministryofjustice/hmpps-electronic-monitoring-components/issues"
+  },
+  "homepage": "https://github.com/ministryofjustice/hmpps-electronic-monitoring-components#readme",
   "main": "./dist/index.cjs.js",
   "module": "./dist/index.es.js",
   "types": "./dist/types/index.d.ts",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "tag": "latest"
   },
   "scripts": {
     "prepare": "husky",
@@ -15,12 +25,12 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:ci": "jest --runInBand",
-    "test:component": "cypress run --component --config-file cypress/cypress.config.ts",
-    "test:component-ui": "cypress open --component --browser chrome --config-file cypress/cypress.config.ts",
+    "int-test": "cypress run --component --config-file integration_tests/cypress.config.ts",
+    "int-test-ui": "cypress open --component --browser chrome --config-file integration_tests/cypress.config.ts",
     "vite": "vite",
     "watch:css": "chokidar 'src/styles/**/*.scss' -c \"npm run build:css\"",
     "build:css": "sass --no-source-map --quiet-deps --load-path=node_modules src/styles/moj-map.scss src/styles/moj-map.raw.css",
-    "sandbox": "npm-run-all --parallel build:css watch:css vite",
+    "start-feature": "npm-run-all --parallel build:css watch:css vite",
     "build": "npm run build:css && BUILD=lib vite build && tsc",
     "preview": "vite preview"
   },

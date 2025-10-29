@@ -1,0 +1,17 @@
+name: 'CodeQL configuration'
+
+languages:
+  - javascript
+  - typescript
+
+# Directories to include in the scan
+paths:
+  - src/
+  - integration_tests/
+
+# Exclude directories
+paths-ignore:
+  - dist/
+  - node_modules/
+  - coverage/
+  - '**/*.test.*'

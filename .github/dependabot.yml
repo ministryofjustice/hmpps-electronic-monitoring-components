@@ -1,0 +1,22 @@
+version: 2
+updates:
+  # Keep npm dependencies up to date
+  - package-ecosystem: npm
+    directory: /
+    ignore:
+      - dependency-name: '@types/node'
+        versions:
+          - '>=23'
+    schedule:
+      interval: weekly
+      day: wednesday
+    groups:
+      development:
+        dependency-type: 'development'
+
+  # Keep GitHub Actions versions up to date
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: wednesday
