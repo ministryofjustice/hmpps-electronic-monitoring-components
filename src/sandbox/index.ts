@@ -1,17 +1,17 @@
-import '../scripts/moj-map'
-import { MojMap } from '../scripts/moj-map'
-import { CirclesLayer, LocationsLayer, NumberingLayer, TracksLayer } from '../scripts/map/layers'
+import '@map/scripts/em-map'
+import { EmMap } from '@map/scripts/em-map'
+import { CirclesLayer, LocationsLayer, NumberingLayer, TracksLayer } from '../components/map/scripts/core/layers'
 import { isEmpty } from 'ol/extent'
-import config from '../scripts/map/config'
-import '../styles/moj-map.scss'
+import config from '../components/map/scripts/core/config'
+import '@map/styles/em-map.scss'
 
 // Import some sample GeoJSON data for testing
-import emptyPositions from '../fixtures/empty-positions.json'
-import positions from '../fixtures/positions.json'
+import emptyPositions from '../components/map/fixtures/empty-positions.json'
+import positions from '../components/map/fixtures/positions.json'
 
 let positionData
 
-const map = document.createElement('moj-map')
+const map = document.createElement('em-map')
 
 const apiKey = import.meta.env.VITE_OS_MAPS_API_KEY ?? ''
 const vectorTestUrl = `${config.tiles.urls.vectorStyleUrl}${config.tiles.urls.vectorStyleUrl.includes('?') ? '&' : '?'}key=${apiKey}`
@@ -77,10 +77,10 @@ map.appendChild(positionsScript)
 // Alert slot for sandbox
 const alertsContainer = document.createElement('div')
 alertsContainer.setAttribute('slot', 'alerts')
-alertsContainer.className = 'moj-map__alerts'
+alertsContainer.className = 'em-map__alerts'
 alertsContainer.innerHTML = `
-  <div class="moj-alert" role="alert">
-    <div class="moj-alert__content">Example alert: map data may be incomplete.</p>
+  <div class="em-alert" role="alert">
+    <div class="em-alert__content">Example alert: map data may be incomplete.</p>
   </div>
 `
 // map.appendChild(alertsContainer)
@@ -88,20 +88,20 @@ alertsContainer.innerHTML = `
 document.body.appendChild(map)
 
 map.addEventListener('map:ready', () => {
-  const mojMap = map as MojMap
-  const olMap = mojMap.olMapInstance
-  const positions = mojMap.positions
+  const emMap = map as EmMap
+  const olMap = emMap.olMapInstance
+  const positions = emMap.positions
 
   if (!olMap || !positions?.length) return
 
-  const locationsLayer = mojMap.addLayer(
+  const locationsLayer = emMap.addLayer(
     new LocationsLayer({
       title: 'pointsLayer',
       positions,
     }),
   )
 
-  mojMap.addLayer(
+  emMap.addLayer(
     new TracksLayer({
       title: 'tracksLayer',
       visible: true,
@@ -109,7 +109,7 @@ map.addEventListener('map:ready', () => {
     }),
   )
 
-  mojMap.addLayer(
+  emMap.addLayer(
     new NumberingLayer({
       positions,
       numberProperty: 'sequenceNumber',
@@ -118,7 +118,7 @@ map.addEventListener('map:ready', () => {
     }),
   )
 
-  mojMap.addLayer(
+  emMap.addLayer(
     new CirclesLayer({
       positions,
       id: 'confidence',

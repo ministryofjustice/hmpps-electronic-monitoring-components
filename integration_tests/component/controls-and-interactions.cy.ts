@@ -1,23 +1,23 @@
 import Map from 'ol/Map'
 import View from 'ol/View'
-import LocationDisplayControl from '@/scripts/map/controls/location-display-control'
-import MapPointerInteraction from '@/scripts/map/interactions/map-pointer-interaction'
+import LocationDisplayControl from '@/components/map/scripts/core/controls/location-display-control'
+import MapPointerInteraction from '@/components/map/scripts/core/interactions/map-pointer-interaction'
 import { invokePointerHandler } from '../support/helpers'
 
-describe('<moj-map> controls & cursor', () => {
+describe('<em-map> controls & cursor', () => {
   beforeEach(() => {
-    cy.mountMojMap({ attrs: { 'scale-control': 'bar', 'zoom-slider': 'true' } })
+    cy.mountEmMap({ attrs: { 'scale-control': 'bar', 'zoom-slider': 'true' } })
     cy.wait('@stubMapStyle')
   })
 
   it('applies control CSS classes and grab cursor by default', () => {
-    cy.get('moj-map').should('have.class', 'has-scale-control').and('have.class', 'has-zoom-slider')
+    cy.get('em-map').should('have.class', 'has-scale-control').and('have.class', 'has-zoom-slider')
 
-    cy.get('moj-map').shadow().find('#map').should('exist')
+    cy.get('em-map').shadow().find('#map').should('exist')
   })
 
   it('disables grab cursor when grab-cursor="false"', () => {
-    cy.mountMojMap({
+    cy.mountEmMap({
       attrs: {
         'vector-test-url': '/os-map/vector/style',
         'csp-nonce': 'x',
@@ -25,7 +25,7 @@ describe('<moj-map> controls & cursor', () => {
       },
     })
     cy.wait('@stubMapStyle')
-    cy.get('moj-map').should('exist')
+    cy.get('em-map').should('exist')
   })
 })
 

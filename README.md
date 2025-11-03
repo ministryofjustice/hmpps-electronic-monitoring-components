@@ -25,9 +25,9 @@ This component targets modern browsers only.
 
 ---
 
-# Getting Started with `<moj-map>`
+# Getting Started with `<em-map>`
 
-`<moj-map>` is an embeddable map component. It uses Ordnance Survey **vector tiles** by default via a small server middleware and provides a typed API for adding layers from your app code.
+`<em-map>` is an embeddable map component. It uses Ordnance Survey **vector tiles** by default via a small server middleware and provides a typed API for adding layers from your app code.
 
 ---
 
@@ -46,7 +46,7 @@ import 'hmpps-open-layers-map'
 Optionally import types if you’ll interact with the map in TypeScript:
 
 ```ts
-import type { MojMap } from 'hmpps-open-layers-map'
+import type { EmMap } from 'hmpps-open-layers-map'
 ```
 
 ---
@@ -59,7 +59,7 @@ Mount it in your server app, e.g.:
 ```ts
 // server/app.ts
 import express from 'express'
-import { CacheClient, mojOrdnanceSurveyAuth } from 'hmpps-open-layers-map/ordnance-survey-auth'
+import { CacheClient, emOrdnanceSurveyAuth } from 'hmpps-open-layers-map/ordnance-survey-auth'
 
 const app = express()
 
@@ -70,7 +70,7 @@ if (config.redis.enabled) {
 }
 
 app.use(
-  mojOrdnanceSurveyAuth({
+  emOrdnanceSurveyAuth({
     apiKey: process.env.OS_API_KEY!, // from Ordance Survey
     apiSecret: process.env.OS_API_SECRET!, // from Ordnance Survey
     // Optional: Redis cache + expiry override
@@ -101,9 +101,9 @@ nunjucks.configure(['<your-app-views>', 'node_modules/hmpps-open-layers-map/nunj
 Render the element with the macro:
 
 ```njk
-{% from "components/moj-map/macro.njk" import mojMap %}
+{% from "components/em-map/macro.njk" import emMap %}
 
-{{ mojMap({
+{{ emMap({
   alerts: alerts,
   cspNonce: cspNonce
 }) }}
@@ -194,9 +194,9 @@ This configuration keeps security strict for scripts (the `script-src` directive
 ## Example (Nunjucks)
 
 ```njk
-{% from "components/moj-map/macro.njk" import mojMap %}
+{% from "components/em-map/macro.njk" import emMap %}
 
-{{ mojMap({
+{{ emMap({
   alerts: alerts,
   cspNonce: cspNonce,
   positions: positions,
@@ -220,19 +220,19 @@ This configuration keeps security strict for scripts (the `script-src` directive
 The component fires **`map:ready`** once initialised:
 
 ```ts
-import type { MojMap } from 'hmpps-open-layers-map'
+import type { EmMap } from 'hmpps-open-layers-map'
 
-const mojMap = document.querySelector('moj-map') as MojMap
+const emMap = document.querySelector('em-map') as EmMap
 
 await new Promise<void>(resolve => {
-  mojMap.addEventListener('map:ready', () => resolve(), { once: true })
+  emMap.addEventListener('map:ready', () => resolve(), { once: true })
 })
 
 // OpenLayers map instance (if using OpenLayers renderer)
-const map = mojMap.olMapInstance
+const map = emMap.olMapInstance
 
 // The positions payload you provided
-const positions = mojMap.positions
+const positions = emMap.positions
 ```
 
 ---
@@ -260,29 +260,29 @@ Each layer accepts:
 ### Full example
 
 ```ts
-import type { MojMap } from 'hmpps-open-layers-map'
+import type { EmMap } from 'hmpps-open-layers-map'
 import { LocationsLayer, TracksLayer, CirclesLayer, NumberingLayer } from 'hmpps-open-layers-map/layers'
 import { isEmpty } from 'ol/extent'
 
-const mojMap = document.querySelector('moj-map') as MojMap
+const emMap = document.querySelector('em-map') as EmMap
 
 await new Promise<void>(resolve => {
-  mojMap.addEventListener('map:ready', () => resolve(), { once: true })
+  emMap.addEventListener('map:ready', () => resolve(), { once: true })
 })
 
-const map = mojMap.olMapInstance!
-const positions = mojMap.positions // your array of positions
-if (!positions?.length) throw new Error('No positions provided to <moj-map>')
+const map = emMap.olMapInstance!
+const positions = emMap.positions // your array of positions
+if (!positions?.length) throw new Error('No positions provided to <em-map>')
 
 // 1) Locations
-const locationsLayer = mojMap.addLayer(
+const locationsLayer = emMap.addLayer(
   new LocationsLayer({
     positions,
   }),
 )!
 
 // 2) Tracks (lines + arrows)
-const tracksLayer = mojMap.addLayer(
+const tracksLayer = emMap.addLayer(
   new TracksLayer({
     positions,
     visible: false,
@@ -292,7 +292,7 @@ const tracksLayer = mojMap.addLayer(
 )!
 
 // 3) Circles
-mojMap.addLayer(
+emMap.addLayer(
   new CirclesLayer({
     positions,
     id: 'confidence',
@@ -304,7 +304,7 @@ mojMap.addLayer(
 )
 
 // 4) Numbering
-mojMap.addLayer(
+emMap.addLayer(
   new NumberingLayer({
     positions,
     numberProperty: 'sequenceNumber',
@@ -406,13 +406,13 @@ MapLibre support is planned but not yet available.
   - `.has-scale-control`
   - `.has-location-dms`
 - CSS custom property:
-  - `--moj-scale-bar-bottom` — bottom offset for scale + location readout.
+  - `--em-scale-bar-bottom` — bottom offset for scale + location readout.
 
 Example:
 
 ```css
-moj-map {
-  --moj-scale-bar-bottom: 16px;
+em-map {
+  --em-scale-bar-bottom: 16px;
 }
 ```
 

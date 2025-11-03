@@ -1,14 +1,14 @@
 import Map from 'ol/Map'
 import CircleStyle from 'ol/style/Circle'
 import VectorLayer from 'ol/layer/Vector'
-import { CirclesLayer, LocationsLayer, NumberingLayer, TracksLayer } from '@/scripts/map/layers'
-import type { MojMap } from '@/scripts/moj-map'
+import { CirclesLayer, LocationsLayer, NumberingLayer, TracksLayer } from '@map/scripts/core/layers'
+import type { EmMap } from '@map/scripts/em-map'
 import { findLayerByTitle } from '../support/helpers'
 
-describe('<moj-map> layers', () => {
+describe('<em-map> layers', () => {
   it('renders and attaches all expected layer types', () => {
-    cy.fixture('positions.json').then(positions => {
-      cy.mountMojMap({
+    cy.readFile('src/components/map/fixtures/positions.json').then(positions => {
+      cy.mountEmMap({
         attrs: { 'csp-nonce': 'x' },
         slots: { 'position-data': positions },
       })
@@ -16,8 +16,8 @@ describe('<moj-map> layers', () => {
       cy.wait('@stubMapStyle')
       cy.waitForMapReady()
 
-      cy.get('moj-map').then($el => {
-        const el = $el[0] as MojMap
+      cy.get('em-map').then($el => {
+        const el = $el[0] as EmMap
         const olMap = el.olMapInstance as Map
         expect(olMap, 'OL map should exist').to.exist
 
@@ -60,18 +60,18 @@ describe('<moj-map> layers', () => {
   })
 })
 
-describe('<moj-map> LocationsLayer', () => {
+describe('<em-map> LocationsLayer', () => {
   beforeEach(() => {
     cy.stubMapMiddleware()
-    cy.fixture('positions.json').as('positions')
-    cy.mountMojMap({ attrs: { 'csp-nonce': 'x' } })
+    cy.readFile('src/components/map/fixtures/positions.json').as('positions')
+    cy.mountEmMap({ attrs: { 'csp-nonce': 'x' } })
     cy.wait('@stubMapStyle')
     cy.waitForMapReady()
   })
 
   it('adds and removes LocationsLayer with correct visibility, zIndex, and style', function () {
-    cy.get('moj-map').then($el => {
-      const el = $el[0] as MojMap
+    cy.get('em-map').then($el => {
+      const el = $el[0] as EmMap
       const map = el.olMapInstance as Map
       const positions = this.positions as any[]
 
@@ -126,18 +126,18 @@ describe('<moj-map> LocationsLayer', () => {
   })
 })
 
-describe('<moj-map> TracksLayer', () => {
+describe('<em-map> TracksLayer', () => {
   beforeEach(() => {
     cy.stubMapMiddleware()
-    cy.fixture('positions.json').as('positions')
-    cy.mountMojMap({ attrs: { 'csp-nonce': 'x' } })
+    cy.readFile('src/components/map/fixtures/positions.json').as('positions')
+    cy.mountEmMap({ attrs: { 'csp-nonce': 'x' } })
     cy.wait('@stubMapStyle')
     cy.waitForMapReady()
   })
 
   it('adds and removes TracksLayer with correct visibility, zIndex, and style', function () {
-    cy.get('moj-map').then($el => {
-      const el = $el[0] as MojMap
+    cy.get('em-map').then($el => {
+      const el = $el[0] as EmMap
       const map = el.olMapInstance as Map
       const positions = this.positions as any[]
       const customStyle = { stroke: { color: 'red' } }
@@ -186,18 +186,18 @@ describe('<moj-map> TracksLayer', () => {
   })
 })
 
-describe('<moj-map> NumberingLayer', () => {
+describe('<em-map> NumberingLayer', () => {
   beforeEach(() => {
     cy.stubMapMiddleware()
-    cy.fixture('positions.json').as('positions')
-    cy.mountMojMap({ attrs: { 'csp-nonce': 'x' } })
+    cy.readFile('src/components/map/fixtures/positions.json').as('positions')
+    cy.mountEmMap({ attrs: { 'csp-nonce': 'x' } })
     cy.wait('@stubMapStyle')
     cy.waitForMapReady()
   })
 
   it('adds and removes NumberingLayer with correct visibility, zIndex, and text style', function () {
-    cy.get('moj-map').then($el => {
-      const el = $el[0] as MojMap
+    cy.get('em-map').then($el => {
+      const el = $el[0] as EmMap
       const map = el.olMapInstance as Map
       const positions = this.positions as any[]
 
@@ -261,18 +261,18 @@ describe('<moj-map> NumberingLayer', () => {
   })
 })
 
-describe('<moj-map> CirclesLayer', () => {
+describe('<em-map> CirclesLayer', () => {
   beforeEach(() => {
     cy.stubMapMiddleware()
-    cy.fixture('positions.json').as('positions')
-    cy.mountMojMap({ attrs: { 'csp-nonce': 'x' } })
+    cy.readFile('src/components/map/fixtures/positions.json').as('positions')
+    cy.mountEmMap({ attrs: { 'csp-nonce': 'x' } })
     cy.wait('@stubMapStyle')
     cy.waitForMapReady()
   })
 
   it('adds and removes CirclesLayer with correct visibility, zIndex, and fill/stroke style', function () {
-    cy.get('moj-map').then($el => {
-      const el = $el[0] as MojMap
+    cy.get('em-map').then($el => {
+      const el = $el[0] as EmMap
       const map = el.olMapInstance as Map
       const positions = this.positions as any[]
 

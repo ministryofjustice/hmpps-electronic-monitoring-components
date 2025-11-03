@@ -1,3 +1,3 @@
-import './scripts/global'
+import './components/map/scripts/global'
 
-export { MojMap } from './scripts/moj-map'
+export { EmMap } from './components/map/scripts/em-map'

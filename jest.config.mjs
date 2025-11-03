@@ -25,14 +25,13 @@ export default {
       ...commonProjectSettings,
       testEnvironment: 'jsdom',
       setupFilesAfterEnv: ['<rootDir>/src/jest.setup.ts'],
-      testPathIgnorePatterns: ['/node_modules/', '/src/scripts/ordnance-survey-auth/'],
+      testPathIgnorePatterns: ['/node_modules/', '/src/.*/server/'],
     },
     {
       displayName: 'server',
       ...commonProjectSettings,
       testEnvironment: 'node',
-      setupFilesAfterEnv: [],
-      testMatch: ['<rootDir>/src/scripts/ordnance-survey-auth/**/*.test.ts'],
+      testMatch: ['<rootDir>/src/**/server/**/*.test.ts'],
     },
   ],
 }

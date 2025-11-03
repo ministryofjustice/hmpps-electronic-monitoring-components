@@ -9,7 +9,7 @@ export default [
       'node_modules/**',
       'coverage/**',
       'nunjucks/**',
-      'src/styles/**/*.raw.css',
+      'src/**/*.raw.css',
       'src/sandbox/**',
       'eslint.config.{js,cjs,mjs}',
       'babel.config.{js,cjs,mjs}',
