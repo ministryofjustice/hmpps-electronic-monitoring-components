@@ -1,7 +1,7 @@
 import type OLMap from 'ol/Map'
 import type View from 'ol/View'
 import type { Coordinate } from 'ol/coordinate'
-import type { MapAdapter } from '../../src/scripts/map/map-adapter'
+import type { MapAdapter } from '../../src/components/map/scripts/core/map-adapter'
 
 export default function makeOpenLayersAdapter() {
   const olMapMock = {

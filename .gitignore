@@ -2,8 +2,8 @@
 dist/
 
 # Generated Sass output
-src/styles/moj-map.raw.css
-src/styles/moj-map.raw.css.map
+src/**/*.raw.css
+src/**/*.raw.css.map
 
 # Node dependencies
 node_modules/

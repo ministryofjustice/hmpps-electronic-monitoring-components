@@ -14,10 +14,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "paths": {
-      "@scripts/*": ["scripts/*"]
+      "@map/*": ["components/map/*"]
     },
     "types": ["jest", "@testing-library/jest-dom"]
   },
-  "include": ["src", "jest.setup.ts"],
+  "include": ["src", "src/components/**/*.d.ts", "src/types/**/*.d.ts", "jest.setup.ts"],
   "exclude": ["dist", "src/**/*.test.ts", "tests", "cypress"]
 }

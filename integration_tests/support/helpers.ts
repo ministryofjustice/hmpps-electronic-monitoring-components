@@ -11,11 +11,11 @@ export function shouldNotHaveAlerts(containerSelector: string): void {
 }
 
 export function shouldShowOverlay(): void {
-  cy.get('moj-map').shadow().find('.ol-overlay-container').should('be.visible')
+  cy.get('em-map').shadow().find('.ol-overlay-container').should('be.visible')
 }
 
 export function shouldNotShowOverlay(): void {
-  cy.get('moj-map').shadow().find('.ol-overlay-container').should('not.be.visible')
+  cy.get('em-map').shadow().find('.ol-overlay-container').should('not.be.visible')
 }
 
 // Recursively searches through all OL layers/groups and sub-layers to find a layer with the given title

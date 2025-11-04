@@ -11,7 +11,7 @@ declare global {
     interface Chainable {
       stubMapMiddleware(): Chainable<void>
       mount(html: string): Chainable<void>
-      mountMojMap(opts?: MountOpts): Chainable<void>
+      mountEmMap(opts?: MountOpts): Chainable<void>
       waitForMapReady(): Chainable<void>
       mapPostRenderComplete<T = void>(map: Map, callback: () => T): Chainable<T>
     }

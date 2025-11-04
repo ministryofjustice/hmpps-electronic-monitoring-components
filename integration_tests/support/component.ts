@@ -1,4 +1,4 @@
-import '@/scripts/moj-map.ts'
+import '@map/scripts/em-map'
 
 type MountOpts = {
   attrs?: Record<string, string | boolean>
@@ -28,9 +28,9 @@ Cypress.Commands.add('mapPostRenderComplete', (map, callback) => {
   )
 })
 
-// Resolves once <moj-map> has initialized and dispatched 'map:ready'
+// Resolves once <em-map> has initialized and dispatched 'map:ready'
 Cypress.Commands.add('waitForMapReady', () => {
-  cy.get('moj-map').then($el => {
+  cy.get('em-map').then($el => {
     const el = $el[0] as HTMLElement
     return new Promise<void>(resolve => {
       // If the component has already set its map instance, resolve immediately
@@ -81,14 +81,14 @@ Cypress.Commands.add('mount', (html: string) => {
   })
 })
 
-// Mounts a <moj-map> element with default or custom attributes + slots.
+// Mounts a <em-map> element with default or custom attributes + slots.
 // Automatically calls cy.stubMapMiddleware() unless disabled.
-Cypress.Commands.add('mountMojMap', (opts: MountOpts = {}) => {
+Cypress.Commands.add('mountEmMap', (opts: MountOpts = {}) => {
   const { autoStub = true, attrs = {}, slots = {}, syncRender = true } = opts
 
   if (autoStub) cy.stubMapMiddleware()
 
-  const el = document.createElement('moj-map')
+  const el = document.createElement('em-map')
 
   // Default attributes
   const defaultAttrs: Record<string, string | boolean> = {
@@ -128,7 +128,7 @@ Cypress.Commands.add('mountMojMap', (opts: MountOpts = {}) => {
   // Optionally wait for map and trigger an initial OL render cycle
   if (syncRender) {
     cy.waitForMapReady()
-    cy.get('moj-map').then($el => {
+    cy.get('em-map').then($el => {
       const map = ($el[0] as any).olMapInstance
       if (map?.updateSize) {
         map.updateSize()

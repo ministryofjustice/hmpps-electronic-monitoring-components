@@ -1,9 +1,9 @@
-import type { MojMap } from '@/scripts/moj-map'
+import type { EmMap } from '@map/scripts/em-map'
 
-describe('<moj-map> API', () => {
+describe('<em-map> API', () => {
   it('parses positions from fixture slot', () => {
-    cy.fixture('positions.json').then(positions => {
-      cy.mountMojMap({
+    cy.readFile('src/components/map/fixtures/positions.json').then(positions => {
+      cy.mountEmMap({
         attrs: { 'csp-nonce': 'x' },
         slots: { 'position-data': positions },
       })
@@ -11,8 +11,8 @@ describe('<moj-map> API', () => {
       cy.wait('@stubMapStyle')
       cy.waitForMapReady()
 
-      cy.get('moj-map').then($el => {
-        const el = $el[0] as unknown as MojMap
+      cy.get('em-map').then($el => {
+        const el = $el[0] as unknown as EmMap
 
         // Verify positions loaded from fixture
         expect(el.positions).to.have.length(positions.length)

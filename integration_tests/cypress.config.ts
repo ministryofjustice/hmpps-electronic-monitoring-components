@@ -26,6 +26,7 @@ export default defineConfig({
           resolve: {
             alias: {
               '@': resolve(__dirname, '../src'),
+              '@map': resolve(__dirname, '../src/components/map'),
             },
           },
         },
@@ -34,6 +35,5 @@ export default defineConfig({
     supportFile: 'integration_tests/support/component.ts',
     specPattern: 'integration_tests/component/**/*.cy.{js,ts}',
     indexHtmlFile: 'integration_tests/support/component-index.html',
-    fixturesFolder: 'src/fixtures',
   },
 })

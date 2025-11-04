@@ -1,16 +1,16 @@
-describe('<moj-map> renderer attribute', () => {
+describe('<em-map> renderer attribute', () => {
   it('uses MapLibre when renderer="maplibre"', () => {
-    cy.mountMojMap({
+    cy.mountEmMap({
       attrs: { renderer: 'maplibre', 'enable-3d-buildings': '' },
     })
     cy.wait('@stubMapStyle')
-    cy.get('moj-map').should('have.attr', 'renderer', 'maplibre')
+    cy.get('em-map').should('have.attr', 'renderer', 'maplibre')
   })
 })
 
-describe('<moj-map> renderer attribute', () => {
+describe('<em-map> renderer attribute', () => {
   beforeEach(() => {
-    cy.mountMojMap({
+    cy.mountEmMap({
       attrs: {
         renderer: 'maplibre',
         'enable-3d-buildings': '',
@@ -20,6 +20,6 @@ describe('<moj-map> renderer attribute', () => {
   })
 
   it('uses MapLibre when renderer="maplibre"', () => {
-    cy.get('moj-map').should('have.attr', 'renderer', 'maplibre').and('exist')
+    cy.get('em-map').should('have.attr', 'renderer', 'maplibre').and('exist')
   })
 })
