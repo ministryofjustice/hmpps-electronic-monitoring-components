@@ -1,9 +1,7 @@
 name: Publish package
 
 on:
-  # Manual trigger (safe for testing)
   workflow_dispatch:
-  # Automatic trigger when a GitHub Release is published
   release:
     types: [published]
 
@@ -64,6 +62,7 @@ jobs:
           node-version-file: .nvmrc
           registry-url: 'https://registry.npmjs.org'
           scope: '@ministryofjustice'
+          cache: npm
 
       - name: Update npm to latest
         run: npm install -g npm@latest
