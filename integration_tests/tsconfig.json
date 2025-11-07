@@ -11,6 +11,6 @@
     "types": ["cypress", "node"],
     "noEmit": true
   },
-  "include": ["./**/*.ts", "../src/vite.env.d.ts", "../src/**/*.d.ts"],
+  "include": ["./**/*.ts", "../src/vite-env.d.ts", "../src/**/*.d.ts"],
   "exclude": ["../dist"]
 }

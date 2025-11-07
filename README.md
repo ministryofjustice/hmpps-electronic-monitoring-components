@@ -101,7 +101,7 @@ nunjucks.configure(['<your-app-views>', 'node_modules/hmpps-open-layers-map/nunj
 Render the element with the macro:
 
 ```njk
-{% from "components/em-map/macro.njk" import emMap %}
+{% from "em-map/macro.njk" import emMap %}
 
 {{ emMap({
   alerts: alerts,
@@ -194,7 +194,7 @@ This configuration keeps security strict for scripts (the `script-src` directive
 ## Example (Nunjucks)
 
 ```njk
-{% from "components/em-map/macro.njk" import emMap %}
+{% from "em-map/macro.njk" import emMap %}
 
 {{ emMap({
   alerts: alerts,

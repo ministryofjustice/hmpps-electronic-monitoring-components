@@ -19,5 +19,5 @@
     "types": ["jest", "@testing-library/jest-dom"]
   },
   "include": ["src", "src/components/**/*.d.ts", "src/types/**/*.d.ts", "jest.setup.ts"],
-  "exclude": ["dist", "src/**/*.test.ts", "tests", "cypress"]
+  "exclude": ["dist", "src/**/*.test.ts", "tests", "cypress", "src/sandbox", "src/stories"]
 }
