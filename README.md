@@ -24,7 +24,7 @@ Every branch automatically builds its own **Storybook documentation preview** us
 After pushing your branch, wait for the “**Deploy Storybook (docs site)**” GitHub Action to complete.  
 You can then access the docs at the URL:
 
-https://ministryofjustice.github.io/hmpps-electronic-monitoring-components/<branch-name>/
+https://ministryofjustice.github.io/hmpps-electronic-monitoring-components/<branch-name>
 
 For example:
 

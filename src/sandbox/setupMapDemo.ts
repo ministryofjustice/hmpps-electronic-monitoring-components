@@ -53,7 +53,11 @@ function ensureOverlayTemplatesOnce() {
   document.body.appendChild(bodyTmpl)
 }
 
-// Creates and mounts a configured <em-map> element for Demos / Stories.
+/**
+ * Creates and mounts a configured <em-map> element for Demos / Stories.
+ * Uses Ordnance Survey vector tiles if an API key is available.
+ * Falls back to OpenStreetMap raster tiles (no key required) for GitHub Pages.
+ */
 export function setupMapDemo({
   container = document.body,
   positions,
@@ -74,12 +78,24 @@ export function setupMapDemo({
 }: MapDemoOptions = {}): HTMLElement {
   const map = document.createElement('em-map')
   const apiKey = (import.meta as any).env?.VITE_OS_MAPS_API_KEY ?? ''
-  const vectorTestUrl = `${config.tiles.urls.vectorStyleUrl}${config.tiles.urls.vectorStyleUrl.includes('?') ? '&' : '?'}key=${apiKey}`
+  const isDocsSite = typeof window !== 'undefined' && window.location.hostname.includes('github.io')
+
+  // Choose data source: Ordnance Survey vector (local) or OpenStreetMap (docs)
+  let vectorUrl: string
+  let attribution: string
+
+  if (apiKey && !isDocsSite) {
+    vectorUrl = `${config.tiles.urls.vectorStyleUrl}${config.tiles.urls.vectorStyleUrl.includes('?') ? '&' : '?'}key=${apiKey}`
+    attribution = '© Ordnance Survey'
+  } else {
+    vectorUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+    attribution = '© OpenStreetMap contributors'
+  }
 
   // Core setup
-  map.setAttribute('api-key', apiKey)
   map.setAttribute('csp-nonce', '1234abcd')
-  map.setAttribute('vector-test-url', vectorTestUrl)
+  map.setAttribute('vector-test-url', vectorUrl)
+  map.setAttribute('data-demo-attribution', attribution)
 
   // Toggle overlays on/off
   if (usesInternalOverlays) {
@@ -87,10 +103,9 @@ export function setupMapDemo({
     ensureOverlayTemplatesOnce()
   }
 
+  // Renderer / controls
   if (renderer === 'maplibre') map.setAttribute('renderer', 'maplibre')
   if (enable3D) map.setAttribute('enable-3d-buildings', '')
-
-  // Controls
   if (controls.scale) map.setAttribute('scale-control', controls.scale)
   if (controls.locationDisplay) map.setAttribute('location-display', controls.locationDisplay)
   if (controls.rotate) map.setAttribute('rotate-control', controls.rotate)
@@ -131,12 +146,21 @@ export function setupMapDemo({
       new CirclesLayer({ positions: pos, id: 'confidence', title: 'confidenceLayer', visible: showCircles }),
     )
 
-    const locationSource = locationsLayer?.getSource()
+    const locationSource = locationsLayer?.getSource?.()
     if (locationSource) {
       const extent = locationSource.getExtent()
       if (isEmpty(extent) === false) {
         olMap.getView().fit(extent, { maxZoom: 16, padding: [30, 30, 30, 30], size: olMap.getSize() })
       }
+    }
+
+    // Optional attribution notice in Storybook
+    if (isDocsSite) {
+      const note = document.createElement('small')
+      note.textContent = 'Using OpenStreetMap tiles for public demo'
+      note.style.cssText =
+        'position:absolute;bottom:4px;right:8px;font-size:0.75em;opacity:0.7;background:#fff;padding:2px 4px;border-radius:2px;'
+      container.appendChild(note)
     }
   })
 
