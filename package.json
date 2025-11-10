@@ -29,10 +29,9 @@
     "vite": "vite",
     "build:css": "for file in src/components/**/styles/*.scss; do sass --no-source-map --quiet-deps --load-path=node_modules \"$file\" \"${file%.scss}.raw.css\"; done",
     "watch:css": "chokidar 'src/components/**/styles/**/*.scss' -c \"npm run build:css\"",
-    "start-feature": "npm-run-all --parallel build:css watch:css vite",
     "build": "npm run build:css && vite build && tsc",
     "preview": "vite preview",
-    "storybook": "storybook dev -p 6006",
+    "start-feature": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "keywords": [
