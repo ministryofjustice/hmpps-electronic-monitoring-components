@@ -1,0 +1,71 @@
+name: Deploy Storybook (docs site)
+
+on:
+  push:
+    branches:
+      - '**'
+  delete:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    name: Build & deploy Storybook
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Storybook
+        run: npm run build-storybook
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./storybook-static
+          publish_branch: gh-pages
+          # main branch -> /
+          # all others -> /<branch-name>/
+          destination_dir: ${{ github.ref_name == 'main' && '' || github.ref_name }}
+          keep_files: true
+
+  cleanup:
+    name: Cleanup deleted branch previews
+    if: github.event_name == 'delete'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Remove deleted branch preview folder
+        run: |
+          # github.event.ref contains "refs/heads/<branch>"
+          full_ref="${{ github.event.ref }}"
+          branch="${full_ref#refs/heads/}"
+          branch_name=$(echo "$branch" | tr '/' '-')
+
+          if [ "$branch" != "main" ]; then
+            echo "🧹 Removing preview for deleted branch: $branch_name"
+            rm -rf "$branch_name"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add -A
+            git commit -m "Remove preview for deleted branch: $branch_name" || echo "No changes to commit"
+            git push origin gh-pages
+          fi

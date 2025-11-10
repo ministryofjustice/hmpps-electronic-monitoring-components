@@ -12,6 +12,32 @@ Reusable web components and map utilities for Electronic Monitoring UI applicati
 
 ---
 
+## Documentation & Preview Sites (GitHub Actions)
+
+Every branch automatically builds its own **Storybook documentation preview** using GitHub Actions.
+
+- When you **push** a branch, Storybook is built and deployed to GitHub Pages.
+- When that branch is **deleted**, the preview site is automatically removed.
+
+### How to check your branch preview
+
+After pushing your branch, wait for the “**Deploy Storybook (docs site)**” GitHub Action to complete.  
+You can then access the docs at the URL:
+
+https://ministryofjustice.github.io/hmpps-electronic-monitoring-components/<branch-name>/
+
+For example:
+
+| Branch name          | Docs URL                                                                                       |
+| -------------------- | ---------------------------------------------------------------------------------------------- |
+| `main`               | https://ministryofjustice.github.io/hmpps-electronic-monitoring-components/                    |
+| `create-docs-site`   | https://ministryofjustice.github.io/hmpps-electronic-monitoring-components/create-docs-site/   |
+| `feature/new-map-ui` | https://ministryofjustice.github.io/hmpps-electronic-monitoring-components/feature-new-map-ui/ |
+
+> **When you delete a branch**, the workflow automatically cleans up the corresponding preview directory from GitHub Pages.
+
+---
+
 ## Development Setup
 
 ```bash

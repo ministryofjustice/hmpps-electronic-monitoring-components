@@ -30,9 +30,8 @@
     "build:css": "for file in src/components/**/styles/*.scss; do sass --no-source-map --quiet-deps --load-path=node_modules \"$file\" \"${file%.scss}.raw.css\"; done",
     "watch:css": "chokidar 'src/components/**/styles/**/*.scss' -c \"npm run build:css\"",
     "build": "npm run build:css && vite build && tsc",
-    "preview": "vite preview",
     "start-feature": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "npm run build:css && storybook build"
   },
   "keywords": [
     "web-component",
