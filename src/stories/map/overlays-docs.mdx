@@ -1,0 +1,118 @@
+import { Meta, Title, Subtitle, Canvas, Controls, Stories } from '@storybook/addon-docs/blocks';
+import * as OverlaysCSF from './overlays-example.stories';
+
+<Meta title="Components/Map/Overlays/Docs" />
+
+<Title>Map overlays</Title>
+<Subtitle>Displaying popups and labels on features</Subtitle>
+
+---
+
+## Live example
+<Canvas of={OverlaysCSF.Example} className="map-docs-canvas" />
+
+## Try the options
+<Controls of={OverlaysCSF.Example} />
+
+---
+
+## Overlay Templating (click-to-open popups)
+
+The `<em-map>` component supports interactive overlays (popups) that display feature data when clicked.  
+This behaviour is enabled by adding the attribute:
+
+```html
+<em-map uses-internal-overlays></em-map>
+```
+
+When active, any feature with valid overlay template IDs in its data will show a popup containing its details.
+
+---
+
+### 1) Example Nunjucks integration
+
+In a typical application page, you can include the overlay templates directly beneath the `<em-map>` macro call:
+
+```njk
+{% block content %}
+  {{
+    appMap({
+      apiKey: apiKey,
+      cspNonce: cspNonce,
+      positions: positions,
+      alerts: alerts,
+      usesInternalOverlays: true,
+    })
+  }}
+
+  {% raw %}
+  <template id="overlay-title-mdss-location">
+    <div><strong>Name (NOMIS ID): {{ subjectName }}</strong></div>
+    <div><strong>Device ID: {{ subjectNomisId }}</strong></div>
+  </template>
+
+  <template id="overlay-body-mdss-location">
+    <div class="app-map__overlay-row">
+      <span class="app-map__overlay-label">Latitude:</span>
+      <span class="app-map__overlay-value">{{ latitude }}</span>
+    </div>
+    <div class="app-map__overlay-row">
+      <span class="app-map__overlay-label">Longitude:</span>
+      <span class="app-map__overlay-value">{{ longitude }}</span>
+    </div>
+  </template>
+  {% endraw %}
+{% endblock %}
+```
+
+This approach keeps overlays defined in the same file as the map macro,  
+while still allowing client-side rendering logic to populate the templates at runtime.
+
+---
+
+### 2) Linking templates to features
+
+Each feature must include two properties:  
+`overlayTitleTemplateId` and `overlayBodyTemplateId`, referencing the IDs of the templates to use.
+
+Example feature data:
+
+```json
+{
+  "latitude": 53.4808,
+  "longitude": -2.2426,
+  "overlayTitleTemplateId": "overlay-title-mdss-location",
+  "overlayBodyTemplateId": "overlay-body-mdss-location",
+  "subjectName": "Jane Doe",
+  "subjectNomisId": "12345"
+}
+```
+
+When clicked, the component automatically fills these template placeholders with matching property values.
+
+---
+
+### 3) Client-side behaviour
+
+Once `<em-map>` is initialised and `uses-internal-overlays` is enabled:
+- Clicking a feature with valid template IDs will open the overlay.
+- The overlay automatically fills each `{{ token }}` with values from the feature.
+- An "x" close button hides the overlay.
+
+You can also close the overlay programmatically:
+
+```js
+const emMap = document.querySelector('em-map')
+emMap.closeOverlay()
+```
+
+---
+
+### Related Stories
+
+- [**Layers Story**](?path=/docs/components-map-layers-docs--docs) — how to add data layers that can trigger overlays
+
+---
+
+**Note:** You can define multiple overlay templates to handle different feature types  
+(e.g. `overlay-body-offender-location`, `overlay-body-device-alert`) and reference them per-feature.

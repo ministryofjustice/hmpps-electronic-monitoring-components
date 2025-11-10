@@ -1,0 +1,257 @@
+import { Meta, Title, Subtitle, Canvas, Controls, Stories } from '@storybook/addon-docs/blocks';
+import * as SetupCSF from './setup-example.stories';
+
+<Meta title="Components/Map/Setup/Docs" />
+
+<Title>Map setup</Title>
+<Subtitle>Interactive map component using OpenLayers or MapLibre</Subtitle>
+
+---
+
+## Live example
+<Canvas of={SetupCSF.Example} className="map-docs-canvas" />
+
+## Try the options
+<Controls of={SetupCSF.Example} />
+
+---
+
+## Browser Support
+
+<table>
+  <thead>
+    <tr>
+      <th>Browser</th>
+      <th>Support</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Chrome (evergreen)</td><td>✅</td></tr>
+    <tr><td>Firefox (evergreen)</td><td>✅</td></tr>
+    <tr><td>Safari 15+</td><td>✅</td></tr>
+    <tr><td>Edge (Chromium)</td><td>✅</td></tr>
+    <tr><td>IE11</td><td>❌</td></tr>
+  </tbody>
+</table>
+
+This component targets modern browsers only.
+
+- IE11 is **not supported** (no native Web Components).
+- Polyfilling for IE11 is **not recommended** (performance/compat issues).
+- If legacy support is required, render a fallback view from your server-side templates.
+
+---
+
+# Getting Started with `<em-map>`
+
+`<em-map>` is an embeddable map component. 
+It uses Ordnance Survey **vector tiles** by default via a small server middleware and provides an API for adding layers from your app code.
+
+## 1) Install
+
+```bash
+npm i @ministryofjustice/hmpps-electronic-monitoring-components
+```
+
+Register the custom element once in your client entry file (e.g. if your UI is using the HMPPS Typescript Template, this would be here assets/js/index.js):
+
+```ts
+import '@ministryofjustice/hmpps-electronic-monitoring-components/map'
+```
+
+Optionally import types if you’ll interact with the map in TypeScript:
+
+```ts
+import type { EmMap } from '@ministryofjustice/hmpps-electronic-monitoring-components/map'
+```
+
+---
+
+## 2) Ordnance Survey Vector Tiles middleware
+
+This package exports an Express middleware that securely proxies Ordnance Survey Vector Tiles (OAuth2 + caching).  
+Mount it in your server app, e.g.:
+
+```ts
+// server/app.ts
+import express from 'express'
+import { CacheClient, emOrdnanceSurveyAuth } from '@ministryofjustice/hmpps-electronic-monitoring-components/map/ordnance-survey-auth'
+
+const app = express()
+
+app.use(
+  emOrdnanceSurveyAuth({
+    apiKey: process.env.OS_API_KEY!, // from Ordance Survey
+    apiSecret: process.env.OS_API_SECRET!, // from Ordnance Survey
+    // Optional: Redis cache + expiry override
+    // redisClient, // connected redis client
+    // cacheExpiry: 3600, // seconds; default is 7 days in production, 0 in dev
+  }),
+)
+```
+
+Notes:
+- Default cache: 7 days in production, none in development.
+- Add a Redis client for server-side caching.
+- Middleware sets ETag and Cache-Control headers for browser caching.
+
+---
+
+## 3) Nunjucks setup
+
+Configure Nunjucks to load the component templates:
+
+```ts
+nunjucks.configure([
+  '<your-app-views>',
+  'node_modules/@ministryofjustice/hmpps-electronic-monitoring-components/dist/nunjucks/'
+])
+```
+
+Render the element with its macro:
+
+```njk
+{% from "em-map/macro.njk" import emMap %}
+{{ emMap({
+  alerts: alerts,
+  cspNonce: cspNonce
+}) }}
+```
+
+Click the Show code button on the map example above for a full Nunjucks implementation.
+
+Ensure the host container has a **non-zero height**, otherwise OpenLayers will log:
+
+> “No map visible because the map container's width or height are 0.”
+
+```scss
+.map-container { height: 450px; }
+```
+
+---
+
+## 4) CSP configuration
+
+```ts
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", (_req, res) => "'nonce-' + res.locals.cspNonce"],
+        styleSrc: ["'self'", 'cdn.jsdelivr.net', "'unsafe-inline'"],
+        fontSrc: ["'self'", 'cdn.jsdelivr.net'],
+        imgSrc: ["'self'", 'data:'],
+        connectSrc: ["'self'"],
+      },
+    },
+  }),
+)
+```
+
+**Why these rules:**
+- `cdn.jsdelivr.net`: loads OpenLayers font assets.
+- `'unsafe-inline'`: required for small inline styles OpenLayers applies dynamically.
+- Keeps `script-src` strict (nonce-based).
+
+---
+
+## 5) Using the Map Component in your Frontend
+
+Once `<em-map>` is rendered, your frontend code can interact with it directly.  
+You can listen for lifecycle events, add or remove layers, and even call the full OpenLayers or MapLibre APIs.
+
+### Map Lifecycle (`map:ready`)
+
+The `<em-map>` component dispatches a `map:ready` event when its internal map has finished initialising.
+
+Use this to safely access the map instance and any parsed position data:
+
+### Using JavaScript
+
+The HMPPS Typescript Template library lets a frontend app use JavaScript in the browser by default.
+
+```js
+// assets/js/map-init.js
+
+// Wait until the map is ready
+const emMap = document.querySelector('em-map')
+
+emMap.addEventListener('map:ready', () => {
+  const map = emMap.olMapInstance // OpenLayers map instance
+  const positions = emMap.positions // Array of parsed positions
+})
+```
+
+If you have configured TypeScript for the client side
+
+```ts
+import { EmMap } from '@ministryofjustice/hmpps-electronic-monitoring-components/map'
+
+const emMap = document.querySelector('em-map') as EmMap
+
+await new Promise<void>(resolve => {
+  emMap.addEventListener('map:ready', () => resolve(), { once: true })
+})
+
+const map = emMap.olMapInstance
+const positions = emMap.positions
+```
+
+### Accessing the Map Library API
+
+Once initialised, you can use the underlying map object for full control.
+
+- **OpenLayers:** access it via `emMap.olMapInstance`  
+  → <a href="https://openlayers.org/en/latest/apidoc/" target="_blank" rel="noopener noreferrer">OpenLayers Map API docs</a>  
+- **MapLibre:** access it via `emMap.maplibreMapInstance`  
+  → <a href="https://maplibre.org/maplibre-gl-js/docs/API/" target="_blank" rel="noopener noreferrer">MapLibre GL JS Map API docs</a>
+
+From there, you can:
+- Add or remove layers using standard OpenLayers or MapLibre methods  
+- Control the map view, zoom, and rotation  
+- Register custom event listeners (`map.on('click', …)`)  
+- Integrate your own vector or raster sources beyond those built into `<em-map>`
+
+---
+
+### Layers
+
+Layers represent sets of features rendered on top of the base map — for example, locations, tracks, numbering, or circles showing GPS confidence.  
+
+This library provides ready-made composable layer classes:
+- `LocationsLayer`
+- `TracksLayer`
+- `NumberingLayer`
+- `CirclesLayer`
+
+Each can be created and added via the `emMap.addLayer()` helper or through your own OpenLayers code.
+
+See the [**Layers Story**](?path=/docs/components-map-layers-docs--docs) for usage and configuration options.
+
+---
+
+### Overlays
+
+Overlays let you display contextual information when clicking on features — such as device details or recorded data points.
+
+To enable this behaviour:
+1. Add the `uses-internal-overlays` attribute to `<em-map>`.  
+2. Provide `<template>` elements defining the overlay title/body markup.  
+3. Include `overlayTitleTemplateId` and `overlayBodyTemplateId` properties in your feature data.
+
+See the [**Overlays Story**](?path=/docs/components-map-overlays-docs--docs) for examples of the templates and click interaction.
+
+---
+
+## Troubleshooting
+
+- **“No map visible because the map container's width or height are 0.”**  
+  Ensure the host container has an explicit height (e.g. `450px`).
+
+- **CSP errors**  
+  Ensure you pass a `cspNonce` and include `'nonce-<value>'` in `style-src`.
+
+- **Vector tiles not loading**  
+  Confirm the server middleware is mounted and OS credentials are set. The UI talks to the local proxy automatically.
+

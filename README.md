@@ -34,19 +34,19 @@ This component targets modern browsers only.
 ## 1) Install
 
 ```bash
-npm install hmpps-open-layers-map
+npm i @ministryofjustice/hmpps-electronic-monitoring-components
 ```
 
-Register the custom element once (e.g. in your client entry file):
+Register the custom element once in your client entry file (e.g. if your UI is using the HMPPS Typescript Template, this would be here assets/js/index.js):
 
 ```ts
-import 'hmpps-open-layers-map'
+import '@ministryofjustice/hmpps-electronic-monitoring-components/map'
 ```
 
 Optionally import types if you’ll interact with the map in TypeScript:
 
 ```ts
-import type { EmMap } from 'hmpps-open-layers-map'
+import type { EmMap } from '@ministryofjustice/hmpps-electronic-monitoring-components/map'
 ```
 
 ---
@@ -59,7 +59,10 @@ Mount it in your server app, e.g.:
 ```ts
 // server/app.ts
 import express from 'express'
-import { CacheClient, emOrdnanceSurveyAuth } from 'hmpps-open-layers-map/ordnance-survey-auth'
+import {
+  CacheClient,
+  emOrdnanceSurveyAuth,
+} from '@ministryofjustice/hmpps-electronic-monitoring-components/map/ordnance-survey-auth'
 
 const app = express()
 
@@ -95,7 +98,10 @@ Point Nunjucks at the component templates:
 
 ```ts
 // e.g. server/utils/nunjucksSetup.ts
-nunjucks.configure(['<your-app-views>', 'node_modules/hmpps-open-layers-map/nunjucks'])
+nunjucks.configure([
+  '<your-app-views>',
+  'node_modules/@ministryofjustice/hmpps-electronic-monitoring-components/dist/nunjucks/',
+])
 ```
 
 Render the element with the macro:
@@ -220,7 +226,7 @@ This configuration keeps security strict for scripts (the `script-src` directive
 The component fires **`map:ready`** once initialised:
 
 ```ts
-import type { EmMap } from 'hmpps-open-layers-map'
+import { EmMap } from '@ministryofjustice/hmpps-electronic-monitoring-components/map'
 
 const emMap = document.querySelector('em-map') as EmMap
 

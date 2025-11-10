@@ -4,7 +4,63 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Electronic Monitoring Components
 
-- **Map component:** interactive OpenLayers / MapLibre integration  
-- **Controls:** scale bar, compass, zoom, and location display
+A library of reusable frontend components designed for **HMPPS Electronic Monitoring applications**.  
+These components follow the GOV.UK Design System where possible and integrate with modern client-side frameworks.
 
 ---
+
+## Map Component
+
+The `<em-map>` component provides an interactive map built with **OpenLayers** or **MapLibre**, using **Ordnance Survey vector tiles** by default.
+
+It supports:
+- Dynamic switching between **OpenLayers** and **MapLibre** renderers
+- Secure loading of OS vector tiles via Express middleware
+- Built-in map **controls** (scale bar, zoom, compass, coordinate display)
+- Configurable **layers** for displaying positions, tracks, numbering, and circles
+- Click-to-open **overlays** for feature details
+
+---
+
+### Documentation
+
+<table>
+  <thead>
+    <tr><th>Section</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>[Setup](?path=/docs/components-map-setup-docs--docs)</td>
+      <td>Installing, configuring and embedding the <code>&lt;em-map&gt;</code> component.</td>
+    </tr>
+    <tr>
+      <td>[Layers](?path=/docs/components-map-layers-docs--docs)</td>
+      <td>Displaying position-based data (locations, tracks, numbering, confidence).</td>
+    </tr>
+    <tr>
+      <td>[Overlays](?path=/docs/components-map-overlays-docs--docs)</td>
+      <td>Configuring click-to-open overlays using templates and data bindings.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+### External References
+
+<ul>
+  <li><a href="https://openlayers.org/en/latest/apidoc/" target="_blank" rel="noopener noreferrer">OpenLayers API Docs</a></li>
+  <li><a href="https://maplibre.org/maplibre-gl-js/docs/" target="_blank" rel="noopener noreferrer">MapLibre GL JS API Docs</a></li>
+  <li><a href="https://www.ordnancesurvey.co.uk/" target="_blank" rel="noopener noreferrer">Ordnance Survey</a></li>
+</ul>
+
+---
+
+### Notes
+
+- Components are framework-agnostic and compatible with **vanilla JS** or **TypeScript** frontends.
+- Works with the **HMPPS TypeScript Template** setup.
+
+---
+
+<strong>Next:</strong> Start with the [Setup Guide](?path=/docs/components-map-setup-docs--docs) to see how to add <code>&lt;em-map&gt;</code> to your application UI.

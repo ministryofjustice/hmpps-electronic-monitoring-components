@@ -3,9 +3,7 @@ import { CirclesLayer, LocationsLayer, NumberingLayer, TracksLayer } from '../co
 import { isEmpty } from 'ol/extent'
 import config from '../components/map/scripts/core/config'
 import '../components/map/styles/em-map.scss'
-import { easeIn } from 'ol/easing'
 
-import emptyPositions from '../components/map/fixtures/empty-positions.json'
 import defaultPositions from '../components/map/fixtures/positions.json'
 
 interface MapDemoOptions {
@@ -24,9 +22,38 @@ interface MapDemoOptions {
   showTracks?: boolean
   showNumbers?: boolean
   showCircles?: boolean
+  usesInternalOverlays?: boolean
 }
 
-// Creates and mounts a configured <em-map> element for Demos.
+/** Inject Demo templates (used by overlayTitleTemplateId / overlayBodyTemplateId) */
+function ensureOverlayTemplatesOnce() {
+  const TITLE_ID = 'overlay-title-test-location'
+  const BODY_ID = 'overlay-body-test-location'
+  if (document.getElementById(TITLE_ID) && document.getElementById(BODY_ID)) return
+
+  const titleTmpl = document.createElement('template')
+  titleTmpl.id = TITLE_ID
+  titleTmpl.innerHTML = `
+    <div><strong>Name (NOMIS ID): {{personName}} ({{personNomisId}})</strong></div>
+  `.trim()
+
+  const bodyTmpl = document.createElement('template')
+  bodyTmpl.id = BODY_ID
+  bodyTmpl.innerHTML = `
+    <div class="app-map__overlay-row"><span class="app-map__overlay-label">Speed </span><span class="app-map__overlay-value">{{displaySpeed}}</span></div>
+    <div class="app-map__overlay-row"><span class="app-map__overlay-label">Direction </span><span class="app-map__overlay-value">{{displayDirection}}</span></div>
+    <div class="app-map__overlay-row"><span class="app-map__overlay-label">Geolocation Mechanism </span><span class="app-map__overlay-value">{{displayGeolocationMechanism}}</span></div>
+    <div class="app-map__overlay-row"><span class="app-map__overlay-label">Recorded </span><span class="app-map__overlay-value">{{displayTimestamp}}</span></div>
+    <div class="app-map__overlay-row"><span class="app-map__overlay-label">Confidence </span><span class="app-map__overlay-value">{{displayConfidence}}</span></div>
+    <div class="app-map__overlay-row"><span class="app-map__overlay-label">Latitude </span><span class="app-map__overlay-value">{{displayLatitude}}</span></div>
+    <div class="app-map__overlay-row"><span class="app-map__overlay-label">Longitude </span><span class="app-map__overlay-value">{{displayLongitude}}</span></div>
+  `.trim()
+
+  document.body.appendChild(titleTmpl)
+  document.body.appendChild(bodyTmpl)
+}
+
+// Creates and mounts a configured <em-map> element for Demos / Stories.
 export function setupMapDemo({
   container = document.body,
   positions,
@@ -43,6 +70,7 @@ export function setupMapDemo({
   showTracks = false,
   showNumbers = false,
   showCircles = false,
+  usesInternalOverlays = true,
 }: MapDemoOptions = {}): HTMLElement {
   const map = document.createElement('em-map')
   const apiKey = (import.meta as any).env?.VITE_OS_MAPS_API_KEY ?? ''
@@ -51,8 +79,13 @@ export function setupMapDemo({
   // Core setup
   map.setAttribute('api-key', apiKey)
   map.setAttribute('csp-nonce', '1234abcd')
-  map.setAttribute('uses-internal-overlays', '')
   map.setAttribute('vector-test-url', vectorTestUrl)
+
+  // Toggle overlays on/off
+  if (usesInternalOverlays) {
+    map.setAttribute('uses-internal-overlays', '')
+    ensureOverlayTemplatesOnce()
+  }
 
   if (renderer === 'maplibre') map.setAttribute('renderer', 'maplibre')
   if (enable3D) map.setAttribute('enable-3d-buildings', '')
@@ -61,8 +94,8 @@ export function setupMapDemo({
   if (controls.scale) map.setAttribute('scale-control', controls.scale)
   if (controls.locationDisplay) map.setAttribute('location-display', controls.locationDisplay)
   if (controls.rotate) map.setAttribute('rotate-control', controls.rotate)
-  if (controls.zoomSlider) map.setAttribute('zoom-slider', String(controls.zoomSlider))
-  if (controls.grabCursor) map.setAttribute('grab-cursor', String(controls.grabCursor))
+  if (typeof controls.zoomSlider === 'boolean') map.setAttribute('zoom-slider', String(controls.zoomSlider))
+  if (typeof controls.grabCursor === 'boolean') map.setAttribute('grab-cursor', String(controls.grabCursor))
 
   // Positions data
   const positionData = positions ?? defaultPositions
@@ -72,75 +105,37 @@ export function setupMapDemo({
   positionsScript.textContent = JSON.stringify(positionData)
   map.appendChild(positionsScript)
 
-  // Alert only when positions array is empty
-  if (!positions || positions.length === 0) {
-    const alertsContainer = document.createElement('div')
-    alertsContainer.slot = 'alerts'
-    alertsContainer.className = 'em-map__alerts'
-    alertsContainer.innerHTML = `
-      <div class="moj-alert" role="alert">
-        <div class="moj-alert__content">
-          Example alert: map data may be incomplete.
-        </div>
-      </div>
-    `
-    map.appendChild(alertsContainer)
-  }
-
-  // Append to DOM
+  // Append + layer setup
   container.appendChild(map)
 
-  // Fit view once ready
   map.addEventListener('map:ready', () => {
     const emMap = map as EmMap
     const olMap = emMap.olMapInstance
-    const positions = emMap.positions
-
-    if (!olMap || !positions?.length) return
+    const pos = emMap.positions
+    if (!olMap || !pos?.length) return
 
     const locationsLayer = emMap.addLayer(
-      new LocationsLayer({
-        title: 'pointsLayer',
-        positions,
-        visible: showPositions,
-      }),
+      new LocationsLayer({ title: 'pointsLayer', positions: pos, visible: showPositions }),
     )
 
-    emMap.addLayer(
-      new TracksLayer({
-        title: 'tracksLayer',
-        positions,
-        visible: showTracks,
-      }),
-    )
-
+    emMap.addLayer(new TracksLayer({ title: 'tracksLayer', positions: pos, visible: showTracks }))
     emMap.addLayer(
       new NumberingLayer({
-        positions,
+        positions: pos,
         numberProperty: 'sequenceNumber',
         title: 'numberingLayer',
         visible: showNumbers,
       }),
     )
-
     emMap.addLayer(
-      new CirclesLayer({
-        positions,
-        id: 'confidence',
-        title: 'confidenceLayer',
-        visible: showCircles,
-      }),
+      new CirclesLayer({ positions: pos, id: 'confidence', title: 'confidenceLayer', visible: showCircles }),
     )
 
     const locationSource = locationsLayer?.getSource()
     if (locationSource) {
       const extent = locationSource.getExtent()
       if (isEmpty(extent) === false) {
-        olMap.getView().fit(extent, {
-          maxZoom: 16,
-          padding: [30, 30, 30, 30],
-          size: olMap.getSize(),
-        })
+        olMap.getView().fit(extent, { maxZoom: 16, padding: [30, 30, 30, 30], size: olMap.getSize() })
       }
     }
   })

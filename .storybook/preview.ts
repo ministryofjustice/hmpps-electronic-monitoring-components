@@ -13,6 +13,9 @@ const preview: Preview = {
 
     options: {
       panelPosition: 'right',
+      storySort: {
+        order: ['Overview', 'Components', ['Map', ['Introduction', 'Setup', 'Layers', 'Overlays']]],
+      },
     },
 
     a11y: {
