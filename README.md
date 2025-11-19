@@ -31,7 +31,7 @@ For example:
 | Branch name          | Docs URL                                                                                       |
 | -------------------- | ---------------------------------------------------------------------------------------------- |
 | `main`               | https://ministryofjustice.github.io/hmpps-electronic-monitoring-components/                    |
-| `create-docs-site`   | https://ministryofjustice.github.io/hmpps-electronic-monitoring-components/create-docs-site/   |
+| `new-feature`        | https://ministryofjustice.github.io/hmpps-electronic-monitoring-components/new-feature/        |
 | `feature/new-map-ui` | https://ministryofjustice.github.io/hmpps-electronic-monitoring-components/feature-new-map-ui/ |
 
 > **When you delete a branch**, the workflow automatically cleans up the corresponding preview directory from GitHub Pages.

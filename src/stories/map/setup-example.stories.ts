@@ -1,5 +1,5 @@
 import type { Meta, StoryObj, StoryContext } from '@storybook/web-components-vite'
-import { setupMapDemo } from '../../sandbox/setupMapDemo'
+import { setupMapDemo } from './setupMapDemo'
 import positions from '../../components/map/fixtures/positions.json'
 
 const meta = {

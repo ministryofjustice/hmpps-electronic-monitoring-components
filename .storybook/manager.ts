@@ -10,7 +10,7 @@ addons.setConfig({
     fontCode: 'monospace',
     brandTitle: 'EM Components',
     // brandUrl: 'https://example.com',
-    brandImage: '/crest-dark.svg',
+    brandImage: 'crest-dark.svg',
     brandTarget: '_self',
   }),
 })

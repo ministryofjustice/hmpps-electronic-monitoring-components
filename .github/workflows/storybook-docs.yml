@@ -16,6 +16,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Clear build caches
+        run: |
+          rm -rf node_modules storybook-static dist .vite .turbo || true
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -28,6 +32,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Inject environment variables for Storybook
+        run: |
+          echo "STORYBOOK_OS_MAPS_API_KEY_PUBLIC_DOCS=${{ secrets.OS_MAPS_API_KEY_PUBLIC_DOCS }}" > .env.production
+
       - name: Build Storybook
         run: npm run build-storybook
 
@@ -37,10 +45,12 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./storybook-static
           publish_branch: gh-pages
-          # main branch -> /
-          # all others -> /<branch-name>/
+
+          # main -> root
+          # other branches -> /<branch>
           destination_dir: ${{ github.ref_name == 'main' && '' || github.ref_name }}
-          keep_files: true
+
+          keep_files: false
 
   cleanup:
     name: Cleanup deleted branch previews
@@ -55,7 +65,6 @@ jobs:
 
       - name: Remove deleted branch preview folder
         run: |
-          # github.event.ref contains "refs/heads/<branch>"
           full_ref="${{ github.event.ref }}"
           branch="${full_ref#refs/heads/}"
           branch_name=$(echo "$branch" | tr '/' '-')

@@ -1,10 +1,10 @@
-import { EmMap } from '../components/map/scripts/em-map'
-import { CirclesLayer, LocationsLayer, NumberingLayer, TracksLayer } from '../components/map/scripts/core/layers'
 import { isEmpty } from 'ol/extent'
-import config from '../components/map/scripts/core/config'
-import '../components/map/styles/em-map.scss'
+import { EmMap } from '../../components/map/scripts/em-map'
+import { CirclesLayer, LocationsLayer, NumberingLayer, TracksLayer } from '../../components/map/scripts/core/layers'
+import config from '../../components/map/scripts/core/config'
+import '../../components/map/styles/em-map.scss'
 
-import defaultPositions from '../components/map/fixtures/positions.json'
+import defaultPositions from '../../components/map/fixtures/positions.json'
 
 interface MapDemoOptions {
   container?: HTMLElement
@@ -73,7 +73,7 @@ export function setupMapDemo({
   usesInternalOverlays = true,
 }: MapDemoOptions = {}): HTMLElement {
   const map = document.createElement('em-map')
-  const apiKey = (import.meta as any).env?.VITE_OS_MAPS_API_KEY ?? ''
+  const apiKey = import.meta.env.STORYBOOK_OS_MAPS_API_KEY_PUBLIC_DOCS || ''
   const vectorTestUrl = `${config.tiles.urls.vectorStyleUrl}${config.tiles.urls.vectorStyleUrl.includes('?') ? '&' : '?'}key=${apiKey}`
 
   // Core setup
