@@ -43,7 +43,7 @@
     <script>
       window.CONFIG_TYPE = 'PRODUCTION';
       window.LOGLEVEL = 'info';
-      window.FRAMEWORK_OPTIONS = {};
+      window.FRAMEWORK_OPTIONS = {"builder":{"viteConfigPath":"vite.config.ts"}};
       window.CHANNEL_OPTIONS = {};
       window.FEATURES = {"argTypeTargetsV7":true,"legacyDecoratorFileOrder":false,"disallowImplicitActionsInRenderV8":true,"viewport":true,"highlight":true,"controls":true,"interactions":true,"actions":true,"backgrounds":true,"outline":true,"measure":true};
       window.STORIES = [{"titlePrefix":"","directory":"./src","files":"**/*.mdx","importPathMatcher":"^\\.[\\\\/](?:src(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)\\/|\\/|$)(?!\\.)(?=.)[^/]*?\\.mdx)$"},{"titlePrefix":"","directory":"./src","files":"**/*.stories.@(js|jsx|mjs|ts|tsx)","importPathMatcher":"^\\.[\\\\/](?:src(?:\\/(?!\\.)(?:(?:(?!(?:^|\\/)\\.).)*?)\\/|\\/|$)(?!\\.)(?=.)[^/]*?\\.stories\\.(js|jsx|mjs|ts|tsx))$"}];
@@ -553,7 +553,41 @@
 
 </style>
 
-    <script type="module" crossorigin src="./assets/iframe-BkcjAekg.js"></script>
+<!-- Global overlay templates for all map stories -->
+<template id="overlay-title-test-location">
+  <div><strong>Name (NOMIS ID): RICHARD GIBBONS (A9124EQ)</strong></div>
+  <div><strong>Device ID: 604023935</strong></div>
+</template>
+
+<template id="overlay-body-test-location">
+  <div class="app-map__overlay-row">
+    <span class="app-map__overlay-label">Direction </span>
+    <span class="app-map__overlay-value">280°</span>
+  </div>
+  <div class="app-map__overlay-row">
+    <span class="app-map__overlay-label">Geolocation Mechanism </span>
+    <span class="app-map__overlay-value">GPS</span>
+  </div>
+  <div class="app-map__overlay-row">
+    <span class="app-map__overlay-label">Recorded Date </span>
+    <span class="app-map__overlay-value">23/04/2025 11:11:50 AM</span>
+  </div>
+  <div class="app-map__overlay-row">
+    <span class="app-map__overlay-label">Confidence </span>
+    <span class="app-map__overlay-value">120 m</span>
+  </div>
+  <div class="app-map__overlay-row">
+    <span class="app-map__overlay-label">Latitude </span>
+    <span class="app-map__overlay-value">51.5761</span>
+  </div>
+  <div class="app-map__overlay-row">
+    <span class="app-map__overlay-label">Longitude </span>
+    <span class="app-map__overlay-value">0.04839</span>
+  </div>
+</template>
+
+
+    <script type="module" crossorigin src="./assets/iframe-CyWKJ67_.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/preload-helper-PPVm8Dsz.js">
     <link rel="stylesheet" crossorigin href="./assets/iframe-CAzdb7g9.css">
   </head>
