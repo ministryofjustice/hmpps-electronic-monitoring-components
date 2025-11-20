@@ -18,10 +18,13 @@ export type CirclesLayerOptions = {
   visible?: boolean
   zIndex?: number
   style?: {
-    fill: string
-    stroke: { color: string; width: number }
+    fill?: string | null
+    stroke?: {
+      color?: string
+      width?: number
+      lineDash?: number[]
+    } | null
   }
-  // The data to render (required)
   positions: Array<Position>
 }
 
