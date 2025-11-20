@@ -68,4 +68,71 @@ describe('OLCirclesLayer (OpenLayers library)', () => {
 
     expect(layer.getVisible()).toBeTruthy()
   })
+
+  it('should remove fill when fill is null', () => {
+    const layer = new OLCirclesLayer({
+      positions,
+      style: {
+        fill: null,
+        stroke: {
+          color: '#000',
+          width: 1,
+        },
+      },
+      title: '',
+    })
+
+    const style = layer.getStyle() as Style
+
+    expect(style.getFill()).toBeNull()
+  })
+
+  it('should remove stroke when stroke is null', () => {
+    const layer = new OLCirclesLayer({
+      positions,
+      style: {
+        stroke: null,
+      },
+      title: '',
+    })
+
+    const style = layer.getStyle() as Style
+
+    expect(style.getStroke()).toBeNull()
+  })
+
+  it('should use default fill when style is provided but fill is omitted', () => {
+    const layer = new OLCirclesLayer({
+      positions,
+      style: {
+        stroke: {
+          color: '#000',
+          width: 1,
+        },
+      },
+      title: '',
+    })
+
+    const style = layer.getStyle() as Style
+
+    expect(style.getFill()?.getColor()).toBe('rgba(255, 165, 0, 0.1)')
+  })
+
+  it('should apply lineDash when provided', () => {
+    const layer = new OLCirclesLayer({
+      positions,
+      style: {
+        stroke: {
+          color: '#000',
+          width: 2,
+          lineDash: [4, 2],
+        },
+      },
+      title: '',
+    })
+
+    const style = layer.getStyle() as Style
+
+    expect(style.getStroke()?.getLineDash()).toEqual([4, 2])
+  })
 })
