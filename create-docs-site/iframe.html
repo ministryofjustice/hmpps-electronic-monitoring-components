@@ -588,7 +588,7 @@
 
 <script>
   // Inject Git branch name for branch Github Pages deployments
-  window.__STORYBOOK_BRANCH__ = '<%= process.env.STORYBOOK_BRANCH || "main" %>';
+  window.STORYBOOK_BRANCH = '<%= process.env.STORYBOOK_BRANCH || "main" %>';
 </script>
 
 
