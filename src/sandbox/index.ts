@@ -1,6 +1,6 @@
 import '@map/scripts/em-map'
 import { EmMap } from '@map/scripts/em-map'
-import { CirclesLayer, LocationsLayer, NumberingLayer, TracksLayer } from '../components/map/scripts/core/layers'
+import { CirclesLayer, LocationsLayer, TextLayer, TracksLayer } from '../components/map/scripts/core/layers'
 import { isEmpty } from 'ol/extent'
 import config from '../components/map/scripts/core/config'
 import '@map/styles/em-map.scss'
@@ -110,10 +110,10 @@ map.addEventListener('map:ready', () => {
   )
 
   emMap.addLayer(
-    new NumberingLayer({
+    new TextLayer({
       positions,
-      numberProperty: 'sequenceNumber',
-      title: 'numberingLayer',
+      textProperty: 'sequenceNumber',
+      title: 'textLayer',
       visible: true,
     }),
   )

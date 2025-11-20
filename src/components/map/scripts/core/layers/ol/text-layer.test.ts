@@ -1,10 +1,10 @@
 import { Style } from 'ol/style'
-import { OLNumberingLayer } from './numbering-layer'
+import { OLTextLayer } from './text-layer'
 import positions from '../../../../fixtures/positions.json'
 
-describe('OLNumberingLayer (OpenLayers library)', () => {
+describe('OLTextLayer (OpenLayers library)', () => {
   it('should display a single text style for each position', () => {
-    const layer = new OLNumberingLayer({
+    const layer = new OLTextLayer({
       positions,
       title: '',
     })
@@ -36,9 +36,9 @@ describe('OLNumberingLayer (OpenLayers library)', () => {
     expect(featureStyles[6][0].getText()?.getText()).toBe('7')
   })
 
-  it('should not display a style if the numbering property is undefined', () => {
-    const layer = new OLNumberingLayer({
-      numberProperty: 'unknown',
+  it('should not display a style if the text property is undefined', () => {
+    const layer = new OLTextLayer({
+      textProperty: 'unknown',
       positions,
       title: '',
     })
@@ -58,7 +58,7 @@ describe('OLNumberingLayer (OpenLayers library)', () => {
   })
 
   it('should use the default style by default', () => {
-    const layer = new OLNumberingLayer({
+    const layer = new OLTextLayer({
       positions,
       title: '',
     })
@@ -76,7 +76,7 @@ describe('OLNumberingLayer (OpenLayers library)', () => {
   })
 
   it('should override the default style settings', () => {
-    const layer = new OLNumberingLayer({
+    const layer = new OLTextLayer({
       positions,
       style: {
         fill: '#fff',
@@ -106,7 +106,7 @@ describe('OLNumberingLayer (OpenLayers library)', () => {
   })
 
   it('should be hidden by default', () => {
-    const layer = new OLNumberingLayer({
+    const layer = new OLTextLayer({
       positions,
       title: '',
     })
@@ -115,7 +115,7 @@ describe('OLNumberingLayer (OpenLayers library)', () => {
   })
 
   it('should override the default visibility', () => {
-    const layer = new OLNumberingLayer({
+    const layer = new OLTextLayer({
       positions,
       title: '',
       visible: true,
