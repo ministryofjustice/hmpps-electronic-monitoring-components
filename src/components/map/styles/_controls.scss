@@ -23,9 +23,9 @@
   @include govuk-font(19, $weight: bold);
   font-family: $govuk-font-family;
   line-height: 1;
-  background-color: govuk-colour('black');
-  color: govuk-colour('white');
-  border: 1px solid govuk-colour('white');
+  background-color: govuk-colour('white');
+  color: govuk-colour('black');
+  border: 1px solid govuk-colour('black');
   border-radius: 0;
   width: 2em;
   height: 2em;
@@ -42,9 +42,37 @@
 :host .ol-control button:hover,
 :host .ol-control button:focus {
   text-decoration: none;
-  outline: 1px solid govuk-colour('white');
+  outline: 1px solid govuk-colour('black');
 }
 
+/* Rotate styles */
+:host .ol-control.ol-rotate {
+  background-color: transparent;
+  left: 0.5em;
+  right: auto;
+  top: 95px;
+
+  .ol-rotate-reset {
+    border-radius: 50%;
+  }
+
+  .ol-compass {
+    font-size: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='29' height='29' fill='%23333' viewBox='0 0 29 29'%3E%3Cpath d='m10.5 14 4-8 4 8z'/%3E%3Cpath fill='%23ccc' d='m10.5 16 4 8 4-8z'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+}
+
+/* When zoom slider is present, move rotate below the slider */
+:host(.has-zoom-slider) .ol-control.ol-rotate {
+  top: 295px;
+}
+
+/* Zoom slider styles */
 :host(.has-zoom-slider) .ol-zoom .ol-zoom-out {
   margin-top: 200px;
 }
@@ -56,14 +84,6 @@
   width: 38px;
   height: 200px;
   position: absolute;
-}
-
-:host(.has-zoom-slider) .ol-touch .ol-zoom .ol-zoom-out {
-  margin-top: 212px;
-}
-
-:host(.has-zoom-slider) .ol-touch .ol-zoomslider {
-  top: 2.75em;
 }
 
 :host(.has-zoom-slider) .ol-zoom-in.ol-has-tooltip:hover [role='tooltip'],
