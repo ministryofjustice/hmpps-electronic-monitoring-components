@@ -1,6 +1,6 @@
 import { isEmpty } from 'ol/extent'
 import { EmMap } from '../../components/map/scripts/em-map'
-import { CirclesLayer, LocationsLayer, NumberingLayer, TracksLayer } from '../../components/map/scripts/core/layers'
+import { CirclesLayer, LocationsLayer, TextLayer, TracksLayer } from '../../components/map/scripts/core/layers'
 import config from '../../components/map/scripts/core/config'
 import '../../components/map/styles/em-map.scss'
 
@@ -20,7 +20,7 @@ interface MapDemoOptions {
   }
   showPositions?: boolean
   showTracks?: boolean
-  showNumbers?: boolean
+  showText?: boolean
   showCircles?: boolean
   usesInternalOverlays?: boolean
 }
@@ -68,7 +68,7 @@ export function setupMapDemo({
   },
   showPositions = true,
   showTracks = false,
-  showNumbers = false,
+  showText = false,
   showCircles = false,
   usesInternalOverlays = true,
 }: MapDemoOptions = {}): HTMLElement {
@@ -120,11 +120,11 @@ export function setupMapDemo({
 
     emMap.addLayer(new TracksLayer({ title: 'tracksLayer', positions: pos, visible: showTracks }))
     emMap.addLayer(
-      new NumberingLayer({
+      new TextLayer({
         positions: pos,
-        numberProperty: 'sequenceNumber',
-        title: 'numberingLayer',
-        visible: showNumbers,
+        textProperty: 'sequenceNumber',
+        title: 'textLayer',
+        visible: showText,
       }),
     )
     emMap.addLayer(

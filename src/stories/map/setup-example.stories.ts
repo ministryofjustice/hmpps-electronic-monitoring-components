@@ -47,7 +47,7 @@ const meta = {
       },
       showPositions: true,
       showTracks: false,
-      showNumbers: false,
+      showText: false,
       showCircles: false,
     })
 

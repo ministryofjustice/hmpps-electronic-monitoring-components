@@ -1,7 +1,7 @@
 import Map from 'ol/Map'
 import CircleStyle from 'ol/style/Circle'
 import VectorLayer from 'ol/layer/Vector'
-import { CirclesLayer, LocationsLayer, NumberingLayer, TracksLayer } from '@map/scripts/core/layers'
+import { CirclesLayer, LocationsLayer, TextLayer, TracksLayer } from '@map/scripts/core/layers'
 import type { EmMap } from '@map/scripts/em-map'
 import { findLayerByTitle } from '../support/helpers'
 
@@ -25,11 +25,11 @@ describe('<em-map> layers', () => {
         el.addLayer(new LocationsLayer({ title: 'pointsLayer', positions }))
         el.addLayer(new TracksLayer({ title: 'tracksLayer', positions, visible: true }))
         el.addLayer(
-          new NumberingLayer({
-            title: 'numberingLayer',
+          new TextLayer({
+            title: 'textLayer',
             positions,
             visible: true,
-            numberProperty: 'sequenceNumber',
+            textProperty: 'sequenceNumber',
           }),
         )
         el.addLayer(
@@ -45,12 +45,12 @@ describe('<em-map> layers', () => {
         const confidenceLayer = findLayerByTitle(olMap, 'circlesLayer')
         const tracksLayer = findLayerByTitle(olMap, 'tracksLayer')
         const pointsLayer = findLayerByTitle(olMap, 'pointsLayer') as VectorLayer
-        const numberingLayer = findLayerByTitle(olMap, 'numberingLayer')
+        const textLayer = findLayerByTitle(olMap, 'textLayer')
 
         expect(confidenceLayer, 'Confidence layer should exist').to.exist
         expect(tracksLayer, 'Tracks layer should exist').to.exist
         expect(pointsLayer, 'Points layer should exist').to.exist
-        expect(numberingLayer, 'Numbers layer should exist').to.exist
+        expect(textLayer, 'Text layer should exist').to.exist
 
         // Verify point features count matches positions data
         const featureCount = pointsLayer.getSource()!.getFeatures().length
@@ -186,7 +186,7 @@ describe('<em-map> TracksLayer', () => {
   })
 })
 
-describe('<em-map> NumberingLayer', () => {
+describe('<em-map> TextLayer', () => {
   beforeEach(() => {
     cy.stubMapMiddleware()
     cy.readFile('src/components/map/fixtures/positions.json').as('positions')
@@ -195,7 +195,7 @@ describe('<em-map> NumberingLayer', () => {
     cy.waitForMapReady()
   })
 
-  it('adds and removes NumberingLayer with correct visibility, zIndex, and text style', function () {
+  it('adds and removes TextLayer with correct visibility, zIndex, and text style', function () {
     cy.get('em-map').then($el => {
       const el = $el[0] as EmMap
       const map = el.olMapInstance as Map
@@ -209,20 +209,20 @@ describe('<em-map> NumberingLayer', () => {
       }
 
       el.addLayer(
-        new NumberingLayer({
-          title: 'numberingLayer',
+        new TextLayer({
+          title: 'textLayer',
           positions,
           visible: true,
           zIndex: 7,
-          numberProperty: 'sequenceNumber',
+          textProperty: 'sequenceNumber',
           style: customStyle,
         }),
       )
 
-      const layer = findLayerByTitle(map, 'numberingLayer') as VectorLayer
-      expect(layer, 'NumberingLayer should exist').to.exist
+      const layer = findLayerByTitle(map, 'textLayer') as VectorLayer
+      expect(layer, 'TextLayer should exist').to.exist
       expect(layer.getVisible(), 'Layer should be visible').to.be.true
-      expect(layer.get('title')).to.equal('numberingLayer')
+      expect(layer.get('title')).to.equal('textLayer')
       expect(layer.getZIndex()).to.equal(7)
 
       const source = layer.getSource()
@@ -246,17 +246,17 @@ describe('<em-map> NumberingLayer', () => {
       expect(textStyle!.getOffsetX()).to.equal(10)
       expect(textStyle!.getOffsetY()).to.equal(5)
 
-      // Verify the text value corresponds to the numberProperty
+      // Verify the text value corresponds to the textProperty
       const textValue = textStyle!.getText()
       expect(textValue, 'Text should show the sequence number').to.match(/^\d+$/)
 
       // Detach and verify removal
-      el.removeLayer('numberingLayer')
+      el.removeLayer('textLayer')
       const allTitles = map
         .getLayers()
         .getArray()
         .map(layerByTitle => layerByTitle.get('title'))
-      expect(allTitles).to.not.include('numberingLayer')
+      expect(allTitles).to.not.include('textLayer')
     })
   })
 })

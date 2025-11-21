@@ -7,7 +7,7 @@ import { Fill, Stroke, Style, Text } from 'ol/style'
 import { FeatureLike } from 'ol/Feature'
 import { createPointFeatureCollectionFromPositions } from '../../features/point'
 
-type OLNumberingLayerStyle = {
+type OLTextLayerStyle = {
   fill: string
   font: string
   offset: {
@@ -20,16 +20,15 @@ type OLNumberingLayerStyle = {
   }
 }
 
-type OLNumberingLayerOptions = {
-  numberProperty?: string
+type OLTextLayerOptions = {
+  textProperty: string
   positions: Array<Position>
-  style?: OLNumberingLayerStyle
+  style?: OLTextLayerStyle
   title: string
   visible?: boolean
   zIndex?: number
 }
 
-const DEFAULT_NUMBER_PROPERTY = 'sequenceNumber'
 const DEFAULT_FONT = 'bold 14px "GDS Transport", system-ui, sans-serif'
 const DEFAULT_FILL = 'black'
 const DEFAULT_STROKE_COLOR = 'white'
@@ -37,7 +36,7 @@ const DEFAULT_STROKE_WIDTH = 2
 const DEFAULT_OFFSET_X = 12
 const DEFAULT_OFFSET_Y = 1
 const DEFAULT_VISIBILITY = false
-const DEFAULT_STYLE: OLNumberingLayerStyle = {
+const DEFAULT_STYLE: OLTextLayerStyle = {
   fill: DEFAULT_FILL,
   font: DEFAULT_FONT,
   offset: {
@@ -51,7 +50,7 @@ const DEFAULT_STYLE: OLNumberingLayerStyle = {
 }
 
 const createStyleFunction =
-  (style: OLNumberingLayerStyle, property: string) =>
+  (style: OLTextLayerStyle, property: string) =>
   (feature: FeatureLike): Array<Style> => {
     const value = feature.get(property)
 
@@ -78,15 +77,15 @@ const createStyleFunction =
     return []
   }
 
-export class OLNumberingLayer extends VectorLayer<VectorSource<Feature<Point>>> {
+export class OLTextLayer extends VectorLayer<VectorSource<Feature<Point>>> {
   constructor({
-    numberProperty = DEFAULT_NUMBER_PROPERTY,
+    textProperty,
     positions,
     style = DEFAULT_STYLE,
     title,
     visible = DEFAULT_VISIBILITY,
     zIndex,
-  }: OLNumberingLayerOptions) {
+  }: OLTextLayerOptions) {
     super({
       properties: {
         title,
@@ -94,7 +93,7 @@ export class OLNumberingLayer extends VectorLayer<VectorSource<Feature<Point>>> 
       source: new VectorSource({
         features: createPointFeatureCollectionFromPositions(positions),
       }),
-      style: createStyleFunction(style, numberProperty),
+      style: createStyleFunction(style, textProperty),
       visible,
       zIndex,
     })

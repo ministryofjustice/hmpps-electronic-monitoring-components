@@ -20,7 +20,7 @@ const meta = {
     showLocations: { control: 'boolean', description: 'Show Locations layer' },
     showTracks: { control: 'boolean', description: 'Show Tracks layer' },
     showCircles: { control: 'boolean', description: 'Show Circles layer' },
-    showNumbers: { control: 'boolean', description: 'Show Numbering layer' },
+    showText: { control: 'boolean', description: 'Show Text layer' },
   },
   render: args => {
     const container = document.createElement('div')
@@ -37,7 +37,7 @@ const meta = {
       showPositions: args.showLocations,
       showTracks: args.showTracks,
       showCircles: args.showCircles,
-      showNumbers: args.showNumbers,
+      showText: args.showText,
     })
     return container
   },
@@ -53,7 +53,7 @@ export const Example: Story = {
     showLocations: true,
     showTracks: false,
     showCircles: false,
-    showNumbers: false,
+    showText: false,
   },
   parameters: {
     docs: {

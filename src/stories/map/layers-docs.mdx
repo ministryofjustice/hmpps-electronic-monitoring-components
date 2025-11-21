@@ -4,7 +4,7 @@ import * as LayersCSF from './layers-example.stories';
 <Meta title="Components/Map/Layers/Docs" />
 
 <Title>Map layers</Title>
-<Subtitle>Visualising positions, tracks, circles, and numbering</Subtitle>
+<Subtitle>Visualising positions, tracks, circles, and text</Subtitle>
 
 ---
 
@@ -21,7 +21,7 @@ import * as LayersCSF from './layers-example.stories';
 Layers are added/removed through the public methods on the `<em-map>` element. 
 
 ```ts
-// Create a layer (any of LocationsLayer, TracksLayer, CirclesLayer, NumberingLayer)
+// Create a layer (any of LocationsLayer, TracksLayer, CirclesLayer, TextLayer)
 // "id" defaults to "locations" if not provided
 const layer = new LocationsLayer({
   id: 'locations',
@@ -77,10 +77,10 @@ emMap.removeLayer('Locations')  // by title
       <td><code>circles</code></td>
     </tr>
     <tr>
-      <td><code>NumberingLayer</code></td>
-      <td>Paints numeric labels (e.g. <code>sequenceNumber</code>) next to points.</td>
+      <td><code>TextLayer</code></td>
+      <td>Paints labels (e.g. <code>label</code>) next to points.</td>
       <td>Point</td>
-      <td><code>numbering</code></td>
+      <td><code>text</code></td>
     </tr>
   </tbody>
 </table>
@@ -97,7 +97,7 @@ import {
   LocationsLayer,
   TracksLayer,
   CirclesLayer,
-  NumberingLayer,
+  TextLayer,
 } from '@ministryofjustice/hmpps-electronic-monitoring-components/map/layers'
 import { isEmpty } from 'ol/extent'
 
@@ -114,7 +114,7 @@ if (!ol || !positions?.length) return
 const locations = emMap.addLayer(new LocationsLayer({ positions, title: 'Locations' }))
 emMap.addLayer(new TracksLayer({ positions, visible: false, title: 'Tracks' }))
 emMap.addLayer(new CirclesLayer({ positions, visible: false, title: 'Confidence circles' }))
-emMap.addLayer(new NumberingLayer({ positions, visible: false, title: 'Numbering' }))
+emMap.addLayer(new TextLayer({ positions, visible: false, title: 'Text' }))
 
 // Fit to locations
 const src = locations?.getSource()
@@ -132,7 +132,7 @@ if (src) {
 
 Each layer type supports a common base set:
 
-- <code>id?: string</code> — unique id (defaults to layer type: <code>locations</code> / <code>tracks</code> / <code>circles</code> / <code>numbering</code>)  
+- <code>id?: string</code> — unique id (defaults to layer type: <code>locations</code> / <code>tracks</code> / <code>circles</code> / <code>text</code>)  
 - <code>title?: string</code> — human-friendly name (stored in OL layer properties)  
 - <code>visible?: boolean</code> — initial visibility (defaults vary by layer)  
 - <code>zIndex?: number</code> — draw order (higher renders above lower)  
@@ -183,12 +183,12 @@ emMap.addLayer(new CirclesLayer({
 }))
 ```
 
-### NumberingLayer
+### TextLayer
 
 ```ts
-emMap.addLayer(new NumberingLayer({
+emMap.addLayer(new TextLayer({
   positions,
-  numberProperty: 'myLabel',
+  textProperty: 'myLabel',
   visible: true,
   zIndex: 40,
   style: {
@@ -267,17 +267,17 @@ emMap.addLayer(new NumberingLayer({
 
 ---
 
-### <code>NumberingLayer(options)</code>
+### <code>TextLayer(options)</code>
 
 <table>
   <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
     <tr><td><code>positions</code></td><td><code>Position[]</code></td><td>—</td><td>Required point inputs.</td></tr>
-    <tr><td><code>id</code></td><td><code>string</code></td><td><code>numbering</code></td><td>Unique id.</td></tr>
+    <tr><td><code>id</code></td><td><code>string</code></td><td><code>text</code></td><td>Unique id.</td></tr>
     <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>Human-readable name.</td></tr>
     <tr><td><code>visible</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Initial visibility.</td></tr>
     <tr><td><code>zIndex</code></td><td><code>number</code></td><td>—</td><td>Draw order.</td></tr>
-    <tr><td><code>numberProperty</code></td><td><code>string</code></td><td><code>sequenceNumber</code></td><td>Feature property to display.</td></tr>
+    <tr><td><code>textProperty</code></td><td><code>string</code></td><td><code>label</code></td><td>Feature property to display.</td></tr>
     <tr>
       <td><code>style</code></td>
       <td><code>{'{'}</code> <code>font: string; fill: string; stroke: {'{'} color: string; width: number {'}'}; offset: {'{'} x: number; y: number {'}'} {'}'}</code></td>

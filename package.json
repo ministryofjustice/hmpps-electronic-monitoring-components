@@ -1,6 +1,6 @@
 {
   "name": "@ministryofjustice/hmpps-electronic-monitoring-components",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "HMPPS Electronic Monitoring Frontend Components",
   "repository": {
     "type": "git",
@@ -24,8 +24,8 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:ci": "jest --runInBand",
-    "int-test": "cypress run --component --config-file integration_tests/cypress.config.ts",
-    "int-test:ui": "cypress open --component --browser chrome --config-file integration_tests/cypress.config.ts",
+    "int-test": "npm run build:css && cypress run --component --config-file integration_tests/cypress.config.ts",
+    "int-test:ui": "npm run build:css && cypress open --component --browser chrome --config-file integration_tests/cypress.config.ts",
     "vite": "vite",
     "build:css": "for file in src/components/**/styles/*.scss; do sass --no-source-map --quiet-deps --load-path=node_modules \"$file\" \"${file%.scss}.raw.css\"; done",
     "watch:css": "chokidar 'src/components/**/styles/**/*.scss' -c \"npm run build:css\"",

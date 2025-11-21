@@ -5,12 +5,12 @@ import type Geometry from 'ol/geom/Geometry'
 import type { ComposableLayer } from './base'
 import type { MapAdapter } from '../map-adapter'
 import Position from '../types/position'
-import { OLNumberingLayer } from './ol/numbering-layer'
+import { OLTextLayer } from './ol/text-layer'
 
 type OLVecSource = VectorSource<Feature<Geometry>>
 type OLVecLayer = VectorLayer<OLVecSource>
 
-export type NumberingLayerOptions = {
+export type TextLayerOptions = {
   id?: string
   title?: string
   visible?: boolean
@@ -27,21 +27,20 @@ export type NumberingLayerOptions = {
       y: number
     }
   }
-  numberProperty?: string
-  // The data to render (required)
+  textProperty: string
   positions: Array<Position>
 }
 
-export class NumberingLayer implements ComposableLayer<OLVecLayer> {
+export class TextLayer implements ComposableLayer<OLVecLayer> {
   public readonly id: string
 
-  private readonly options: NumberingLayerOptions
+  private readonly options: TextLayerOptions
 
   private olLayer?: OLVecLayer
 
-  constructor(options: NumberingLayerOptions) {
+  constructor(options: TextLayerOptions) {
     this.options = options
-    this.id = options.id ?? 'numbering'
+    this.id = options.id ?? 'text'
   }
 
   getNativeLayer(): OLVecLayer | undefined {
@@ -50,14 +49,14 @@ export class NumberingLayer implements ComposableLayer<OLVecLayer> {
 
   attach(adapter: MapAdapter): void {
     if (adapter.mapLibrary !== 'openlayers') {
-      console.warn(`[NumberingLayer] MapLibre support is not implemented yet (layer "${this.id}")`)
+      console.warn(`[TextLayer] MapLibre support is not implemented yet (layer "${this.id}")`)
       return
     }
 
     const { map } = adapter.openlayers!
 
-    this.olLayer = new OLNumberingLayer({
-      numberProperty: this.options.numberProperty,
+    this.olLayer = new OLTextLayer({
+      textProperty: this.options.textProperty,
       positions: this.options.positions,
       style: this.options.style,
       title: this.options.title ?? this.id,

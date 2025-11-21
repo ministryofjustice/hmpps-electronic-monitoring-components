@@ -97,16 +97,19 @@ npm run int-test:ui
 
 To publish a new version:
 
-1. Update the package version in `package.json`.
-2. Ensure all changes are merged into `main`.
-3. Commit and push the version change.
-4. Create a **new GitHub Release** (e.g. `v1.3.0`).
-5. The workflow will:
-   - Install dependencies and run lint, type, and test checks
-   - Build the package
-   - Publish to npm via OpenID Connect (OIDC), **only if the version is new**
+1. When a pull request is merged into main, the CI pipeline automatically:
 
-Once complete, the new version will appear on the npm registry under the MoJ namespace:
+- Runs linting, type checking, and all tests.
+- Builds the package.
+- Increments the version number in package.json (using npm version patch).
+- Creates and pushes a Git tag (e.g. v0.0.7).
+
+2. The vX.Y.Z tag automatically triggers the “Publish package” workflow, which:
+
+- Rebuilds the package.
+- Publishes it to npm under the MoJ namespace via OpenID Connect (OIDC) authentication.
+
+3. Once complete, the new version will appear on the npm registry under the MoJ namespace:
 
 `@ministryofjustice/hmpps-electronic-monitoring-components`
 
@@ -118,7 +121,7 @@ Once complete, the new version will appear on the npm registry under the MoJ nam
 | ------------------- | -------------------- | ------------------------------------------------------ |
 | **Build & Test**    | Any branch push / PR | Validates code (lint, types, unit + integration tests) |
 | **Docs Publish**    | Merge to `main`      | Updates any Docs changes on GitHub Pages               |
-| **Package Publish** | GitHub Release       | Publishes new npm package version                      |
+| **Package Publish** | Tag (auto or manual) | Publishes to npm if the version is new                 |
 
 ---
 
