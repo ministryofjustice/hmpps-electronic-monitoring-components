@@ -1,7 +1,6 @@
-import{j as e,M as o}from"./WithTooltip-SK46ZJ2J-Dga3z9Xp.js";import{useMDXComponents as i}from"./index-DyY9K06A.js";import"./preload-helper-PPVm8Dsz.js";import"./iframe-Do0EvzfF.js";function s(r){const n={a:"a",br:"br",code:"code",h1:"h1",h2:"h2",h3:"h3",hr:"hr",li:"li",p:"p",strong:"strong",ul:"ul",...i(),...r.components};return e.jsxs(e.Fragment,{children:[e.jsx(o,{title:"Overview/Home"}),`
+import{j as e,M as o}from"./WithTooltip-SK46ZJ2J-qZjqK6rA.js";import{useMDXComponents as i}from"./index-CUJ9n-rf.js";import"./preload-helper-PPVm8Dsz.js";import"./iframe-Cl2cNNgQ.js";function s(r){const n={a:"a",code:"code",h1:"h1",h2:"h2",h3:"h3",hr:"hr",li:"li",p:"p",strong:"strong",ul:"ul",...i(),...r.components};return e.jsxs(e.Fragment,{children:[e.jsx(o,{title:"Overview/Home"}),`
 `,e.jsx(n.h1,{id:"electronic-monitoring-components",children:"Electronic Monitoring Components"}),`
-`,e.jsxs(n.p,{children:["A library of reusable frontend components designed for ",e.jsx(n.strong,{children:"HMPPS Electronic Monitoring applications"}),".",e.jsx(n.br,{}),`
-`,"These components follow the GOV.UK Design System where possible and integrate with modern client-side frameworks."]}),`
+`,e.jsxs(n.p,{children:["A library of reusable frontend components designed for ",e.jsx(n.strong,{children:"HMPPS Electronic Monitoring applications"}),"."]}),`
 `,e.jsx(n.hr,{}),`
 `,e.jsx(n.h2,{id:"map-component",children:"Map Component"}),`
 `,e.jsxs(n.p,{children:["The ",e.jsx(n.code,{children:"<em-map>"})," component provides an interactive map built with ",e.jsx(n.strong,{children:"OpenLayers"})," or ",e.jsx(n.strong,{children:"MapLibre"}),", using ",e.jsx(n.strong,{children:"Ordnance Survey vector tiles"})," by default."]}),`
