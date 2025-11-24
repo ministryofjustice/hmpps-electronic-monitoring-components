@@ -1,4 +1,4 @@
-import{j as e,M as o,T as t,S as a,C as l,a as d}from"./WithTooltip-SK46ZJ2J-qZjqK6rA.js";import{useMDXComponents as c}from"./index-CUJ9n-rf.js";import{Example as r}from"./setup-example.stories-Da9gHw2G.js";import"./preload-helper-PPVm8Dsz.js";import"./iframe-Cl2cNNgQ.js";import"./setupMapDemo-BZGk4Rfr.js";function i(s){const n={a:"a",blockquote:"blockquote",br:"br",code:"code",h1:"h1",h2:"h2",h3:"h3",hr:"hr",li:"li",ol:"ol",p:"p",pre:"pre",strong:"strong",ul:"ul",...c(),...s.components};return e.jsxs(e.Fragment,{children:[e.jsx(o,{title:"Components/Map/Setup/Docs"}),`
+import{j as e,M as o,T as t,S as a,C as l,a as d}from"./WithTooltip-SK46ZJ2J-CQSxaV6x.js";import{useMDXComponents as c}from"./index-CPCNvDsz.js";import{Example as r}from"./setup-example.stories-DH66kCcj.js";import"./preload-helper-PPVm8Dsz.js";import"./iframe-BzEMOncp.js";import"./setupMapDemo-BGmEH5Vf.js";function i(s){const n={a:"a",blockquote:"blockquote",br:"br",code:"code",h1:"h1",h2:"h2",h3:"h3",hr:"hr",li:"li",ol:"ol",p:"p",pre:"pre",strong:"strong",ul:"ul",...c(),...s.components};return e.jsxs(e.Fragment,{children:[e.jsx(o,{title:"Components/Map/Setup/Docs"}),`
 `,e.jsx(t,{children:"Map setup"}),`
 `,e.jsx(a,{children:"Interactive map component using OpenLayers or MapLibre"}),`
 `,e.jsx(n.hr,{}),`
@@ -147,7 +147,7 @@ const positions = emMap.positions
 `]}),`
 `,e.jsx(n.hr,{}),`
 `,e.jsx(n.h3,{id:"layers",children:"Layers"}),`
-`,e.jsx(n.p,{children:"Layers represent sets of features rendered on top of the base map — for example, locations, tracks, numbering, or circles showing GPS confidence."}),`
+`,e.jsx(n.p,{children:"Layers represent sets of features rendered on top of the base map — for example, locations, tracks, text, or circles showing GPS confidence."}),`
 `,e.jsx(n.p,{children:"This library provides ready-made composable layer classes:"}),`
 `,e.jsxs(n.ul,{children:[`
 `,e.jsx(n.li,{children:e.jsx(n.code,{children:"LocationsLayer"})}),`
