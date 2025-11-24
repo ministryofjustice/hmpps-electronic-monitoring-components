@@ -1,4 +1,4 @@
-import{j as e,M as l,T as c,S as t,C as o,a as h}from"./WithTooltip-SK46ZJ2J-3K-MHjm3.js";import{useMDXComponents as d}from"./index-oJi1lAkl.js";import{Example as i}from"./layers-example.stories-sFOrD6rp.js";import"./preload-helper-PPVm8Dsz.js";import"./iframe-CyWKJ67_.js";import"./setupMapDemo-DJknm6xg.js";function r(s){const n={code:"code",h2:"h2",h3:"h3",hr:"hr",li:"li",p:"p",pre:"pre",strong:"strong",ul:"ul",...d(),...s.components};return e.jsxs(e.Fragment,{children:[e.jsx(l,{title:"Components/Map/Layers/Docs"}),`
+import{j as e,M as l,T as c,S as t,C as o,a as h}from"./WithTooltip-SK46ZJ2J-BH1bVQRp.js";import{useMDXComponents as d}from"./index-Y42PMXBY.js";import{Example as i}from"./layers-example.stories-D8ReRc7I.js";import"./preload-helper-PPVm8Dsz.js";import"./iframe-CjENJMCR.js";import"./setupMapDemo-C89o-0-L.js";function r(s){const n={code:"code",h2:"h2",h3:"h3",hr:"hr",li:"li",p:"p",pre:"pre",strong:"strong",ul:"ul",...d(),...s.components};return e.jsxs(e.Fragment,{children:[e.jsx(l,{title:"Components/Map/Layers/Docs"}),`
 `,e.jsx(c,{children:"Map layers"}),`
 `,e.jsx(t,{children:"Visualising positions, tracks, circles, and numbering"}),`
 `,e.jsx(n.hr,{}),`
@@ -9,7 +9,7 @@ import{j as e,M as l,T as c,S as t,C as o,a as h}from"./WithTooltip-SK46ZJ2J-3K-
 `,e.jsx(n.hr,{}),`
 `,e.jsx(n.h2,{id:"public-api-for-managing-layers",children:"Public API for managing layers"}),`
 `,e.jsxs(n.p,{children:["Layers are added/removed through the public methods on the ",e.jsx(n.code,{children:"<em-map>"})," element."]}),`
-`,e.jsx(n.pre,{children:e.jsx(n.code,{className:"language-ts",children:`// Create a layer (any of LocationsLayer, TracksLayer, CirclesLayer, NumberingLayer)
+`,e.jsx(n.pre,{children:e.jsx(n.code,{className:"language-ts",children:`// Create a layer (any of LocationsLayer, TracksLayer, CirclesLayer, TextLayer)
 // "id" defaults to "locations" if not provided
 const layer = new LocationsLayer({
   id: 'locations',
@@ -34,7 +34,7 @@ emMap.removeLayer('Locations')  // by title
 `]}),`
 `,e.jsx(n.hr,{}),`
 `,e.jsx(n.h2,{id:"available-layers",children:"Available layers"}),`
-`,e.jsxs("table",{children:[e.jsx("thead",{children:e.jsxs("tr",{children:[e.jsx("th",{children:"Layer"}),e.jsx("th",{children:"Description"}),e.jsx("th",{children:"Geometry"}),e.jsx("th",{children:"Default id"})]})}),e.jsxs("tbody",{children:[e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"LocationsLayer"})}),e.jsxs("td",{children:["Renders ",e.jsx("strong",{children:"Point"})," positions as circles."]}),e.jsx("td",{children:"Point"}),e.jsx("td",{children:e.jsx("code",{children:"locations"})})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"TracksLayer"})}),e.jsxs("td",{children:["Composite for ",e.jsx("strong",{children:"LineString"})," tracks with directional arrows."]}),e.jsx("td",{children:"LineString"}),e.jsx("td",{children:e.jsx("code",{children:"tracks"})})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"CirclesLayer"})}),e.jsx("td",{children:"Renders circles from point positions (e.g. confidence radius)."}),e.jsx("td",{children:"Point → Circle"}),e.jsx("td",{children:e.jsx("code",{children:"circles"})})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"NumberingLayer"})}),e.jsxs("td",{children:["Paints numeric labels (e.g. ",e.jsx("code",{children:"sequenceNumber"}),") next to points."]}),e.jsx("td",{children:"Point"}),e.jsx("td",{children:e.jsx("code",{children:"numbering"})})]})]})]}),`
+`,e.jsxs("table",{children:[e.jsx("thead",{children:e.jsxs("tr",{children:[e.jsx("th",{children:"Layer"}),e.jsx("th",{children:"Description"}),e.jsx("th",{children:"Geometry"}),e.jsx("th",{children:"Default id"})]})}),e.jsxs("tbody",{children:[e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"LocationsLayer"})}),e.jsxs("td",{children:["Renders ",e.jsx("strong",{children:"Point"})," positions as circles."]}),e.jsx("td",{children:"Point"}),e.jsx("td",{children:e.jsx("code",{children:"locations"})})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"TracksLayer"})}),e.jsxs("td",{children:["Composite for ",e.jsx("strong",{children:"LineString"})," tracks with directional arrows."]}),e.jsx("td",{children:"LineString"}),e.jsx("td",{children:e.jsx("code",{children:"tracks"})})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"CirclesLayer"})}),e.jsx("td",{children:"Renders circles from point positions (e.g. confidence radius)."}),e.jsx("td",{children:"Point → Circle"}),e.jsx("td",{children:e.jsx("code",{children:"circles"})})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"TextLayer"})}),e.jsxs("td",{children:["Paints numeric labels (e.g. ",e.jsx("code",{children:"sequenceNumber"}),") next to points."]}),e.jsx("td",{children:"Point"}),e.jsx("td",{children:e.jsx("code",{children:"numbering"})})]})]})]}),`
 `,e.jsx("p",{children:e.jsx("em",{children:"MapLibre support is planned; these layers currently attach to OpenLayers."})}),`
 `,e.jsx(n.hr,{}),`
 `,e.jsx(n.h2,{id:"quick-start-full-example",children:"Quick start (full example)"}),`
@@ -43,7 +43,7 @@ import {
   LocationsLayer,
   TracksLayer,
   CirclesLayer,
-  NumberingLayer,
+  TextLayer,
 } from '@ministryofjustice/hmpps-electronic-monitoring-components/map/layers'
 import { isEmpty } from 'ol/extent'
 
@@ -60,7 +60,7 @@ if (!ol || !positions?.length) return
 const locations = emMap.addLayer(new LocationsLayer({ positions, title: 'Locations' }))
 emMap.addLayer(new TracksLayer({ positions, visible: false, title: 'Tracks' }))
 emMap.addLayer(new CirclesLayer({ positions, visible: false, title: 'Confidence circles' }))
-emMap.addLayer(new NumberingLayer({ positions, visible: false, title: 'Numbering' }))
+emMap.addLayer(new TextLayer({ positions, visible: false, title: 'Numbering' }))
 
 // Fit to locations
 const src = locations?.getSource()
@@ -114,8 +114,8 @@ if (src) {
   },
 }))
 `})}),`
-`,e.jsx(n.h3,{id:"numberinglayer",children:"NumberingLayer"}),`
-`,e.jsx(n.pre,{children:e.jsx(n.code,{className:"language-ts",children:`emMap.addLayer(new NumberingLayer({
+`,e.jsx(n.h3,{id:"textlayer",children:"TextLayer"}),`
+`,e.jsx(n.pre,{children:e.jsx(n.code,{className:"language-ts",children:`emMap.addLayer(new TextLayer({
   positions,
   numberProperty: 'myLabel',
   visible: true,
@@ -139,5 +139,5 @@ if (src) {
 `,e.jsx(n.h3,{id:"circleslayeroptions",children:e.jsx("code",{children:"CirclesLayer(options)"})}),`
 `,e.jsxs("table",{children:[e.jsx("thead",{children:e.jsxs("tr",{children:[e.jsx("th",{children:"Option"}),e.jsx("th",{children:"Type"}),e.jsx("th",{children:"Default"}),e.jsx("th",{children:"Description"})]})}),e.jsxs("tbody",{children:[e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"positions"})}),e.jsx("td",{children:e.jsx("code",{children:"Position[]"})}),e.jsx("td",{children:"—"}),e.jsx("td",{children:"Required point inputs."})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"id"})}),e.jsx("td",{children:e.jsx("code",{children:"string"})}),e.jsx("td",{children:e.jsx("code",{children:"circles"})}),e.jsx("td",{children:"Unique id."})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"title"})}),e.jsx("td",{children:e.jsx("code",{children:"string"})}),e.jsx("td",{children:"—"}),e.jsx("td",{children:"Human-readable name."})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"visible"})}),e.jsx("td",{children:e.jsx("code",{children:"boolean"})}),e.jsx("td",{children:e.jsx("code",{children:"false"})}),e.jsx("td",{children:"Initial visibility."})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"zIndex"})}),e.jsx("td",{children:e.jsx("code",{children:"number"})}),e.jsx("td",{children:"—"}),e.jsx("td",{children:"Draw order."})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"style"})}),e.jsxs("td",{children:[e.jsx("code",{children:"{"})," ",e.jsxs("code",{children:["fill: string; stroke: ","{"," color: string; width: number ","}"," ","}"]})]}),e.jsx("td",{children:"—"}),e.jsx("td",{children:"Fill & stroke styling."})]})]})]}),`
 `,e.jsx(n.hr,{}),`
-`,e.jsx(n.h3,{id:"numberinglayeroptions",children:e.jsx("code",{children:"NumberingLayer(options)"})}),`
+`,e.jsx(n.h3,{id:"textlayeroptions",children:e.jsx("code",{children:"TextLayer(options)"})}),`
 `,e.jsxs("table",{children:[e.jsx("thead",{children:e.jsxs("tr",{children:[e.jsx("th",{children:"Option"}),e.jsx("th",{children:"Type"}),e.jsx("th",{children:"Default"}),e.jsx("th",{children:"Description"})]})}),e.jsxs("tbody",{children:[e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"positions"})}),e.jsx("td",{children:e.jsx("code",{children:"Position[]"})}),e.jsx("td",{children:"—"}),e.jsx("td",{children:"Required point inputs."})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"id"})}),e.jsx("td",{children:e.jsx("code",{children:"string"})}),e.jsx("td",{children:e.jsx("code",{children:"numbering"})}),e.jsx("td",{children:"Unique id."})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"title"})}),e.jsx("td",{children:e.jsx("code",{children:"string"})}),e.jsx("td",{children:"—"}),e.jsx("td",{children:"Human-readable name."})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"visible"})}),e.jsx("td",{children:e.jsx("code",{children:"boolean"})}),e.jsx("td",{children:e.jsx("code",{children:"false"})}),e.jsx("td",{children:"Initial visibility."})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"zIndex"})}),e.jsx("td",{children:e.jsx("code",{children:"number"})}),e.jsx("td",{children:"—"}),e.jsx("td",{children:"Draw order."})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"numberProperty"})}),e.jsx("td",{children:e.jsx("code",{children:"string"})}),e.jsx("td",{children:e.jsx("code",{children:"sequenceNumber"})}),e.jsx("td",{children:"Feature property to display."})]}),e.jsxs("tr",{children:[e.jsx("td",{children:e.jsx("code",{children:"style"})}),e.jsxs("td",{children:[e.jsx("code",{children:"{"})," ",e.jsxs("code",{children:["font: string; fill: string; stroke: ","{"," color: string; width: number ","}","; offset: ","{"," x: number; y: number ","}"," ","}"]})]}),e.jsx("td",{children:"—"}),e.jsx("td",{children:"Text styling & offset."})]})]})]})]})}function u(s={}){const{wrapper:n}={...d(),...s.components};return n?e.jsx(n,{...s,children:e.jsx(r,{...s})}):r(s)}export{u as default};

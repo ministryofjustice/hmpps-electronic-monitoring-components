@@ -1,4 +1,4 @@
-import{j as e,M as o,T as t,S as a,C as l,a as d}from"./WithTooltip-SK46ZJ2J-3K-MHjm3.js";import{useMDXComponents as c}from"./index-oJi1lAkl.js";import{Example as r}from"./setup-example.stories-CJd7C1JW.js";import"./preload-helper-PPVm8Dsz.js";import"./iframe-CyWKJ67_.js";import"./setupMapDemo-DJknm6xg.js";function i(s){const n={a:"a",blockquote:"blockquote",br:"br",code:"code",h1:"h1",h2:"h2",h3:"h3",hr:"hr",li:"li",ol:"ol",p:"p",pre:"pre",strong:"strong",ul:"ul",...c(),...s.components};return e.jsxs(e.Fragment,{children:[e.jsx(o,{title:"Components/Map/Setup/Docs"}),`
+import{j as e,M as o,T as t,S as a,C as l,a as d}from"./WithTooltip-SK46ZJ2J-BH1bVQRp.js";import{useMDXComponents as c}from"./index-Y42PMXBY.js";import{Example as r}from"./setup-example.stories-DOhSyOjd.js";import"./preload-helper-PPVm8Dsz.js";import"./iframe-CjENJMCR.js";import"./setupMapDemo-C89o-0-L.js";function i(s){const n={a:"a",blockquote:"blockquote",br:"br",code:"code",h1:"h1",h2:"h2",h3:"h3",hr:"hr",li:"li",ol:"ol",p:"p",pre:"pre",strong:"strong",ul:"ul",...c(),...s.components};return e.jsxs(e.Fragment,{children:[e.jsx(o,{title:"Components/Map/Setup/Docs"}),`
 `,e.jsx(t,{children:"Map setup"}),`
 `,e.jsx(a,{children:"Interactive map component using OpenLayers or MapLibre"}),`
 `,e.jsx(n.hr,{}),`
@@ -152,7 +152,7 @@ const positions = emMap.positions
 `,e.jsxs(n.ul,{children:[`
 `,e.jsx(n.li,{children:e.jsx(n.code,{children:"LocationsLayer"})}),`
 `,e.jsx(n.li,{children:e.jsx(n.code,{children:"TracksLayer"})}),`
-`,e.jsx(n.li,{children:e.jsx(n.code,{children:"NumberingLayer"})}),`
+`,e.jsx(n.li,{children:e.jsx(n.code,{children:"TextLayer"})}),`
 `,e.jsx(n.li,{children:e.jsx(n.code,{children:"CirclesLayer"})}),`
 `]}),`
 `,e.jsxs(n.p,{children:["Each can be created and added via the ",e.jsx(n.code,{children:"emMap.addLayer()"})," helper or through your own OpenLayers code."]}),`
