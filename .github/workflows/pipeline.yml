@@ -1,4 +1,4 @@
-name: Pipeline [build → test]
+name: Pipeline [build → test → tag]
 
 on:
   push:
@@ -29,7 +29,7 @@ jobs:
     secrets: inherit
 
   auto_tag:
-    name: Auto tag & version bump (main only)
+    name: Auto tag if version changed (main only)
     runs-on: ubuntu-latest
     needs: [node_build, node_unit_tests, node_integration_tests]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
@@ -38,28 +38,56 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # needed to push tags
+          fetch-depth: 0 # needed to compare versions and push tags
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
 
+      - name: Install dependencies
+        run: npm ci
+
       - name: Configure Git identity
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run build
-        run: npm run build
-
-      - name: Bump version and create tag
+      - name: Check version difference
+        id: version_check
         run: |
+          # Fetch latest main to compare with current HEAD
+          git fetch origin main --depth=1 || true
+
+          # Get version in package.json from current branch and previous main
           current_version=$(jq -r .version package.json)
-          npm version patch -m "chore: release v%s [skip ci]"
-          new_version=$(jq -r .version package.json)
-          echo "Bumped from $current_version to $new_version"
-          git push origin main --follow-tags
+          previous_version=$(git show origin/main:package.json | jq -r .version 2>/dev/null || echo "0.0.0")
+
+          echo "Current: $current_version"
+          echo "Previous: $previous_version"
+
+          if [ "$current_version" == "$previous_version" ]; then
+            echo "Version number in package.json has not been updated."
+            echo "Please bump the version before merging to main."
+            exit 1
+          fi
+
+          echo "Version changed from $previous_version to $current_version"
+          echo "version=$current_version" >> $GITHUB_OUTPUT
+
+      - name: Create and push Git tag
+        if: success()
+        run: |
+          version=${{ steps.version_check.outputs.version }}
+          tag="v${version}"
+
+          echo "Creating tag $tag"
+
+          # Avoid duplicate tags
+          if git rev-parse "$tag" >/dev/null 2>&1; then
+            echo "Tag $tag already exists — skipping."
+          else
+            git tag -a "$tag" -m "Release $tag"
+            git push origin "$tag"
+            echo "Tag $tag created and pushed."
+          fi

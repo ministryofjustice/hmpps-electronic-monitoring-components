@@ -90,46 +90,59 @@ npm run int-test:ui
 
 ---
 
-### **Publishing to npm**
+## Publishing to npm
 
-- Publishing the library is managed via the **“Publish package”** GitHub Actions workflow.
-- It runs automatically when a **new release** is created in GitHub, or can be triggered manually via the **“Run workflow”** button under the **Actions** tab.
+Publishing is now **fully automated** through GitHub Actions when changes are merged into the `main` branch.
 
-To publish a new version:
+### What happens automatically
 
-1. When a pull request is merged into main, the CI pipeline automatically:
+When a **pull request is merged into `main`**, the pipeline will:
 
-- Runs linting, type checking, and all tests.
-- Builds the package.
-- Increments the version number in package.json (using npm version patch).
-- Creates and pushes a Git tag (e.g. v0.0.7).
+1. Run linting, type checking, unit tests, and integration tests.
+2. Build the library.
+3. Check if the version in `package.json` has changed.
+   - If it **has changed**, a **Git tag** is automatically created (e.g. `v0.0.7`).
+   - If it **has not changed**, the workflow fails — reminding the developer to bump the version before merging.
+4. The new tag automatically triggers the **Publish package** workflow, which:
+   - Rebuilds the package.
+   - Publishes it to npm using **OpenID Connect (OIDC)** authentication — no manual login or tokens required.
 
-2. The vX.Y.Z tag automatically triggers the “Publish package” workflow, which:
+---
 
-- Rebuilds the package.
-- Publishes it to npm under the MoJ namespace via OpenID Connect (OIDC) authentication.
+### To prepare a branch for release
 
-3. Once complete, the new version will appear on the npm registry under the MoJ namespace:
+Before creating a PR:
 
-`@ministryofjustice/hmpps-electronic-monitoring-components`
+- Manually bump the version in `package.json` using semantic versioning:
+  ```bash
+  npm version patch   # for bug fixes
+  npm version minor   # for backward-compatible features
+  npm version major   # for breaking changes
+  ```
+- Commit and push the updated `package.json` to the feature branch.
+
+When the PR is merged into `main`, the CI/CD workflow will handle tagging and publishing automatically.
+
+---
+
+### 📦 npm package
+
+Once published, the latest version of the package will be available on npm:
+
+```bash
+@ministryofjustice/hmpps-electronic-monitoring-components
+```
+
+You can view it on [npmjs.com](https://www.npmjs.com/package/@ministryofjustice/hmpps-electronic-monitoring-components)
 
 ---
 
 ### **Summary**
 
-| Action              | Trigger              | Output                                                 |
-| ------------------- | -------------------- | ------------------------------------------------------ |
-| **Build & Test**    | Any branch push / PR | Validates code (lint, types, unit + integration tests) |
-| **Docs Publish**    | Merge to `main`      | Updates any Docs changes on GitHub Pages               |
-| **Package Publish** | Tag (auto or manual) | Publishes to npm if the version is new                 |
-
----
-
-## Repository structure
-
-| Path                 | Purpose                           |
-| -------------------- | --------------------------------- |
-| `/src/components`    | Web component source files        |
-| `/src/stories`       | Storybook stories and docs        |
-| `/integration_tests` | Cypress component tests           |
-| `/dist`              | Compiled build output (generated) |
+| Action              | Trigger                          | Output                                                 |
+| ------------------- | -------------------------------- | ------------------------------------------------------ |
+| **Build & Test**    | Any branch push / PR             | Validates code (lint, types, unit + integration tests) |
+| **Docs Preview**    | Any branch push                  | Deploys Storybook preview for the branch               |
+| **Docs Publish**    | Merge to `main`                  | Updates documentation on GitHub Pages                  |
+| **Version & Tag**   | Merge to `main` with new version | Creates Git tag (vX.Y.Z)                               |
+| **Package Publish** | Tag (auto or manual)             | Publishes new npm package version                      |
