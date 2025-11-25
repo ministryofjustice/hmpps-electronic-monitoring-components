@@ -19,9 +19,9 @@ const getEnv = (): Record<string, string | undefined> => {
 
 export const env = getEnv()
 
-const OS_MAPS_VECTOR_BASE_URL = env.VITE_OS_MAPS_VECTOR_BASE_URL || 'https://api.os.uk/maps/vector/v1'
+const OS_MAPS_VECTOR_BASE_URL = env.OS_MAPS_VECTOR_BASE_URL || 'https://api.os.uk/maps/vector/v1'
 
-const authUrl = env.VITE_OS_MAPS_AUTH_URL || 'https://api.os.uk/oauth2/token/v1'
+const authUrl = env.OS_MAPS_AUTH_URL || 'https://api.os.uk/oauth2/token/v1'
 
 const vectorRoot = `${OS_MAPS_VECTOR_BASE_URL.replace(/\/$/, '')}/vts`
 const localBasePath = '/os-map/vector'

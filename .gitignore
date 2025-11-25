@@ -25,3 +25,9 @@ cypress/downloads/
 
 # Env files
 .env
+
+# Storybook files
+*storybook.log
+storybook-static
+.storybook-cache/
+

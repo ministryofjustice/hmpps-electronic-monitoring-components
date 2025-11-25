@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import eslint from 'vite-plugin-eslint2'
@@ -5,7 +6,13 @@ import { viteStaticCopy } from 'vite-plugin-static-copy'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import fg from 'fast-glob'
+import { fileURLToPath } from 'node:url'
+import { storybookTest } from '@storybook/addon-vitest/vitest-plugin'
+import { playwright } from '@vitest/browser-playwright'
 
+const dirname = typeof __dirname !== 'undefined' ? __dirname : path.dirname(fileURLToPath(import.meta.url))
+
+// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
   plugins: [
     tsconfigPaths(),
@@ -20,13 +27,11 @@ export default defineConfig({
     }),
     copyNunjucks(),
   ],
-
   build: {
     outDir: 'dist',
     target: 'es2020',
     cssCodeSplit: true,
     assetsDir: 'assets',
-
     lib: {
       entry: {
         index: 'src/index.ts',
@@ -39,7 +44,6 @@ export default defineConfig({
       fileName: (format, entryName) =>
         entryName === 'index' ? `index.${format}.js` : `${entryName}/index.${format}.js`,
     },
-
     rollupOptions: {
       external: id =>
         id === 'ol' ||
@@ -61,15 +65,43 @@ export default defineConfig({
           'util',
           'events',
         ].includes(id),
-
       output: {
         chunkFileNames: 'assets/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash][extname]',
       },
     },
   },
-
-  server: { open: true },
+  server: {
+    open: true,
+  },
+  test: {
+    projects: [
+      {
+        extends: true,
+        plugins: [
+          // The plugin will run tests for the stories defined in your Storybook config
+          // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
+          storybookTest({
+            configDir: path.join(dirname, '.storybook'),
+          }),
+        ],
+        test: {
+          name: 'storybook',
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({}),
+            instances: [
+              {
+                browser: 'chromium',
+              },
+            ],
+          },
+          setupFiles: ['.storybook/vitest.setup.ts'],
+        },
+      },
+    ],
+  },
 })
 
 // Needed to copy nunjucks templates to dist only once per build
@@ -84,13 +116,14 @@ function copyNunjucks() {
     async closeBundle() {
       if (done) return
       done = true
-
       const files = await fg('src/nunjucks/*/**/*.{njk,nunjucks}')
       await Promise.all(
         files.map(async file => {
           const rel = file.replace(/^src[\\/]/, '')
           const out = path.resolve('dist', rel)
-          await fs.mkdir(path.dirname(out), { recursive: true })
+          await fs.mkdir(path.dirname(out), {
+            recursive: true,
+          })
           await fs.copyFile(file, out)
         }),
       )

@@ -17,7 +17,7 @@ describe('TextLayer (OpenLayers library)', () => {
 
   it('attaches a VectorLayer with text styles from the textProperty', () => {
     const { adapter, olMapMock } = makeOpenLayersAdapter()
-    const layer = new TextLayer({ positions, id: 'text' })
+    const layer = new TextLayer({ positions, id: 'text', textProperty: 'sequenceNumber' })
 
     layer.attach(adapter)
 
@@ -38,7 +38,7 @@ describe('TextLayer (OpenLayers library)', () => {
 
   it('respects visible=false and zIndex from options', () => {
     const { adapter, olMapMock } = makeOpenLayersAdapter()
-    const layer = new TextLayer({ positions, visible: false, zIndex: 42 })
+    const layer = new TextLayer({ positions, visible: false, zIndex: 42, textProperty: 'sequenceNumber' })
 
     layer.attach(adapter)
 
@@ -64,7 +64,7 @@ describe('TextLayer (OpenLayers library)', () => {
 
   it('detaches by removing the same VectorLayer from the map', () => {
     const { adapter, olMapMock } = makeOpenLayersAdapter()
-    const layer = new TextLayer({ positions })
+    const layer = new TextLayer({ positions, textProperty: 'sequenceNumber' })
 
     layer.attach(adapter)
     const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer

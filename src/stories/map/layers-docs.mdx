@@ -1,0 +1,288 @@
+import { Meta, Title, Subtitle, Canvas, Controls, Stories } from '@storybook/addon-docs/blocks';
+import * as LayersCSF from './layers-example.stories';
+
+<Meta title="Components/Map/Layers/Docs" />
+
+<Title>Map layers</Title>
+<Subtitle>Visualising positions, tracks, circles, and text</Subtitle>
+
+---
+
+## Live example
+<Canvas of={LayersCSF.Example} className="map-docs-canvas" />
+
+## Try the options
+<Controls of={LayersCSF.Example} />
+
+---
+
+## Public API for managing layers
+
+Layers are added/removed through the public methods on the `<em-map>` element. 
+
+```ts
+// Create a layer (any of LocationsLayer, TracksLayer, CirclesLayer, TextLayer)
+// "id" defaults to "locations" if not provided
+const layer = new LocationsLayer({
+  id: 'locations',
+  title: 'Locations',
+  positions,
+})
+
+// 1) Add: mounts into the map and returns the native OL layer instance (if available)
+const olLayer = emMap.addLayer(layer) // -> VectorLayer<...> in OL
+
+// 2) Get: retrieve the wrapper instance by its id
+const sameLayer = emMap.getLayer('locations')
+
+// 3) Remove: remove by id *or* by the layer's "title" property
+emMap.removeLayer('locations')  // by id
+emMap.removeLayer('Locations')  // by title
+```
+
+**Notes**
+- If a layer with the same `id` already exists, `addLayer()` removes it first, then adds the new one.
+- The return value of `addLayer()` is the **native** OpenLayers layer (when applicable), which is useful if you want to call OpenLayers APIs directly.
+
+---
+
+## Available layers
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Description</th>
+      <th>Geometry</th>
+      <th>Default&nbsp;id</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>LocationsLayer</code></td>
+      <td>Renders <strong>Point</strong> positions as circles.</td>
+      <td>Point</td>
+      <td><code>locations</code></td>
+    </tr>
+    <tr>
+      <td><code>TracksLayer</code></td>
+      <td>Composite for <strong>LineString</strong> tracks with directional arrows.</td>
+      <td>LineString</td>
+      <td><code>tracks</code></td>
+    </tr>
+    <tr>
+      <td><code>CirclesLayer</code></td>
+      <td>Renders circles from point positions (e.g. confidence radius).</td>
+      <td>Point → Circle</td>
+      <td><code>circles</code></td>
+    </tr>
+    <tr>
+      <td><code>TextLayer</code></td>
+      <td>Paints labels (e.g. <code>label</code>) next to points.</td>
+      <td>Point</td>
+      <td><code>text</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><em>MapLibre support is planned; these layers currently attach to OpenLayers.</em></p>
+
+---
+
+## Quick start (full example)
+
+```ts
+import type { EmMap } from '@ministryofjustice/hmpps-electronic-monitoring-components/map'
+import {
+  LocationsLayer,
+  TracksLayer,
+  CirclesLayer,
+  TextLayer,
+} from '@ministryofjustice/hmpps-electronic-monitoring-components/map/layers'
+import { isEmpty } from 'ol/extent'
+
+const emMap = document.querySelector('em-map') as EmMap
+
+await new Promise<void>(resolve => {
+  emMap.addEventListener('map:ready', () => resolve(), { once: true })
+})
+
+const ol = emMap.olMapInstance
+const positions = emMap.positions
+if (!ol || !positions?.length) return
+
+const locations = emMap.addLayer(new LocationsLayer({ positions, title: 'Locations' }))
+emMap.addLayer(new TracksLayer({ positions, visible: false, title: 'Tracks' }))
+emMap.addLayer(new CirclesLayer({ positions, visible: false, title: 'Confidence circles' }))
+emMap.addLayer(new TextLayer({ positions, visible: false, title: 'Text' }))
+
+// Fit to locations
+const src = locations?.getSource()
+if (src) {
+  const extent = src.getExtent()
+  if (!isEmpty(extent)) {
+    ol.getView().fit(extent, { maxZoom: 16, padding: [30, 30, 30, 30], size: ol.getSize() })
+  }
+}
+```
+
+---
+
+## Shared options (all layers)
+
+Each layer type supports a common base set:
+
+- <code>id?: string</code> — unique id (defaults to layer type: <code>locations</code> / <code>tracks</code> / <code>circles</code> / <code>text</code>)  
+- <code>title?: string</code> — human-friendly name (stored in OL layer properties)  
+- <code>visible?: boolean</code> — initial visibility (defaults vary by layer)  
+- <code>zIndex?: number</code> — draw order (higher renders above lower)  
+- <code>positions: Position[]</code> — required input data
+
+---
+
+## Style overrides — quick examples
+
+
+### LocationsLayer
+
+```ts
+emMap.addLayer(new LocationsLayer({
+  positions,
+  visible: false,
+  zIndex: 30,
+  style: {
+    radius: 10,
+    fill: '#28a197',
+    stroke: { color: '#003078', width: 3 },
+  },
+}))
+```
+
+### TracksLayer
+
+```ts
+emMap.addLayer(new TracksLayer({
+  positions,
+  visible: true,
+  zIndex: 25,
+  style: { stroke: { color: '#6f72af' } },
+}))
+```
+
+### CirclesLayer
+
+```ts
+emMap.addLayer(new CirclesLayer({
+  positions,
+  visible: true,
+  zIndex: 20,
+  style: {
+    fill: 'rgba(255, 191, 71, 0.15)',
+    stroke: { color: '#ffbf47', width: 4 },
+  },
+}))
+```
+
+### TextLayer
+
+```ts
+emMap.addLayer(new TextLayer({
+  positions,
+  textProperty: 'myLabel',
+  visible: true,
+  zIndex: 40,
+  style: {
+    font: '600 12px system-ui, sans-serif',
+    fill: '#1d70b8',
+    stroke: { color: '#0b0c0c', width: 2 },
+    offset: { x: 8, y: 0 },
+  },
+}))
+```
+
+---
+
+## Layer reference
+
+### <code>LocationsLayer(options)</code>
+
+<table>
+  <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>positions</code></td><td><code>Position[]</code></td><td>—</td><td>Required point inputs.</td></tr>
+    <tr><td><code>id</code></td><td><code>string</code></td><td><code>locations</code></td><td>Unique id.</td></tr>
+    <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>Human-readable name.</td></tr>
+    <tr><td><code>visible</code></td><td><code>boolean</code></td><td><code>true</code></td><td>Initial visibility.</td></tr>
+    <tr><td><code>zIndex</code></td><td><code>number</code></td><td>—</td><td>Draw order.</td></tr>
+    <tr>
+      <td><code>style</code></td>
+      <td><code>{'{'}</code> <code>radius: number; fill: string; stroke: {'{'} color: string; width: number {'}'} {'}'}</code></td>
+      <td>—</td>
+      <td>Circle styling.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+### <code>TracksLayer(options)</code>
+
+<table>
+  <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>positions</code></td><td><code>Position[]</code></td><td>—</td><td>Required line inputs.</td></tr>
+    <tr><td><code>id</code></td><td><code>string</code></td><td><code>tracks</code></td><td>Unique id.</td></tr>
+    <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>Human-readable name.</td></tr>
+    <tr><td><code>visible</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Initial visibility.</td></tr>
+    <tr><td><code>zIndex</code></td><td><code>number</code></td><td>—</td><td>Draw order.</td></tr>
+    <tr>
+      <td><code>style</code></td>
+      <td><code>{'{'}</code> <code>stroke: {'{'} color: string {'}'} {'}'}</code></td>
+      <td>—</td>
+      <td>Line + arrow style (colour only exposed).</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+### <code>CirclesLayer(options)</code>
+
+<table>
+  <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>positions</code></td><td><code>Position[]</code></td><td>—</td><td>Required point inputs.</td></tr>
+    <tr><td><code>id</code></td><td><code>string</code></td><td><code>circles</code></td><td>Unique id.</td></tr>
+    <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>Human-readable name.</td></tr>
+    <tr><td><code>visible</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Initial visibility.</td></tr>
+    <tr><td><code>zIndex</code></td><td><code>number</code></td><td>—</td><td>Draw order.</td></tr>
+    <tr>
+      <td><code>style</code></td>
+      <td><code>{'{'}</code> <code>fill: string; stroke: {'{'} color: string; width: number {'}'} {'}'}</code></td>
+      <td>—</td>
+      <td>Fill &amp; stroke styling.</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+### <code>TextLayer(options)</code>
+
+<table>
+  <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>positions</code></td><td><code>Position[]</code></td><td>—</td><td>Required point inputs.</td></tr>
+    <tr><td><code>id</code></td><td><code>string</code></td><td><code>text</code></td><td>Unique id.</td></tr>
+    <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>Human-readable name.</td></tr>
+    <tr><td><code>visible</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Initial visibility.</td></tr>
+    <tr><td><code>zIndex</code></td><td><code>number</code></td><td>—</td><td>Draw order.</td></tr>
+    <tr><td><code>textProperty</code></td><td><code>string</code></td><td><code>label</code></td><td>Feature property to display.</td></tr>
+    <tr>
+      <td><code>style</code></td>
+      <td><code>{'{'}</code> <code>font: string; fill: string; stroke: {'{'} color: string; width: number {'}'}; offset: {'{'} x: number; y: number {'}'} {'}'}</code></td>
+      <td>—</td>
+      <td>Text styling &amp; offset.</td>
+    </tr>
+  </tbody>
+</table>

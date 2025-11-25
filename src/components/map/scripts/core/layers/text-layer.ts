@@ -27,7 +27,7 @@ export type TextLayerOptions = {
       y: number
     }
   }
-  textProperty?: string
+  textProperty: string
   positions: Array<Position>
 }
 

@@ -21,7 +21,7 @@ type OLTextLayerStyle = {
 }
 
 type OLTextLayerOptions = {
-  textProperty?: string
+  textProperty: string
   positions: Array<Position>
   style?: OLTextLayerStyle
   title: string
@@ -29,7 +29,6 @@ type OLTextLayerOptions = {
   zIndex?: number
 }
 
-const DEFAULT_TEXT_PROPERTY = 'sequenceNumber'
 const DEFAULT_FONT = 'bold 14px "GDS Transport", system-ui, sans-serif'
 const DEFAULT_FILL = 'black'
 const DEFAULT_STROKE_COLOR = 'white'
@@ -80,7 +79,7 @@ const createStyleFunction =
 
 export class OLTextLayer extends VectorLayer<VectorSource<Feature<Point>>> {
   constructor({
-    textProperty = DEFAULT_TEXT_PROPERTY,
+    textProperty,
     positions,
     style = DEFAULT_STYLE,
     title,

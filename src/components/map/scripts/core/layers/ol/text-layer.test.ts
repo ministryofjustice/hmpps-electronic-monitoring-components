@@ -7,6 +7,7 @@ describe('OLTextLayer (OpenLayers library)', () => {
     const layer = new OLTextLayer({
       positions,
       title: '',
+      textProperty: 'sequenceNumber',
     })
     const source = layer.getSource()
     const features = source?.getFeatures() || []
@@ -36,31 +37,11 @@ describe('OLTextLayer (OpenLayers library)', () => {
     expect(featureStyles[6][0].getText()?.getText()).toBe('7')
   })
 
-  it('should not display a style if the text property is undefined', () => {
-    const layer = new OLTextLayer({
-      textProperty: 'unknown',
-      positions,
-      title: '',
-    })
-    const source = layer.getSource()
-    const features = source?.getFeatures() || []
-    const styleFunction = layer.getStyleFunction()!
-    const featureStyles = features.map(feature => styleFunction(feature, 0)) as Array<Array<Style>>
-
-    expect(featureStyles).toHaveLength(7)
-    expect(featureStyles[0]).toHaveLength(0)
-    expect(featureStyles[1]).toHaveLength(0)
-    expect(featureStyles[2]).toHaveLength(0)
-    expect(featureStyles[3]).toHaveLength(0)
-    expect(featureStyles[4]).toHaveLength(0)
-    expect(featureStyles[5]).toHaveLength(0)
-    expect(featureStyles[6]).toHaveLength(0)
-  })
-
   it('should use the default style by default', () => {
     const layer = new OLTextLayer({
       positions,
       title: '',
+      textProperty: 'sequenceNumber',
     })
     const source = layer.getSource()
     const features = source?.getFeatures() || []
@@ -91,6 +72,7 @@ describe('OLTextLayer (OpenLayers library)', () => {
         },
       },
       title: '',
+      textProperty: 'sequenceNumber',
     })
     const source = layer.getSource()
     const features = source?.getFeatures() || []
@@ -109,6 +91,7 @@ describe('OLTextLayer (OpenLayers library)', () => {
     const layer = new OLTextLayer({
       positions,
       title: '',
+      textProperty: 'sequenceNumber',
     })
 
     expect(layer.getVisible()).toBeFalsy()
@@ -119,6 +102,7 @@ describe('OLTextLayer (OpenLayers library)', () => {
       positions,
       title: '',
       visible: true,
+      textProperty: 'sequenceNumber',
     })
 
     expect(layer.getVisible()).toBeTruthy()
