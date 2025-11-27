@@ -3,6 +3,7 @@ import { OrdnanceSurveyVectorTileLayer } from '../layers/ordnance-survey-vector'
 import { FeaturePointerInteraction, MapPointerInteraction } from '../interactions'
 import FeatureOverlay from '../overlays/feature-overlay'
 import config from '../config'
+import { attachDragRotate } from '../interactions/drag-rotate'
 
 type OLMapInstanceWithOverlay = OLMapInstance & { featureOverlay?: FeatureOverlay }
 
@@ -20,6 +21,12 @@ export async function setupOpenLayersMap(
     layers: [],
     controls: options.controls,
   })
+
+  // If renderer is OpenLayers and rotationMode is 'right-drag', attach the rotation interaction
+  const olRotationMode = options.controls?.olRotationMode ?? 'default'
+  if (olRotationMode === 'right-drag') {
+    attachDragRotate(map)
+  }
 
   const styleUrl = options.vectorUrl || config.tiles.urls.localVectorStyleUrl
   const vectorLayer = new OrdnanceSurveyVectorTileLayer()

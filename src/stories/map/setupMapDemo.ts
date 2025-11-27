@@ -14,6 +14,7 @@ interface MapDemoOptions {
   controls?: {
     zoomSlider?: boolean
     rotate?: 'true' | 'auto-hide' | 'false'
+    olRotationMode?: 'default' | 'right-drag'
     scale?: 'bar' | 'line' | 'false'
     locationDisplay?: 'dms' | 'latlon' | 'false'
     grabCursor?: boolean
@@ -64,6 +65,7 @@ export function setupMapDemo({
     scale: 'bar',
     locationDisplay: 'latlon',
     rotate: 'true',
+    olRotationMode: 'default',
     zoomSlider: true,
   },
   showPositions = true,
@@ -94,6 +96,7 @@ export function setupMapDemo({
   if (controls.scale) map.setAttribute('scale-control', controls.scale)
   if (controls.locationDisplay) map.setAttribute('location-display', controls.locationDisplay)
   if (controls.rotate) map.setAttribute('rotate-control', controls.rotate)
+  if (controls.olRotationMode) map.setAttribute('ol-rotation-mode', controls.olRotationMode)
   if (typeof controls.zoomSlider === 'boolean') map.setAttribute('zoom-slider', String(controls.zoomSlider))
   if (typeof controls.grabCursor === 'boolean') map.setAttribute('grab-cursor', String(controls.grabCursor))
 

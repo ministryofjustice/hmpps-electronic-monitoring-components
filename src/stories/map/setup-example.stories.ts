@@ -24,6 +24,12 @@ const meta = {
     },
     'controls.zoomSlider': { control: 'boolean' },
     'controls.rotate': { control: 'select', options: ['true', 'auto-hide', 'false'] },
+    'controls.olRotationMode': {
+      control: 'select',
+      options: ['default', 'right-drag'],
+      description:
+        'Rotation gesture mode. "default" = Alt+Shift + left-drag (OpenLayers). "right-drag" = right-drag or Ctrl + left-drag.',
+    },
     'controls.scale': { control: 'select', options: ['bar', 'line', 'false'] },
     'controls.locationDisplay': { control: 'select', options: ['dms', 'latlon', 'false'] },
     'controls.grabCursor': { control: 'boolean' },
@@ -41,6 +47,7 @@ const meta = {
       controls: {
         zoomSlider: args['controls.zoomSlider'],
         rotate: args['controls.rotate'],
+        olRotationMode: args['controls.olRotationMode'],
         scale: args['controls.scale'],
         locationDisplay: args['controls.locationDisplay'],
         grabCursor: args['controls.grabCursor'],
@@ -66,6 +73,7 @@ export const Example: Story = {
     usesInternalOverlays: true,
     'controls.zoomSlider': false,
     'controls.rotate': 'false',
+    'controls.olRotationMode': 'default',
     'controls.scale': 'false',
     'controls.locationDisplay': 'false',
     'controls.grabCursor': true,
@@ -105,6 +113,7 @@ export const Example: Story = {
     scaleControl: '${args['controls.scale']}',
     locationDisplay: '${args['controls.locationDisplay']}',
     rotateControl: '${args['controls.rotate']}',
+    olRotationMode: '${args['controls.olRotationMode']}',
     zoomSlider: ${args['controls.zoomSlider']},
     grabCursor: ${args['controls.grabCursor']}
   }

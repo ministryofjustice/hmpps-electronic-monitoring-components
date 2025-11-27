@@ -2,7 +2,6 @@ import * as olControl from 'ol/control.js'
 import { OLMapInstance } from './open-layers-map-instance'
 
 import * as locationDisplayControl from './controls/location-display-control'
-import * as ctrlDragRotate from './interactions/ctrl-drag-rotate'
 import * as defaultView from './view/default-view'
 
 const mockExtend = jest.fn()
@@ -35,7 +34,6 @@ jest.mock('./controls/location-display-control', () =>
   jest.fn().mockImplementation(opts => ({ type: 'LocationDisplayControl', ...opts })),
 )
 
-jest.mock('./interactions/ctrl-drag-rotate', () => jest.fn(() => ({ type: 'CtrlDragRotate' })))
 jest.mock('./view/default-view', () => jest.fn(() => ({ type: 'DefaultView' })))
 
 describe('EmMapInstance', () => {
@@ -85,12 +83,6 @@ describe('EmMapInstance', () => {
   it('adds ZoomSlider when zoomSlider = true', () => {
     new OLMapInstance({ target, controls: { zoomSlider: true } })
     expect(olControl.ZoomSlider).toHaveBeenCalled()
-  })
-
-  it('always extends interactions with ctrl-drag-rotate', () => {
-    const spy = jest.spyOn(ctrlDragRotate, 'default')
-    new OLMapInstance({ target })
-    expect(spy).toHaveBeenCalled()
   })
 
   it('uses DefaultView', () => {

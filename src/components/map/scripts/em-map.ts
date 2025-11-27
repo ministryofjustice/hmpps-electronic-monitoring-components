@@ -14,6 +14,7 @@ import config from './core/config'
 
 type EmMapControls = OLMapOptions['controls'] & {
   enable3DBuildings?: boolean
+  olRotationMode?: 'default' | 'right-drag'
 }
 
 type EmMapOptions = {
@@ -202,11 +203,12 @@ export class EmMap extends HTMLElement {
 
   private getControlOptions(): EmMapControls {
     const parseBool = (name: string): boolean => this.hasAttribute(name) && this.getAttribute(name) !== 'false'
-    const rotateAttr = this.getAttribute('rotate-control')
-    let rotateOpt: false | { autoHide: boolean }
-    if (rotateAttr === 'false') rotateOpt = false
-    else if (rotateAttr === 'auto-hide') rotateOpt = { autoHide: true }
-    else rotateOpt = { autoHide: false }
+
+    const rotateButtonAttr = this.getAttribute('rotate-control')
+    let rotateButtonOpt: false | { autoHide: boolean }
+    if (rotateButtonAttr === 'false') rotateButtonOpt = false
+    else if (rotateButtonAttr === 'auto-hide') rotateButtonOpt = { autoHide: true }
+    else rotateButtonOpt = { autoHide: false }
 
     const legacyScaleLine = this.hasAttribute('scale-line') && this.getAttribute('scale-line') !== 'false'
     const scaleAttr = this.getAttribute('scale-control')
@@ -224,14 +226,29 @@ export class EmMap extends HTMLElement {
       scaleControl = 'line'
     }
 
-    this.classList.toggle('has-rotate-control', rotateOpt !== false)
+    const rendererAttr = this.getAttribute('renderer')
+    const isOpenLayers = rendererAttr !== 'maplibre'
+    let olRotationMode: 'default' | 'right-drag' | undefined
+
+    if (isOpenLayers) {
+      const rotationModeAttr = this.getAttribute('ol-rotation-mode')
+      if (rotationModeAttr === 'right-drag') {
+        olRotationMode = 'right-drag'
+      } else {
+        olRotationMode = 'default'
+      }
+    }
+
+    this.classList.toggle('has-rotate-control', rotateButtonOpt !== false)
     this.classList.toggle('has-zoom-slider', zoomSlider)
     this.classList.toggle('has-scale-control', !!scaleControl)
     this.classList.toggle('has-location-dms', locationDisplay === 'dms')
+    this.classList.toggle('ol-rotation-mode', olRotationMode === 'right-drag')
 
     return {
       grabCursor,
-      rotate: rotateOpt,
+      rotate: rotateButtonOpt,
+      olRotationMode,
       zoomSlider,
       scaleControl,
       locationDisplay,

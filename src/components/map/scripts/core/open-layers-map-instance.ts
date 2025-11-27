@@ -8,7 +8,6 @@ import Overlay from 'ol/Overlay.js'
 import { defaults as defaultControls, Rotate, ScaleLine, ZoomSlider } from 'ol/control.js'
 import LocationDisplayControl from './controls/location-display-control'
 import createDragPanWithKinetic from './interactions/drag-pan-with-kinetic'
-import createCtrlDragRotateInteraction from './interactions/ctrl-drag-rotate'
 import DefaultView from './view/default-view'
 
 export interface OLMapOptions {
@@ -19,6 +18,7 @@ export interface OLMapOptions {
   controls?: {
     grabCursor?: boolean
     rotate?: boolean | { autoHide?: boolean }
+    olRotationMode?: 'default' | 'right-drag'
     zoomSlider?: boolean
     scaleControl?: 'bar' | 'line'
     locationDisplay?: 'dms' | 'latlon'
@@ -84,15 +84,17 @@ export class OLMapInstance extends Map {
       return []
     }
 
-    const baseInteractions = normalizeInteractions(defaultInteractions({ altShiftDragRotate: false })).filter(
-      (i: Interaction) => !(i instanceof DragPan),
-    )
+    // OpenLayers Alt+Shift rotate is ON unless we explicitly choose 'right-drag' mode.
+    const enableAltShiftRotate = controlOptions.olRotationMode !== 'right-drag'
+
+    const baseInteractions = normalizeInteractions(
+      defaultInteractions({ altShiftDragRotate: enableAltShiftRotate }),
+    ).filter((i: Interaction) => !(i instanceof DragPan))
 
     const interactions = [
       ...baseInteractions.filter((i: Interaction) => !(i instanceof DragPan)),
       createDragPanWithKinetic(),
       ...(options.interactions || []),
-      createCtrlDragRotateInteraction(),
     ]
 
     super({
