@@ -28,9 +28,9 @@
     "int-test:ui": "npm run build:css && cypress open --component --browser chrome --config-file integration_tests/cypress.config.ts",
     "vite": "vite",
     "build:css": "for file in src/components/**/styles/*.scss; do sass --no-source-map --quiet-deps --load-path=node_modules \"$file\" \"${file%.scss}.raw.css\"; done",
-    "watch:css": "chokidar 'src/components/**/styles/**/*.scss' -c \"npm run build:css\"",
+    "watch:css": "chokidar --glob \"src/components/**/styles/**/*.scss\" -c \"npm run build:css --silent\"",
     "build": "npm run build:css && vite build && tsc",
-    "start-feature": "storybook dev -p 6006",
+    "start-feature": "npm run build:css && storybook dev -p 6006",
     "build-storybook": "npm run build:css && storybook build"
   },
   "keywords": [

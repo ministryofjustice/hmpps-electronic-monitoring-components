@@ -19,6 +19,7 @@ export interface OLMapOptions {
     grabCursor?: boolean
     rotate?: boolean | { autoHide?: boolean }
     olRotationMode?: 'default' | 'right-drag'
+    olRotateTooltip?: boolean
     zoomSlider?: boolean
     scaleControl?: 'bar' | 'line'
     locationDisplay?: 'dms' | 'latlon'

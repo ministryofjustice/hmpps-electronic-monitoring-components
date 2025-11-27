@@ -15,6 +15,7 @@ import config from './core/config'
 type EmMapControls = OLMapOptions['controls'] & {
   enable3DBuildings?: boolean
   olRotationMode?: 'default' | 'right-drag'
+  olRotateTooltip?: boolean
 }
 
 type EmMapOptions = {
@@ -209,6 +210,9 @@ export class EmMap extends HTMLElement {
     if (rotateButtonAttr === 'false') rotateButtonOpt = false
     else if (rotateButtonAttr === 'auto-hide') rotateButtonOpt = { autoHide: true }
     else rotateButtonOpt = { autoHide: false }
+    const olRotateTooltip = this.hasAttribute('ol-rotate-tooltip')
+      ? this.getAttribute('ol-rotate-tooltip') !== 'false'
+      : true
 
     const legacyScaleLine = this.hasAttribute('scale-line') && this.getAttribute('scale-line') !== 'false'
     const scaleAttr = this.getAttribute('scale-control')
@@ -244,10 +248,12 @@ export class EmMap extends HTMLElement {
     this.classList.toggle('has-scale-control', !!scaleControl)
     this.classList.toggle('has-location-dms', locationDisplay === 'dms')
     this.classList.toggle('ol-rotation-mode', olRotationMode === 'right-drag')
+    this.classList.toggle('ol-rotate-tooltip', olRotateTooltip)
 
     return {
       grabCursor,
       rotate: rotateButtonOpt,
+      olRotateTooltip,
       olRotationMode,
       zoomSlider,
       scaleControl,

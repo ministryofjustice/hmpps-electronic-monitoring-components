@@ -14,7 +14,6 @@
       {% elseif params.controls.rotate.button === false %}
         rotate-control="false"
       {% else %}
-        {# treat anything truthy / 'always' as "show the button" #}
         rotate-control="true"
       {% endif %}
     {% endif %}
@@ -23,6 +22,13 @@
       ol-rotation-mode="{{ params.controls.olRotationMode }}"
     {% endif %}
 
+    {% if params.controls.olRotateTooltip is defined %}
+      {% if params.controls.olRotateTooltip %}
+        ol-rotate-tooltip="true"
+      {% else %}
+        ol-rotate-tooltip="false"
+      {% endif %}
+    {% endif %}
   {% endif %}
   {% if params.controls.locationDisplay %}location-display="{{ params.controls.locationDisplay }}"{% endif %}
   {% if params.controls.enable3DBuildings %}enable-3d-buildings{% endif %}

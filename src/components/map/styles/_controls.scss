@@ -50,10 +50,11 @@
   background-color: transparent;
   left: 0.5em;
   right: auto;
-  top: 95px;
+  top: 70px;
 
   .ol-rotate-reset {
     border-radius: 50%;
+    display: inline;
   }
 
   .ol-compass {
@@ -65,11 +66,36 @@
     background-repeat: no-repeat;
     background-position: center;
   }
+
+  .em-rotate-tooltip {
+    display: inline;
+    position: relative;
+    top: 56px;
+    left: -19px;
+    transform: translateY(0);
+    padding: 6px 10px;
+    border-radius: 4px;
+    background: rgba(govuk-colour('black'), 0.75);
+    color: govuk-colour('white');
+    font-size: 13px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition:
+      opacity 150ms ease-out,
+      transform 150ms ease-out;
+    z-index: 20;
+  }
+
+  .em-rotate-tooltip.is-visible {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
 }
 
 /* When zoom slider is present, move rotate below the slider */
 :host(.has-zoom-slider) .ol-control.ol-rotate {
-  top: 295px;
+  top: 270px;
 }
 
 /* Zoom slider styles */
