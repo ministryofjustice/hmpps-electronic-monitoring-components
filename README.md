@@ -102,10 +102,10 @@ When a **pull request is merged into `main`**, the pipeline will:
 2. Build the library.
 3. Check if the version in `package.json` has changed.
    - If it **has changed**, a **Git tag** is automatically created (e.g. `v0.0.7`).
-   - If it **has not changed**, the workflow fails — reminding the developer to bump the version before merging.
+   - If it **has not changed**, the workflow fails - reminding the developer to bump the version before merging.
 4. The new tag automatically triggers the **Publish package** workflow, which:
    - Rebuilds the package.
-   - Publishes it to npm using **OpenID Connect (OIDC)** authentication — no manual login or tokens required.
+   - Publishes it to npm using **OpenID Connect (OIDC)** authentication - no manual login or tokens required.
 
 ---
 

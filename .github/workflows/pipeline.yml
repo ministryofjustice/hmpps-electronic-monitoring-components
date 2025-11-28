@@ -85,7 +85,7 @@ jobs:
 
           # Avoid duplicate tags
           if git rev-parse "$tag" >/dev/null 2>&1; then
-            echo "Tag $tag already exists — skipping."
+            echo "Release tag $tag already exists - skipping."
           else
             git tag -a "$tag" -m "Release $tag"
             git push origin "$tag"
