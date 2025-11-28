@@ -5,7 +5,7 @@ import VectorSource from 'ol/source/Vector'
 import type { ComposableLayer } from './base'
 import type { MapAdapter } from '../map-adapter'
 import { OLTracksLayer } from './ol/tracks-layer'
-import Position from '../types/position'
+import { Position } from '../types/position'
 
 type OLVecSource = VectorSource<Feature<Geometry>>
 type OLVecLayer = VectorLayer<OLVecSource>

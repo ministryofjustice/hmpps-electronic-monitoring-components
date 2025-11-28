@@ -6,7 +6,7 @@ import { OLLocationsLayer } from './ol/locations-layer'
 
 import type { ComposableLayer, LayerStateOptions } from './base'
 import type { MapAdapter } from '../map-adapter'
-import Position from '../types/position'
+import { Position } from '../types/position'
 
 type OLVecSrc = VectorSource<Feature<Geometry>>
 type OLVecLayer = VectorLayer<OLVecSrc>

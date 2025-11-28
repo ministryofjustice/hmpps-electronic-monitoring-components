@@ -27,7 +27,6 @@ interface MapDemoOptions {
   usesInternalOverlays?: boolean
 }
 
-/** Inject Demo templates (used by overlayTitleTemplateId / overlayBodyTemplateId) */
 function ensureOverlayTemplatesOnce() {
   const TITLE_ID = 'overlay-title-test-location'
   const BODY_ID = 'overlay-body-test-location'

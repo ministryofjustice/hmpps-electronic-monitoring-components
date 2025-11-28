@@ -1,7 +1,7 @@
 import { Collection, Feature } from 'ol'
 import { LineString } from 'ol/geom'
 import { fromLonLat } from 'ol/proj'
-import Position from '../types/position'
+import { Position } from '../types/position'
 
 const createLineStringFeatureFromPosition = (position: Position, nextPosition: Position): Feature<LineString> => {
   return new Feature({

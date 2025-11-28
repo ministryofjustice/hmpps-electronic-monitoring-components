@@ -5,7 +5,7 @@ import { Style } from 'ol/style'
 import { LineString } from 'ol/geom'
 import LineStyle from '../../styles/line'
 import { createLineStringFeatureCollectionFromPositions } from '../../features/line-string'
-import Position from '../../types/position'
+import { Position } from '../../types/position'
 
 type OLLinesLayerStyle = {
   stroke: {

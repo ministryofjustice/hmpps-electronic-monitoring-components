@@ -4,7 +4,7 @@ import type Feature from 'ol/Feature'
 import type Geometry from 'ol/geom/Geometry'
 import type { ComposableLayer } from './base'
 import type { MapAdapter } from '../map-adapter'
-import Position from '../types/position'
+import { Position } from '../types/position'
 import { OLTextLayer } from './ol/text-layer'
 
 type OLVecSource = VectorSource<Feature<Geometry>>

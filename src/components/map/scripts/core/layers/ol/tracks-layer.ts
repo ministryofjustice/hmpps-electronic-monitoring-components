@@ -7,7 +7,7 @@ import { LineString } from 'ol/geom'
 import { calculateAngleOfInclination, calculateInterpolatedCoordinate } from '../../../helpers/geometry'
 import LineStyle from '../../styles/line'
 import { createLineStringFeatureCollectionFromPositions } from '../../features/line-string'
-import Position from '../../types/position'
+import { Position } from '../../types/position'
 import ArrowStyle from '../../styles/arrow'
 
 type OLTracksLayerStyle = {

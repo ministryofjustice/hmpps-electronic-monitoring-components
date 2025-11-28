@@ -3,7 +3,7 @@ import { Circle } from 'ol/geom'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { Fill, Stroke, Style } from 'ol/style'
-import Position from '../../types/position'
+import { PositionWithPrecision } from '../../types/position'
 import { createCircleFeatureCollectionFromPositions } from '../../features/circle'
 
 type OLCirclesLayerStyle = {
@@ -20,7 +20,7 @@ type OLCirclesLayerStyle = {
 }
 
 type OLCirclesLayerOptions = {
-  positions?: Array<Position>
+  positions?: Array<PositionWithPrecision>
   style?: OLCirclesLayerStyle
   title: string
   visible?: boolean

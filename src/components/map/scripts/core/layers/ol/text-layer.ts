@@ -1,4 +1,4 @@
-import Position from '@map/scripts/core/types/position'
+import { Position } from '@map/scripts/core/types/position'
 import { Feature } from 'ol'
 import { Point } from 'ol/geom'
 import VectorLayer from 'ol/layer/Vector'

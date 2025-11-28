@@ -9,7 +9,7 @@ import FeatureOverlay from './core/overlays/feature-overlay'
 import type { ComposableLayer, LayerStateOptions } from './core/layers/base'
 import { type MapAdapter, type MapLibrary, createOpenLayersAdapter, createMapLibreAdapter } from './core/map-adapter'
 import styles from '../styles/em-map.raw.css?raw'
-import Position from './core/types/position'
+import { Position } from './core/types/position'
 import config from './core/config'
 
 type EmMapControls = OLMapOptions['controls'] & {
