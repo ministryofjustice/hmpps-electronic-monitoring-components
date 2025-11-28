@@ -8,12 +8,21 @@ import CircleStyle from 'ol/style/Circle'
 import { createPointFeatureCollectionFromPositions } from '../../features/point'
 
 type OLLocationsLayerStyle = {
-  fill: string
-  radius: number
-  stroke: {
-    color: string
-    width: number
+  fill?: string | CanvasPattern | CanvasGradient
+  radius?: number
+  stroke?: {
+    color?: string
+    width?: number
+    lineCap?: CanvasLineCap
+    lineJoin?: CanvasLineJoin
+    lineDash?: number[]
+    lineDashOffset?: number
+    miterLimit?: number
   }
+  displacement?: [number, number]
+  rotation?: number
+  rotateWithView?: boolean
+  scale?: number | [number, number]
 }
 
 type OLLocationsLayerOptions = {
@@ -29,23 +38,16 @@ const DEFAULT_FILL = '#d4351c'
 const DEFAULT_STROKE_COLOR = '#505a5f'
 const DEFAULT_STROKE_WIDTH = 2
 const DEFAULT_VISIBILITY = true
-const DEFAULT_STYLE: OLLocationsLayerStyle = {
-  fill: DEFAULT_FILL,
-  radius: DEFAULT_RADIUS,
-  stroke: {
-    color: DEFAULT_STROKE_COLOR,
-    width: DEFAULT_STROKE_WIDTH,
-  },
-}
 
 export class OLLocationsLayer extends VectorLayer<VectorSource<Feature<Point>>> {
-  constructor({
-    positions,
-    style = DEFAULT_STYLE,
-    title,
-    visible = DEFAULT_VISIBILITY,
-    zIndex,
-  }: OLLocationsLayerOptions) {
+  constructor({ positions, style = {}, title, visible = DEFAULT_VISIBILITY, zIndex }: OLLocationsLayerOptions) {
+    const radius = style.radius ?? DEFAULT_RADIUS
+    const fillColor = style.fill ?? DEFAULT_FILL
+
+    const stroke = style.stroke ?? {}
+    const strokeColor = stroke.color ?? DEFAULT_STROKE_COLOR
+    const strokeWidth = stroke.width ?? DEFAULT_STROKE_WIDTH
+
     super({
       properties: {
         title,
@@ -55,12 +57,21 @@ export class OLLocationsLayer extends VectorLayer<VectorSource<Feature<Point>>> 
       }),
       style: new Style({
         image: new CircleStyle({
-          radius: style.radius,
-          fill: new Fill({ color: style.fill }),
+          radius,
+          fill: new Fill({ color: fillColor }),
           stroke: new Stroke({
-            color: style.stroke.color,
-            width: style.stroke.width,
+            color: strokeColor,
+            width: strokeWidth,
+            lineCap: stroke.lineCap,
+            lineJoin: stroke.lineJoin,
+            lineDash: stroke.lineDash,
+            lineDashOffset: stroke.lineDashOffset,
+            miterLimit: stroke.miterLimit,
           }),
+          displacement: style.displacement,
+          rotation: style.rotation,
+          rotateWithView: style.rotateWithView,
+          scale: style.scale,
         }),
       }),
       visible,

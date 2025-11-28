@@ -17,12 +17,23 @@ export type LocationsLayerOptions = {
   visible?: boolean
   zIndex?: number
   style?: {
-    radius: number
-    fill: string
-    stroke: { color: string; width: number }
+    radius?: number
+    fill?: string | CanvasPattern | CanvasGradient
+    stroke?: {
+      color?: string
+      width?: number
+      lineCap?: CanvasLineCap
+      lineJoin?: CanvasLineJoin
+      lineDash?: number[]
+      lineDashOffset?: number
+      miterLimit?: number
+    }
+    displacement?: [number, number]
+    rotation?: number
+    rotateWithView?: boolean
+    scale?: number | [number, number]
   }
-  // The data to render (required)
-  positions: Array<Position>
+  positions?: Array<Position>
 }
 
 export class LocationsLayer implements ComposableLayer<OLVecLayer> {
@@ -50,7 +61,7 @@ export class LocationsLayer implements ComposableLayer<OLVecLayer> {
     const { map } = adapter.openlayers!
 
     this.olLayer = new OLLocationsLayer({
-      positions: this.options.positions,
+      positions: this.options.positions ?? [],
       style: this.options.style,
       title: this.options.title ?? this.id,
       visible: layerStateOptions?.visible ?? this.options.visible,

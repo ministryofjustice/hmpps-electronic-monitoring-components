@@ -8,15 +8,32 @@ import { FeatureLike } from 'ol/Feature'
 import { createPointFeatureCollectionFromPositions } from '../../features/point'
 
 type OLTextLayerStyle = {
-  fill: string
-  font: string
-  offset: {
-    x: number
-    y: number
+  fill?: string | CanvasPattern | CanvasGradient
+  font?: string
+  offset?: {
+    x?: number
+    y?: number
   }
-  stroke: {
-    color: string
-    width: number
+  stroke?: {
+    color?: string
+    width?: number
+  }
+  textAlign?: CanvasTextAlign
+  textBaseline?: CanvasTextBaseline
+  rotation?: number
+  scale?: number | [number, number]
+  rotateWithView?: boolean
+  maxAngle?: number
+  overflow?: boolean
+  padding?: number[]
+  placement?: 'point' | 'line'
+  keepUpright?: boolean
+  justify?: 'left' | 'center' | 'right'
+  backgroundFill?: string | CanvasPattern | CanvasGradient
+  backgroundStroke?: {
+    color?: string
+    width?: number
+    lineDash?: number[]
   }
 }
 
@@ -58,17 +75,34 @@ const createStyleFunction =
       return [
         new Style({
           text: new Text({
-            textAlign: 'left',
-            textBaseline: 'middle',
-            font: style.font,
-            fill: new Fill({ color: style.fill }),
+            text: String(value),
+            font: style.font ?? DEFAULT_FONT,
+            fill: new Fill({ color: style.fill ?? DEFAULT_FILL }),
             stroke: new Stroke({
-              color: style.stroke.color,
-              width: style.stroke.width,
+              color: style.stroke?.color ?? DEFAULT_STROKE_COLOR,
+              width: style.stroke?.width ?? DEFAULT_STROKE_WIDTH,
             }),
-            text: String(feature.get(property)),
-            offsetX: style.offset.x,
-            offsetY: style.offset.y,
+            offsetX: style.offset?.x ?? DEFAULT_OFFSET_X,
+            offsetY: style.offset?.y ?? DEFAULT_OFFSET_Y,
+            textAlign: style.textAlign ?? 'left',
+            textBaseline: style.textBaseline ?? 'middle',
+            rotation: style.rotation,
+            scale: style.scale,
+            rotateWithView: style.rotateWithView,
+            maxAngle: style.maxAngle,
+            overflow: style.overflow,
+            padding: style.padding,
+            placement: style.placement,
+            keepUpright: style.keepUpright,
+            justify: style.justify,
+            backgroundFill: style.backgroundFill ? new Fill({ color: style.backgroundFill }) : undefined,
+            backgroundStroke: style.backgroundStroke
+              ? new Stroke({
+                  color: style.backgroundStroke.color,
+                  width: style.backgroundStroke.width,
+                  lineDash: style.backgroundStroke.lineDash,
+                })
+              : undefined,
           }),
         }),
       ]

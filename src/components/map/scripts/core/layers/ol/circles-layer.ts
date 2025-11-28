@@ -7,16 +7,20 @@ import Position from '../../types/position'
 import { createCircleFeatureCollectionFromPositions } from '../../features/circle'
 
 type OLCirclesLayerStyle = {
-  fill?: string | null
+  fill?: string | CanvasPattern | CanvasGradient | null
   stroke?: {
     color?: string
     width?: number
     lineDash?: number[]
+    lineCap?: CanvasLineCap
+    lineJoin?: CanvasLineJoin
+    lineDashOffset?: number
+    miterLimit?: number
   } | null
 }
 
 type OLCirclesLayerOptions = {
-  positions: Array<Position>
+  positions?: Array<Position>
   style?: OLCirclesLayerStyle
   title: string
   visible?: boolean
@@ -30,19 +34,24 @@ const DEFAULT_VISIBILITY = false
 
 export class OLCirclesLayer extends VectorLayer<VectorSource<Feature<Circle>>> {
   constructor({ positions, style, title, visible = DEFAULT_VISIBILITY, zIndex }: OLCirclesLayerOptions) {
-    let fillColor: string | undefined
-
+    // Resolve fill: null explicitly disables it
+    let fillColor: string | CanvasPattern | CanvasGradient | undefined
     if (style?.fill === null) {
       fillColor = undefined
     } else {
       fillColor = style?.fill ?? DEFAULT_FILL
     }
 
+    // Resolve stroke: null explicitly disables it
     let strokeOptions:
       | {
           color: string
           width: number
           lineDash?: number[]
+          lineCap?: CanvasLineCap
+          lineJoin?: CanvasLineJoin
+          lineDashOffset?: number
+          miterLimit?: number
         }
       | undefined
 
@@ -55,6 +64,10 @@ export class OLCirclesLayer extends VectorLayer<VectorSource<Feature<Circle>>> {
         color: stroke?.color ?? DEFAULT_STROKE_COLOR,
         width: stroke?.width ?? DEFAULT_STROKE_WIDTH,
         lineDash: stroke?.lineDash,
+        lineCap: stroke?.lineCap,
+        lineJoin: stroke?.lineJoin,
+        lineDashOffset: stroke?.lineDashOffset,
+        miterLimit: stroke?.miterLimit,
       }
     }
 
@@ -63,7 +76,7 @@ export class OLCirclesLayer extends VectorLayer<VectorSource<Feature<Circle>>> {
         title,
       },
       source: new VectorSource({
-        features: createCircleFeatureCollectionFromPositions(positions),
+        features: createCircleFeatureCollectionFromPositions(positions ?? []),
       }),
       style: new Style({
         fill: fillColor ? new Fill({ color: fillColor }) : undefined,
@@ -72,6 +85,10 @@ export class OLCirclesLayer extends VectorLayer<VectorSource<Feature<Circle>>> {
               color: strokeOptions.color,
               width: strokeOptions.width,
               lineDash: strokeOptions.lineDash,
+              lineCap: strokeOptions.lineCap,
+              lineJoin: strokeOptions.lineJoin,
+              lineDashOffset: strokeOptions.lineDashOffset,
+              miterLimit: strokeOptions.miterLimit,
             })
           : undefined,
       }),

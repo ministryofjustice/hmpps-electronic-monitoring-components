@@ -3,31 +3,29 @@
 <em-map
   {% if params.usesInternalOverlays %}uses-internal-overlays{% endif %}
   csp-nonce="{{ params.cspNonce }}"
-  {% if params.apiKey %}api-key="{{ params.apiKey }}"{% endif %}
-  {% if params.renderer %}renderer="{{ params.renderer }}"{% endif %}
-  {% if params.controls.scaleControl %}scale-control="{{ params.controls.scaleControl }}"{% endif %}
-  {% if params.controls.zoomSlider %}zoom-slider{% endif %}
-  {% if params.controls.rotate is defined %}
-    {% if params.controls.rotate.button is defined %}
-      {% if params.controls.rotate.button === 'auto-hide' %}
-        rotate-control="auto-hide"
-      {% elseif params.controls.rotate.button === false %}
-        rotate-control="false"
-      {% else %}
-        rotate-control="true"
-      {% endif %}
+    {% if params.apiKey %}api-key="{{ params.apiKey }}"{% endif %}
+    {% if params.renderer %}renderer="{{ params.renderer }}"{% endif %}
+    {% if params.controls.scaleControl %}scale-control="{{ params.controls.scaleControl }}"{% endif %}
+    {% if params.controls.zoomSlider %}zoom-slider{% endif %}
+    {% if params.controls.rotateControl is defined %}
+    {% if params.controls.rotateControl === 'auto-hide' %}
+      rotate-control="auto-hide"
+    {% elseif params.controls.rotateControl === false %}
+      rotate-control="false"
+    {% else %}
+      rotate-control="true"
     {% endif %}
+  {% endif %}
 
-    {% if params.controls.olRotationMode is defined %}
-      ol-rotation-mode="{{ params.controls.olRotationMode }}"
-    {% endif %}
+  {% if params.controls.olRotationMode is defined %}
+    ol-rotation-mode="{{ params.controls.olRotationMode }}"
+  {% endif %}
 
-    {% if params.controls.olRotateTooltip is defined %}
-      {% if params.controls.olRotateTooltip %}
-        ol-rotate-tooltip="true"
-      {% else %}
-        ol-rotate-tooltip="false"
-      {% endif %}
+  {% if params.controls.olRotateTooltip is defined %}
+    {% if params.controls.olRotateTooltip %}
+      ol-rotate-tooltip="true"
+    {% else %}
+      ol-rotate-tooltip="false"
     {% endif %}
   {% endif %}
   {% if params.controls.locationDisplay %}location-display="{{ params.controls.locationDisplay }}"{% endif %}

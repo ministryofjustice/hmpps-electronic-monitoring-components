@@ -23,9 +23,13 @@ export type CirclesLayerOptions = {
       color?: string
       width?: number
       lineDash?: number[]
+      lineCap?: CanvasLineCap
+      lineJoin?: CanvasLineJoin
+      lineDashOffset?: number
+      miterLimit?: number
     } | null
   }
-  positions: Array<Position>
+  positions?: Array<Position>
 }
 
 export class CirclesLayer implements ComposableLayer<OLVecLayer> {
@@ -53,7 +57,7 @@ export class CirclesLayer implements ComposableLayer<OLVecLayer> {
     const { map } = adapter.openlayers!
 
     this.olLayer = new OLCirclesLayer({
-      positions: this.options.positions,
+      positions: this.options.positions ?? [],
       style: this.options.style,
       title: this.options.title ?? this.id,
       visible: this.options.visible,
