@@ -148,4 +148,36 @@ describe('CirclesLayer (OpenLayers library)', () => {
 
     expect(style.getStroke()?.getLineDash()).toEqual([4, 2])
   })
+
+  it('applies full stroke options when provided', () => {
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+    const layer = new CirclesLayer({
+      positions,
+      style: {
+        stroke: {
+          color: '#123456',
+          width: 3,
+          lineDash: [1, 2],
+          lineCap: 'round',
+          lineJoin: 'bevel',
+          lineDashOffset: 5,
+          miterLimit: 10,
+        },
+      },
+    })
+
+    layer.attach(adapter)
+
+    const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
+    const style = added.getStyle() as Style
+    const stroke = style.getStroke()!
+
+    expect(stroke.getColor()).toBe('#123456')
+    expect(stroke.getWidth()).toBe(3)
+    expect(stroke.getLineDash()).toEqual([1, 2])
+    expect(stroke.getLineCap()).toBe('round')
+    expect(stroke.getLineJoin()).toBe('bevel')
+    expect(stroke.getLineDashOffset()).toBe(5)
+    expect(stroke.getMiterLimit()).toBe(10)
+  })
 })

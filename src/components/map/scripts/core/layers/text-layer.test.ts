@@ -73,4 +73,42 @@ describe('TextLayer (OpenLayers library)', () => {
 
     expect(olMapMock.removeLayer).toHaveBeenCalledWith(added)
   })
+
+  it('forwards all style properties to OLTextLayer', () => {
+    const style = {
+      fill: '#f00',
+      font: '20px serif',
+      offset: { x: 10, y: 5 },
+      stroke: { color: '#000', width: 2 },
+      rotation: 1.5,
+      textAlign: 'center' as CanvasTextAlign,
+      justify: 'center' as const,
+      padding: [2, 4, 2, 4],
+    }
+
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+    const layer = new TextLayer({
+      positions,
+      textProperty: 'sequenceNumber',
+      style,
+    })
+
+    layer.attach(adapter)
+
+    const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
+    const source = added.getSource()!
+    const styleFn = added.getStyle() as any
+    const applied = styleFn(source.getFeatures()[0])[0].getText()
+
+    expect(applied.getFill()?.getColor()).toBe('#f00')
+    expect(applied.getFont()).toBe('20px serif')
+    expect(applied.getOffsetX()).toBe(10)
+    expect(applied.getOffsetY()).toBe(5)
+    expect(applied.getStroke()?.getColor()).toBe('#000')
+    expect(applied.getStroke()?.getWidth()).toBe(2)
+    expect(applied.getRotation()).toBe(1.5)
+    expect(applied.getTextAlign()).toBe('center')
+    expect(applied.getJustify()).toBe('center')
+    expect(applied.getPadding()).toEqual([2, 4, 2, 4])
+  })
 })

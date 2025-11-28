@@ -169,4 +169,77 @@ describe('EmMap', () => {
     emMap.closeOverlay()
     expect(closeFn).toHaveBeenCalled()
   })
+
+  it('passes olRotationMode="right-drag" into OpenLayers control options and applies host class', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    const setupOL = setupOpenLayersMap as jest.Mock
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+    emMap.setAttribute('ol-rotation-mode', 'right-drag')
+
+    const ready = new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+    })
+
+    document.body.appendChild(emMap)
+
+    const [, opts] = setupOL.mock.calls[0]
+
+    expect(opts.controls.olRotationMode).toBe('right-drag')
+    expect(emMap.classList.contains('ol-rotation-mode')).toBe(true)
+  })
+
+  it('defaults olRotationMode to "default" when no attribute is provided', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    const setupOL = setupOpenLayersMap as jest.Mock
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+
+    const ready = new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+    })
+
+    document.body.appendChild(emMap)
+
+    const [, opts] = setupOL.mock.calls[0]
+
+    expect(opts.controls.olRotationMode).toBe('default')
+  })
+
+  it('parses ol-rotate-tooltip="false" and applies host class removal', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    const setupOL = setupOpenLayersMap as jest.Mock
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+    emMap.setAttribute('ol-rotate-tooltip', 'false')
+
+    const ready = new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+    })
+
+    document.body.appendChild(emMap)
+
+    const [, opts] = setupOL.mock.calls[0]
+
+    expect(opts.controls.olRotateTooltip).toBe(false)
+    expect(emMap.classList.contains('ol-rotate-tooltip')).toBe(false)
+  })
+
+  it('defaults olRotateTooltip to true when attribute is missing', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    const setupOL = setupOpenLayersMap as jest.Mock
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+
+    const ready = new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+    })
+
+    document.body.appendChild(emMap)
+
+    const [, opts] = setupOL.mock.calls[0]
+
+    expect(opts.controls.olRotateTooltip).toBe(true)
+    expect(emMap.classList.contains('ol-rotate-tooltip')).toBe(true)
+  })
 })
