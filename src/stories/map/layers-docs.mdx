@@ -216,7 +216,22 @@ emMap.addLayer(new TextLayer({
     <tr><td><code>zIndex</code></td><td><code>number</code></td><td>—</td><td>Draw order.</td></tr>
     <tr>
       <td><code>style</code></td>
-      <td><code>{'{'}</code> <code>radius: number; fill: string; stroke: {'{'} color: string; width: number {'}'} {'}'}</code></td>
+      <td><code>{'{'}</code>
+        <code>
+          radius: number;
+          fill: string | CanvasPattern | CanvasGradient;
+          stroke: {'{'}
+            color?: string;
+            width?: number;
+            lineDash?: number[];
+            lineCap?: CanvasLineCap;
+            lineJoin?: CanvasLineJoin;
+            lineDashOffset?: number;
+            miterLimit?: number;
+          {'}'}
+        </code>
+      <code>{'}'}</code>
+      </td>
       <td>—</td>
       <td>Circle styling.</td>
     </tr>
@@ -237,7 +252,15 @@ emMap.addLayer(new TextLayer({
     <tr><td><code>zIndex</code></td><td><code>number</code></td><td>—</td><td>Draw order.</td></tr>
     <tr>
       <td><code>style</code></td>
-      <td><code>{'{'}</code> <code>stroke: {'{'} color: string {'}'} {'}'}</code></td>
+      <td>
+        <code>{'{'}</code>
+          <code>
+            stroke: {'{'}
+              color: string
+            {'}'}
+          </code>
+        <code>{'}'}</code>
+      </td>
       <td>—</td>
       <td>Line + arrow style (colour only exposed).</td>
     </tr>
@@ -258,7 +281,22 @@ emMap.addLayer(new TextLayer({
     <tr><td><code>zIndex</code></td><td><code>number</code></td><td>—</td><td>Draw order.</td></tr>
     <tr>
       <td><code>style</code></td>
-      <td><code>{'{'}</code> <code>fill: string; stroke: {'{'} color: string; width: number {'}'} {'}'}</code></td>
+      <td>
+        <code>{'{'}</code>
+          <code>
+            fill?: string | CanvasPattern | CanvasGradient | null;
+            stroke?: {'{'}
+              color?: string;
+              width?: number;
+              lineDash?: number[];
+              lineCap?: CanvasLineCap;
+              lineJoin?: CanvasLineJoin;
+              lineDashOffset?: number;
+              miterLimit?: number;
+            {'}'} | null
+          </code>
+        <code>{'}'}</code>
+      </td>
       <td>—</td>
       <td>Fill &amp; stroke styling.</td>
     </tr>
@@ -273,14 +311,46 @@ emMap.addLayer(new TextLayer({
   <thead><tr><th>Option</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
   <tbody>
     <tr><td><code>positions</code></td><td><code>Position[]</code></td><td>—</td><td>Required point inputs.</td></tr>
-    <tr><td><code>id</code></td><td><code>string</code></td><td><code>text</code></td><td>Unique id.</td></tr>
+    <tr><td><code>id</code></td><td><code>string</code></td><td><code>numbering</code></td><td>Unique id.</td></tr>
     <tr><td><code>title</code></td><td><code>string</code></td><td>—</td><td>Human-readable name.</td></tr>
     <tr><td><code>visible</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Initial visibility.</td></tr>
     <tr><td><code>zIndex</code></td><td><code>number</code></td><td>—</td><td>Draw order.</td></tr>
     <tr><td><code>textProperty</code></td><td><code>string</code></td><td><code>label</code></td><td>Feature property to display.</td></tr>
     <tr>
       <td><code>style</code></td>
-      <td><code>{'{'}</code> <code>font: string; fill: string; stroke: {'{'} color: string; width: number {'}'}; offset: {'{'} x: number; y: number {'}'} {'}'}</code></td>
+      <td>
+        <code>{'{'}</code>
+          <code>
+            font?: string;
+            fill?: string | CanvasPattern | CanvasGradient;
+            stroke?: {'{'}
+              color?: string;
+              width?: number;
+            {'}'};
+            offset?: {'{'}
+              x?: number;
+              y?: number;
+            {'}'};
+            textAlign?: CanvasTextAlign;
+            textBaseline?: CanvasTextBaseline;
+            rotation?: number;
+            scale?: number | [number, number];
+            rotateWithView?: boolean;
+            maxAngle?: number;
+            overflow?: boolean;
+            padding?: number[];
+            placement?: 'point' | 'line';
+            keepUpright?: boolean;
+            justify?: 'left' | 'center' | 'right';
+            backgroundFill?: string | CanvasPattern | CanvasGradient;
+            backgroundStroke?: {'{'}
+              color?: string;
+              width?: number;
+              lineDash?: number[];
+            {'}'}
+          </code>
+        <code>{'}'}</code>
+      </td>
       <td>—</td>
       <td>Text styling &amp; offset.</td>
     </tr>

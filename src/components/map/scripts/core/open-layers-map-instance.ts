@@ -74,7 +74,7 @@ export class OLMapInstance extends Map {
 
     // Interactions
 
-    // Ensure defaultInteractions() is always an array—even though OL v10.6.1 types claim it
+    // Ensure defaultInteractions() is always an array, even though OL v10.6.1 types claim it
     // returns Interaction[], in some contexts (e.g. Jest) it actually returns Collection<Interaction>,
     // so this unwraps it if needed:
     function normalizeInteractions(value: unknown): Interaction[] {
