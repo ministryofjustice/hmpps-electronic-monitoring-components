@@ -2,6 +2,7 @@ import VectorLayer from 'ol/layer/Vector'
 import { Feature } from 'ol'
 import { Geometry } from 'ol/geom'
 import VectorSource from 'ol/source/Vector'
+import { Coordinate } from 'ol/coordinate'
 import type { ComposableLayer } from './base'
 import type { MapAdapter } from '../map-adapter'
 import { OLTracksLayer } from './ol/tracks-layer'
@@ -20,7 +21,7 @@ export type TracksLayerOptions = {
       color: string
     }
   }
-  // The data to render (required)
+  avoidCoordinates?: Array<Coordinate>
   positions: Array<Position>
 }
 
