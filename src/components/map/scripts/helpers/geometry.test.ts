@@ -1,5 +1,5 @@
 import { Coordinate } from 'ol/coordinate'
-import { calculateAngleOfInclination, calculateInterpolatedCoordinate } from './geometry'
+import { calculateAngleOfInclination, calculateInterpolatedCoordinate, isCoordinateWithinDistance } from './geometry'
 
 describe('geometry', () => {
   describe('calculateInterpolatedCoordinate', () => {
@@ -30,6 +30,49 @@ describe('geometry', () => {
       '[%s] calculateAngleOfInclination(%s, %s, %s)',
       (_: string, start: Coordinate, end: Coordinate, expected: number) => {
         expect(calculateAngleOfInclination(start, end)).toBeCloseTo(expected)
+      },
+    )
+  })
+
+  describe('isCoordinateWithinDistance', () => {
+    it.each([
+      [
+        'inside distance to single point',
+        [0, 0],
+        [[3, 4]], // distance = 5
+        6,
+        true,
+      ],
+      [
+        'exactly at max distance',
+        [0, 0],
+        [[3, 4]], // distance = 5
+        5,
+        true,
+      ],
+      [
+        'outside distance to single point',
+        [0, 0],
+        [[6, 8]], // distance = 10
+        5,
+        false,
+      ],
+      ['no other coordinates', [0, 0], [], 5, false],
+      [
+        'inside distance to one of many points',
+        [10, 10],
+        [
+          [100, 100],
+          [13, 14], // distance = 5
+          [50, 50],
+        ],
+        5,
+        true,
+      ],
+    ])(
+      '[%s] isCoordinateWithinDistance(%s, %s, %s)',
+      (_: string, coord: Coordinate, others: Array<Coordinate>, maxDistance: number, expected: boolean) => {
+        expect(isCoordinateWithinDistance(coord, others, maxDistance)).toBe(expected)
       },
     )
   })

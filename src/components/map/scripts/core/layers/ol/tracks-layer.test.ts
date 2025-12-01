@@ -1,4 +1,5 @@
 import { Style } from 'ol/style'
+import { Point } from 'ol/geom'
 import ArrowStyle from '../../styles/arrow'
 import LineStyle from '../../styles/line'
 import { OLTracksLayer } from './tracks-layer'
@@ -103,5 +104,41 @@ describe('OLTracksLayer (OpenLayers library)', () => {
     })
 
     expect(layer.getVisible()).toBeTruthy()
+  })
+
+  it('should skip arrows that are within the collision distance of avoidCoordinates', () => {
+    const resolution = 3
+
+    // Tracks layer with no avoidCoordinates
+    const noClashingPointsLayer = new OLTracksLayer({ positions, title: '' })
+    const noClashingPointsSource = noClashingPointsLayer.getSource()
+    const noClashingPointsFeatures = noClashingPointsSource?.getFeatures() || []
+    const noClashingPointsStyleFunction = noClashingPointsLayer.getStyleFunction()!
+    const noClashingPointsStyles = noClashingPointsStyleFunction(
+      noClashingPointsFeatures[0],
+      resolution,
+    ) as Array<Style>
+    const noClashingPointsArrowStyles = noClashingPointsStyles.filter(style => style instanceof ArrowStyle)
+
+    expect(noClashingPointsArrowStyles.length).toBeGreaterThan(0)
+
+    // Choose one of the arrow coordinates to block
+    const arrowPoint = noClashingPointsArrowStyles[0].getGeometry() as Point
+    const avoidCoordinate = arrowPoint.getCoordinates()
+
+    // Layer with avoidCoordinates set to that arrow's coordinate
+    const avoidLayer = new OLTracksLayer({
+      positions,
+      title: '',
+      avoidCoordinates: [avoidCoordinate],
+    })
+    const avoidSource = avoidLayer.getSource()
+    const avoidFeatures = avoidSource?.getFeatures() || []
+    const avoidStyleFunction = avoidLayer.getStyleFunction()!
+    const avoidStyles = avoidStyleFunction(avoidFeatures[0], resolution) as Array<Style>
+    const avoidArrowStyles = avoidStyles.filter(style => style instanceof ArrowStyle)
+
+    // Expect exactly one less arrow for that blocked coordinate
+    expect(avoidArrowStyles.length).toBe(noClashingPointsArrowStyles.length - 1)
   })
 })

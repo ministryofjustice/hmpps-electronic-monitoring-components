@@ -55,6 +55,7 @@ export class TracksLayer implements ComposableLayer<OLVecLayer> {
       title: this.options.title ?? this.id,
       visible: this.options.visible,
       zIndex: this.options.zIndex,
+      avoidCoordinates: this.options.avoidCoordinates,
     })
 
     map.addLayer(this.olLayer)
