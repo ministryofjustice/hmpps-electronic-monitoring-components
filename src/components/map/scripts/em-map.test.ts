@@ -177,7 +177,7 @@ describe('EmMap', () => {
     emMap.setAttribute('vector-url', 'https://test-vector')
     emMap.setAttribute('ol-rotation-mode', 'right-drag')
 
-    const ready = new Promise<void>(resolve => {
+    new Promise<void>(resolve => {
       emMap.addEventListener('map:ready', () => resolve(), { once: true })
     })
 
@@ -195,7 +195,7 @@ describe('EmMap', () => {
     emMap.setAttribute('renderer', 'openlayers')
     emMap.setAttribute('vector-url', 'https://test-vector')
 
-    const ready = new Promise<void>(resolve => {
+    new Promise<void>(resolve => {
       emMap.addEventListener('map:ready', () => resolve(), { once: true })
     })
 
@@ -213,7 +213,7 @@ describe('EmMap', () => {
     emMap.setAttribute('vector-url', 'https://test-vector')
     emMap.setAttribute('ol-rotate-tooltip', 'false')
 
-    const ready = new Promise<void>(resolve => {
+    new Promise<void>(resolve => {
       emMap.addEventListener('map:ready', () => resolve(), { once: true })
     })
 
@@ -231,7 +231,7 @@ describe('EmMap', () => {
     emMap.setAttribute('renderer', 'openlayers')
     emMap.setAttribute('vector-url', 'https://test-vector')
 
-    const ready = new Promise<void>(resolve => {
+    new Promise<void>(resolve => {
       emMap.addEventListener('map:ready', () => resolve(), { once: true })
     })
 

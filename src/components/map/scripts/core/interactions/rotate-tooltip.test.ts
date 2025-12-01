@@ -102,7 +102,7 @@ describe('attachRotateTooltip', () => {
     expect(tooltip.classList.contains('is-visible')).toBe(true)
 
     const pointerDragHandler = mapMock.on.mock.calls.find(
-      ([eventName, handler]: [string, (...args: unknown[]) => void]) => eventName === 'pointerdrag',
+      ([eventName]: [string, (...args: unknown[]) => void]) => eventName === 'pointerdrag',
     )![1]
     pointerDragHandler()
 
@@ -115,7 +115,7 @@ describe('attachRotateTooltip', () => {
     const tooltip = rotateEl.querySelector('.em-rotate-tooltip') as HTMLElement
 
     const changeRotationHandler = viewMock.on.mock.calls.find(
-      ([eventName, handler]: [string, (...args: unknown[]) => void]) => eventName === 'change:rotation',
+      ([eventName]: [string, (...args: unknown[]) => void]) => eventName === 'change:rotation',
     )![1]
 
     // First rotation = north
