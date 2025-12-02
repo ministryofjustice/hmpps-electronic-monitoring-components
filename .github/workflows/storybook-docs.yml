@@ -12,7 +12,7 @@ permissions:
 jobs:
   build-and-deploy:
     name: Build & deploy Storybook
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && github.ref != 'refs/heads/gh-pages'
     runs-on: ubuntu-latest
 
     steps:
@@ -39,18 +39,24 @@ jobs:
       - name: Build Storybook
         run: npm run build-storybook
 
+      - name: Compute destination dir
+        id: destdir
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+            echo "dir=." >> "$GITHUB_OUTPUT"
+          else
+            # Replace slashes with hyphens for branch previews
+            echo "dir=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./storybook-static
           publish_branch: gh-pages
-
-          # main -> root
-          # other branches -> /<branch>
-          destination_dir: ${{ github.ref_name == 'main' && '' || github.ref_name }}
-
-          keep_files: false
+          destination_dir: ${{ steps.destdir.outputs.dir }}
+          keep_files: true
 
   cleanup:
     name: Cleanup deleted branch previews
@@ -70,7 +76,7 @@ jobs:
           branch_name=$(echo "$branch" | tr '/' '-')
 
           if [ "$branch" != "main" ]; then
-            echo "🧹 Removing preview for deleted branch: $branch_name"
+            echo "Removing preview for deleted branch: $branch_name"
             rm -rf "$branch_name"
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"

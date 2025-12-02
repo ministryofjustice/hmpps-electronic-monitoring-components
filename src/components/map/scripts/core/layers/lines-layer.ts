@@ -5,7 +5,7 @@ import type { LineString } from 'ol/geom'
 import type { ComposableLayer, LayerStateOptions } from './base'
 import type { MapAdapter } from '../map-adapter'
 import { OLLinesLayer } from './ol/lines-layer'
-import Position from '../types/position'
+import { Position } from '../types/position'
 
 type OLLineFeature = Feature<LineString>
 type OLVecSource = VectorSource<OLLineFeature>

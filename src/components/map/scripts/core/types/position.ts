@@ -1,7 +1,10 @@
 type Position = {
   latitude: number
   longitude: number
+}
+
+type PositionWithPrecision = Position & {
   precision: number
 }
 
-export default Position
+export type { Position, PositionWithPrecision }

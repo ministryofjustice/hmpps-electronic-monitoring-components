@@ -4,7 +4,7 @@ import type Feature from 'ol/Feature'
 import type Geometry from 'ol/geom/Geometry'
 import type { ComposableLayer } from './base'
 import type { MapAdapter } from '../map-adapter'
-import Position from '../types/position'
+import { Position } from '../types/position'
 import { OLTextLayer } from './ol/text-layer'
 
 type OLVecSource = VectorSource<Feature<Geometry>>
@@ -16,15 +16,37 @@ export type TextLayerOptions = {
   visible?: boolean
   zIndex?: number
   style?: {
-    fill: string
-    font: string
-    stroke: {
-      color: string
-      width: number
+    fill?: string | CanvasPattern | CanvasGradient
+    font?: string
+    stroke?: {
+      color?: string
+      width?: number
+      lineDash?: number[]
+      lineCap?: CanvasLineCap
+      lineJoin?: CanvasLineJoin
+      lineDashOffset?: number
+      miterLimit?: number
     }
-    offset: {
-      x: number
-      y: number
+    offset?: {
+      x?: number
+      y?: number
+    }
+    textAlign?: CanvasTextAlign
+    textBaseline?: CanvasTextBaseline
+    rotation?: number
+    scale?: number | [number, number]
+    rotateWithView?: boolean
+    maxAngle?: number
+    overflow?: boolean
+    padding?: number[]
+    placement?: 'point' | 'line'
+    keepUpright?: boolean
+    justify?: 'left' | 'center' | 'right'
+    backgroundFill?: string | CanvasPattern | CanvasGradient
+    backgroundStroke?: {
+      color?: string
+      width?: number
+      lineDash?: number[]
     }
   }
   textProperty: string

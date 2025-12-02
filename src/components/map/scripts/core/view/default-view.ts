@@ -13,6 +13,7 @@ class DefaultView extends View {
       maxZoom: config.view.zoom.max,
       center: config.view.default.centre,
       zoom: config.view.default.zoom,
+      constrainRotation: false,
     })
   }
 }

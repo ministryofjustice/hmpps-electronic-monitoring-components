@@ -6,7 +6,7 @@ import Feature from 'ol/Feature'
 import type { ComposableLayer } from './base'
 import type { MapAdapter } from '../map-adapter'
 import { OLCirclesLayer } from './ol/circles-layer'
-import Position from '../types/position'
+import type { Position, PositionWithPrecision } from '../types/position'
 
 type OLCircleFeature = Feature<Circle>
 type OLVecSource = VectorSource<OLCircleFeature>
@@ -23,9 +23,17 @@ export type CirclesLayerOptions = {
       color?: string
       width?: number
       lineDash?: number[]
+      lineCap?: CanvasLineCap
+      lineJoin?: CanvasLineJoin
+      lineDashOffset?: number
+      miterLimit?: number
     } | null
   }
-  positions: Array<Position>
+  positions?: Array<Position>
+}
+
+function hasPrecision(position: Position): position is PositionWithPrecision {
+  return 'precision' in position && typeof position.precision === 'number'
 }
 
 export class CirclesLayer implements ComposableLayer<OLVecLayer> {
@@ -52,8 +60,11 @@ export class CirclesLayer implements ComposableLayer<OLVecLayer> {
 
     const { map } = adapter.openlayers!
 
+    const allPositions = this.options.positions ?? []
+    const precisePositions = allPositions.filter(hasPrecision)
+
     this.olLayer = new OLCirclesLayer({
-      positions: this.options.positions,
+      positions: precisePositions,
       style: this.options.style,
       title: this.options.title ?? this.id,
       visible: this.options.visible,

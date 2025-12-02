@@ -1,7 +1,7 @@
 import { Layer } from 'ol/layer'
 import { TracksLayer } from './tracks-layer'
 import makeOpenLayersAdapter from '../../../../../../tests/utils/openlayers-adapter'
-import Position from '../types/position'
+import { Position } from '../types/position'
 
 const samplePositions: Array<Position> = []
 

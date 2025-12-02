@@ -1,7 +1,7 @@
 import { Feature } from 'ol'
 import { Point } from 'ol/geom'
 import { fromLonLat } from 'ol/proj'
-import Position from '../types/position'
+import { Position } from '../types/position'
 
 const createPointFeatureFromPosition = (position: Position): Feature<Point> => {
   return new Feature({

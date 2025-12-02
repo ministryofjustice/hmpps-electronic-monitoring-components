@@ -75,4 +75,47 @@ describe('LocationLayer (OpenLayers library)', () => {
     expect(style).toBeInstanceOf(Style)
     expect(style.getImage()).toBeDefined()
   })
+
+  it('applies lineDash when provided', () => {
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+    const layer = new LocationsLayer({
+      positions,
+      style: {
+        radius: 6,
+        fill: '#F5CA2C',
+        stroke: { color: '#000', width: 2, lineDash: [4, 2] },
+      },
+    })
+
+    layer.attach(adapter)
+
+    const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
+    const style = added.getStyle() as Style
+    const image = style.getImage() as any
+    const stroke = image.getStroke()
+
+    expect(stroke.getLineDash()).toEqual([4, 2])
+  })
+
+  it('supports CanvasPattern or CanvasGradient for fill', () => {
+    const pattern = {} as CanvasPattern
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+
+    const layer = new LocationsLayer({
+      positions,
+      style: {
+        radius: 5,
+        fill: pattern,
+        stroke: { color: '#000', width: 1 },
+      },
+    })
+
+    layer.attach(adapter)
+
+    const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
+    const style = added.getStyle() as Style
+    const image: any = style.getImage()!
+
+    expect(image.getFill()).toBeTruthy()
+  })
 })
