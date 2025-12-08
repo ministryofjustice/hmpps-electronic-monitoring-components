@@ -12,7 +12,7 @@ describe('OLLinesLayer (OpenLayers library)', () => {
     const styleFunction = layer.getStyleFunction()!
     const featureStyles = features.map(feature => styleFunction(feature, resolution)) as Array<Style>
 
-    expect(featureStyles).toHaveLength(6)
+    expect(featureStyles).toHaveLength(9)
     expect(featureStyles[0]).toBeInstanceOf(LineStyle)
     expect(featureStyles[0].getStroke()?.getWidth()).toBe(1.25)
     expect(featureStyles[1]).toBeInstanceOf(LineStyle)
@@ -33,7 +33,7 @@ describe('OLLinesLayer (OpenLayers library)', () => {
     const styleFunction = layer.getStyleFunction()!
     const featureStyles = features.map(feature => styleFunction(feature, resolution)) as Array<Style>
 
-    expect(featureStyles).toHaveLength(6)
+    expect(featureStyles).toHaveLength(9)
     expect(featureStyles[0]).toBeInstanceOf(LineStyle)
     expect(featureStyles[0].getStroke()?.getWidth()).toBe(2)
     expect(featureStyles[0].getStroke()?.getColor()).toBe('black')

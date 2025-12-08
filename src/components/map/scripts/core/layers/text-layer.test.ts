@@ -26,14 +26,14 @@ describe('TextLayer (OpenLayers library)', () => {
     expect(added).toBeInstanceOf(VectorLayer)
 
     const source = added.getSource() as OLVecSource
-    expect(source.getFeatures().length).toBe(7)
+    expect(source.getFeatures().length).toBe(10)
 
     const styleFn = added.getStyle() as (f: Feature<Geometry>) => Array<Style>
     const first = source.getFeatures()[0]
     const style = styleFn(first)!
     expect(style[0]).toBeInstanceOf(Style)
     expect(style[0].getText()).toBeInstanceOf(Text)
-    expect(style[0].getText()?.getText()).toBe('1')
+    expect(style[0].getText()?.getText()).toBe('1.3')
   })
 
   it('respects visible=false and zIndex from options', () => {

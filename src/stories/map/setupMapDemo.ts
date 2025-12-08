@@ -121,20 +121,41 @@ export function setupMapDemo({
     if (!olMap || !pos?.length) return
 
     const locationsLayer = emMap.addLayer(
-      new LocationsLayer({ title: 'pointsLayer', positions: pos, visible: showPositions }),
+      new LocationsLayer({
+        title: 'pointsLayer',
+        positions: pos,
+        visible: showPositions,
+        zIndex: 4,
+      }),
     )
 
-    emMap.addLayer(new TracksLayer({ title: 'tracksLayer', positions: pos, visible: showTracks }))
+    emMap.addLayer(
+      new TracksLayer({
+        title: 'tracksLayer',
+        positions: pos,
+        visible: showTracks,
+        zIndex: 1,
+      }),
+    )
+
     emMap.addLayer(
       new TextLayer({
         positions: pos,
         textProperty: 'sequenceNumber',
         title: 'textLayer',
         visible: showText,
+        zIndex: 3,
       }),
     )
+
     emMap.addLayer(
-      new CirclesLayer({ positions: pos, id: 'confidence', title: 'confidenceLayer', visible: showCircles }),
+      new CirclesLayer({
+        positions: pos,
+        id: 'confidence',
+        title: 'confidenceLayer',
+        visible: showCircles,
+        zIndex: 2,
+      }),
     )
 
     const locationSource = locationsLayer?.getSource()

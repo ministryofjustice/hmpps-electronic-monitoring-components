@@ -27,7 +27,7 @@ describe('LocationLayer (OpenLayers library)', () => {
 
     const source = added.getSource() as OLVecSrc
     expect(source).toBeInstanceOf(VectorSource)
-    expect(source.getFeatures().length).toBe(7)
+    expect(source.getFeatures().length).toBe(10)
 
     expect(added.get('title')).toBe('Locations')
 

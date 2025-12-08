@@ -27,7 +27,7 @@ describe('CirclesLayer (OpenLayers library)', () => {
     expect(added).toBeInstanceOf(VectorLayer)
 
     const source = added.getSource() as OLVecSource
-    expect(source.getFeatures().length).toBe(7)
+    expect(source.getFeatures().length).toBe(10)
 
     const geomTypes = source.getFeatures().map(f => f.getGeometry()?.getType())
     expect(geomTypes.every(t => t === 'Circle')).toBe(true)
