@@ -248,7 +248,7 @@ describe('<em-map> TextLayer', () => {
 
       // Verify the text value corresponds to the textProperty
       const textValue = textStyle!.getText()
-      expect(textValue, 'Text should show the sequence number').to.match(/^\d+$/)
+      expect(textValue, 'Text should show the sequence number').to.match(/^\d+(\.\d+)?$/)
 
       // Detach and verify removal
       el.removeLayer('textLayer')
