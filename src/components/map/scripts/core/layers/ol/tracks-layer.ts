@@ -66,7 +66,7 @@ const getArrowStyles = (
 
   const adjustedCollisionDistance = ARROW_COLLISION_DISTANCE * resolution
 
-  const styles = Array.from({ length: arrowCount }).reduce<Style[]>((accumulator, _, index) => {
+  const styles = [...Array(arrowCount).keys()].reduce<Style[]>((accumulator, index) => {
     const distanceAlongLine = spacing * (index + 1)
     const coord = calculateInterpolatedCoordinate(start, distanceAlongLine, rotation)
     let blocked = false
