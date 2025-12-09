@@ -64,24 +64,20 @@ const getArrowStyles = (
     return []
   }
 
-  const styles: Style[] = []
   const adjustedCollisionDistance = ARROW_COLLISION_DISTANCE * resolution
 
-  for (let index = 0; index < arrowCount; index += 1) {
+  const styles = Array.from({ length: arrowCount }).reduce<Style[]>((accumulator, _, index) => {
     const distanceAlongLine = spacing * (index + 1)
     const coord = calculateInterpolatedCoordinate(start, distanceAlongLine, rotation)
-    let shouldPlaceArrow = true
+    let blocked = false
 
-    // Collision avoidance
-    if (avoidCoordinates && avoidCoordinates.length > 0) {
-      const isBlocked = isCoordinateWithinDistance(coord, avoidCoordinates, adjustedCollisionDistance)
-      if (isBlocked) shouldPlaceArrow = false
+    if (avoidCoordinates?.length) {
+      blocked = isCoordinateWithinDistance(coord, avoidCoordinates, adjustedCollisionDistance)
     }
 
-    if (shouldPlaceArrow) {
-      styles.push(new ArrowStyle(coord, resolution, rotation))
-    }
-  }
+    if (!blocked) accumulator.push(new ArrowStyle(coord, resolution, rotation))
+    return accumulator
+  }, [])
 
   return styles
 }
