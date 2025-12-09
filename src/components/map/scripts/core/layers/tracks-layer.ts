@@ -20,7 +20,7 @@ export type TracksLayerOptions = {
       color: string
     }
   }
-  // The data to render (required)
+  avoidPositions?: Array<Position>
   positions: Array<Position>
 }
 
@@ -54,6 +54,7 @@ export class TracksLayer implements ComposableLayer<OLVecLayer> {
       title: this.options.title ?? this.id,
       visible: this.options.visible,
       zIndex: this.options.zIndex,
+      avoidPositions: this.options.avoidPositions,
     })
 
     map.addLayer(this.olLayer)

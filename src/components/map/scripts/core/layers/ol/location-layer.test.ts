@@ -12,7 +12,7 @@ describe('OLLocationsLayer (OpenLayers library)', () => {
     const source = layer.getSource()
     const features = source?.getFeatures() || []
 
-    expect(features).toHaveLength(7)
+    expect(features).toHaveLength(10)
   })
 
   it('should use the default style by default', () => {

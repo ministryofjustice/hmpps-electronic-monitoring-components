@@ -251,6 +251,16 @@ emMap.addLayer(new TextLayer({
     <tr><td><code>visible</code></td><td><code>boolean</code></td><td><code>false</code></td><td>Initial visibility.</td></tr>
     <tr><td><code>zIndex</code></td><td><code>number</code></td><td>—</td><td>Draw order.</td></tr>
     <tr>
+      <td><code>avoidPositions</code></td>
+      <td><code>Position[]</code></td>
+      <td><code>positions</code></td>
+      <td>
+        Optional. Positions to avoid when rendering directional arrows
+        (e.g. to prevent arrow overlap with markers or other map features).
+        Defaults to the main <code>positions</code> array.
+      </td>
+    </tr>
+    <tr>
       <td><code>style</code></td>
       <td>
         <code>{'{'}</code>

@@ -13,9 +13,9 @@ describe('OLCirclesLayer (OpenLayers library)', () => {
     const source = layer.getSource()
     const features = source?.getFeatures() || []
 
-    expect(features).toHaveLength(7)
+    expect(features).toHaveLength(10)
     expect(features.map(feature => (feature as Feature<Circle>).getGeometry()?.getRadius())).toEqual([
-      50, 400, 200, 500, 300, 100, 100,
+      80, 60, 50, 200, 30, 500, 400, 40, 20, 120,
     ])
   })
 
