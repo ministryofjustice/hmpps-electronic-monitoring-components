@@ -16,18 +16,13 @@ const calculateInterpolatedCoordinate = (start: Coordinate, distance: number, az
 const isCoordinateWithinDistance = (coord: Coordinate, others: Array<Coordinate>, maxDistance: number): boolean => {
   const maxDistanceSquared = maxDistance * maxDistance
 
-  for (let index = 0; index < others.length; index += 1) {
-    const other = others[index]
+  return others.some(other => {
     const dx = coord[0] - other[0]
     const dy = coord[1] - other[1]
     const distanceSquared = dx * dx + dy * dy
 
-    if (distanceSquared <= maxDistanceSquared) {
-      return true
-    }
-  }
-
-  return false
+    return distanceSquared <= maxDistanceSquared
+  })
 }
 
 export { calculateAngleOfInclination, calculateInterpolatedCoordinate, isCoordinateWithinDistance }
