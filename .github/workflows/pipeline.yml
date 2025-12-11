@@ -46,7 +46,7 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Install dependencies
-        run: npm ci
+        run: npm run setup
 
       - name: Configure Git identity
         run: |

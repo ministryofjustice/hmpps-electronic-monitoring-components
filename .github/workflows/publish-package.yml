@@ -24,7 +24,7 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Install dependencies
-        run: npm ci
+        run: npm run setup
 
       - name: Run lint and typecheck
         run: |
@@ -66,6 +66,9 @@ jobs:
 
       - name: Update npm to latest
         run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: npm run setup
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
