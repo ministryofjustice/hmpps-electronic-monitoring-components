@@ -3,7 +3,9 @@ import storybook from "eslint-plugin-storybook";
 
 import hmppsConfig from '@ministryofjustice/eslint-config-hmpps'
 
-export default [...hmppsConfig(), {
+export default [...hmppsConfig({
+  extraPathsAllowingDevDependencies: ['.allowed-scripts.mjs'],
+}), {
   ignores: [
     'dist/**',
     'node_modules/**',
