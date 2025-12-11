@@ -1,6 +1,6 @@
 {
   "name": "@ministryofjustice/hmpps-electronic-monitoring-components",
-  "version": "0.0.10-beta.1",
+  "version": "0.0.11-beta.1",
   "description": "HMPPS Electronic Monitoring Frontend Components",
   "repository": {
     "type": "git",
@@ -31,7 +31,8 @@
     "watch:css": "chokidar --glob \"src/components/**/styles/**/*.scss\" -c \"npm run build:css --silent\"",
     "build": "npm run build:css && vite build && tsc",
     "start-feature": "npm run build:css && storybook dev -p 6006",
-    "build-storybook": "npm run build:css && storybook build"
+    "build-storybook": "npm run build:css && storybook build",
+    "setup": "npm ci && hmpps-npm-script-run-allowlist"
   },
   "keywords": [
     "web-component",
@@ -90,6 +91,7 @@
     "@chromatic-com/storybook": "^4.1.2",
     "@cypress/vite-dev-server": "^7.0.0",
     "@ministryofjustice/eslint-config-hmpps": "^0.0.3",
+    "@ministryofjustice/hmpps-npm-script-allowlist": "0.0.3",
     "@storybook/addon-a11y": "^10.0.4",
     "@storybook/addon-docs": "^10.0.4",
     "@storybook/addon-vitest": "^10.0.4",
