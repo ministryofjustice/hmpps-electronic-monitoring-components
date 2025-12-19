@@ -1,6 +1,6 @@
 {
   "name": "@ministryofjustice/hmpps-electronic-monitoring-components",
-  "version": "0.0.11-beta.1",
+  "version": "0.0.12-beta.1",
   "description": "HMPPS Electronic Monitoring Frontend Components",
   "repository": {
     "type": "git",
@@ -24,6 +24,7 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:ci": "jest --runInBand",
+    "int-test-init:ci": "cypress install",
     "int-test": "npm run build:css && cypress run --component --config-file integration_tests/cypress.config.ts",
     "int-test:ui": "npm run build:css && cypress open --component --browser chrome --config-file integration_tests/cypress.config.ts",
     "vite": "vite",
@@ -95,7 +96,7 @@
     "@storybook/addon-a11y": "^10.0.4",
     "@storybook/addon-docs": "^10.0.4",
     "@storybook/addon-vitest": "^10.0.4",
-    "@storybook/builder-vite": "^10.0.4",
+    "@storybook/builder-vite": "10.1.10",
     "@storybook/web-components-vite": "^10.0.4",
     "@testing-library/jest-dom": "^6.8.0",
     "@types/express": "^5.0.3",
@@ -125,7 +126,7 @@
     "prettier": "^3.6.2",
     "prettier-plugin-jinja-template": "^2.1.0",
     "sass-embedded": "^1.93.3",
-    "storybook": "^10.0.4",
+    "storybook": "10.1.10",
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.1",
     "typescript": "^5.8.3",
