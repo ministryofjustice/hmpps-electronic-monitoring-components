@@ -5,8 +5,8 @@ import { Position } from '../types/position'
 
 const createPointFeatureFromPosition = (position: Position): Feature<Point> => {
   return new Feature({
-    geometry: new Point(fromLonLat([position.longitude, position.latitude])),
     ...position,
+    geometry: new Point(fromLonLat([position.longitude, position.latitude])),
   })
 }
 
