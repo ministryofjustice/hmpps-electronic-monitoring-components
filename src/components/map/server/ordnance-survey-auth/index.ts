@@ -121,7 +121,7 @@ export function emOrdnanceSurveyAuth(options: OrdnanceSurveyAuthOptions): Router
 
   // Assets endpoint (fonts and resources)
   router.get(`${BASE_PATH}/assets/:assetPath(*)`, async (req, res, next) => {
-    const assetPath = req.params[0]
+    const assetPath = req.params['assetPath(*)']
     const token = await getAccessToken(options)
     const url = `${vectorRoot}/resources/${assetPath}`
     await fetchFromOrdnanceSurvey(req, res, next, url, token, { cache, cacheKeyPrefix: 'tile' })
