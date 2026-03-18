@@ -161,7 +161,7 @@ export function setupMapDemo({
     const locationSource = locationsLayer?.getSource()
     if (locationSource) {
       const extent = locationSource.getExtent()
-      if (isEmpty(extent) === false) {
+      if (extent && !isEmpty(extent)) {
         olMap.getView().fit(extent, { maxZoom: 16, padding: [30, 30, 30, 30], size: olMap.getSize() })
       }
     }

@@ -3,8 +3,8 @@ import { configureAllowedScripts } from '@ministryofjustice/hmpps-npm-script-all
 export default configureAllowedScripts({
    allowlist: {
    "node_modules/@parcel/watcher@2.5.6": "ALLOW",
-   "node_modules/cypress@15.10.0": "ALLOW",
-   "node_modules/esbuild@0.27.3": "ALLOW",
+   "node_modules/cypress@15.12.0": "ALLOW",
+   "node_modules/esbuild@0.27.4": "ALLOW",
    "node_modules/fsevents@2.3.3": "ALLOW",
    "node_modules/playwright/node_modules/fsevents@2.3.2": "ALLOW",
    "node_modules/unrs-resolver@1.11.1": "ALLOW"
