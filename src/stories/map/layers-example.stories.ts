@@ -21,6 +21,11 @@ const meta = {
     showTracks: { control: 'boolean', description: 'Show Tracks layer' },
     showCircles: { control: 'boolean', description: 'Show Circles layer' },
     showText: { control: 'boolean', description: 'Show Text layer' },
+    markerMode: {
+      control: 'select',
+      options: ['default', 'pin', 'pin-with-icon', 'image', 'mixed'],
+      description: 'Marker rendering mode for LocationsLayer',
+    },
   },
   render: args => {
     const container = document.createElement('div')
@@ -29,6 +34,7 @@ const meta = {
       container,
       positions: args.positions,
       enable3D: args.enable3D,
+      markerMode: args.markerMode,
       controls: {
         zoomSlider: true,
         rotate: 'auto-hide',
@@ -54,6 +60,7 @@ export const Example: Story = {
     showTracks: false,
     showCircles: false,
     showText: false,
+    markerMode: 'default',
   },
   parameters: {
     docs: {

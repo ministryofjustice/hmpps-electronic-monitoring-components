@@ -5,6 +5,7 @@ import config from '../../components/map/scripts/core/config'
 import '../../components/map/styles/em-map.scss'
 
 import defaultPositions from '../../components/map/fixtures/positions.json'
+import type { MarkerOptions } from '../../components/map/scripts/core/layers/locations-layer'
 
 interface MapDemoOptions {
   container?: HTMLElement
@@ -25,6 +26,7 @@ interface MapDemoOptions {
   showText?: boolean
   showCircles?: boolean
   usesInternalOverlays?: boolean
+  markerMode?: 'default' | 'pin' | 'pin-with-icon' | 'image' | 'mixed'
 }
 
 function ensureOverlayTemplatesOnce() {
@@ -54,6 +56,71 @@ function ensureOverlayTemplatesOnce() {
   document.body.appendChild(bodyTmpl)
 }
 
+// Helper to demo different marker styles in the LocationsLayer (used in LayersExample story)
+function getMarkerForMode(mode: MapDemoOptions['markerMode'], index: number): MarkerOptions | undefined {
+  if (mode === 'pin') {
+    return {
+      type: 'pin',
+      pin: { color: '#d4351c' },
+    }
+  }
+
+  if (mode === 'pin-with-icon') {
+    return {
+      type: 'pin',
+      pin: {
+        color: '#1d70b8',
+        iconSrc: '/map-icons/house.png',
+        scale: 1.4,
+        iconScale: 0.9,
+      },
+    }
+  }
+
+  if (mode === 'image') {
+    return {
+      type: 'image',
+      image: {
+        src: '/map-icons/house.png',
+      },
+    }
+  }
+
+  if (mode === 'mixed') {
+    const patterns: MarkerOptions[] = [
+      {
+        type: 'pin',
+        pin: { color: '#d4351c' },
+      },
+      {
+        type: 'pin',
+        pin: {
+          color: '#f2c94c',
+          iconSrc: '/map-icons/person.png',
+          scale: 1.4,
+          iconScale: 0.9,
+        },
+      },
+      {
+        type: 'image',
+        image: {
+          src: '/map-icons/house.png',
+        },
+      },
+      {
+        type: 'image',
+        image: {
+          name: 'person',
+        },
+      },
+    ]
+
+    return patterns[index % patterns.length]
+  }
+
+  return undefined
+}
+
 // Creates and mounts a configured <em-map> element for Demos / Stories.
 export function setupMapDemo({
   container = document.body,
@@ -74,6 +141,7 @@ export function setupMapDemo({
   showText = false,
   showCircles = false,
   usesInternalOverlays = true,
+  markerMode = 'default',
 }: MapDemoOptions = {}): HTMLElement {
   const map = document.createElement('em-map')
   const apiKey = import.meta.env.STORYBOOK_OS_MAPS_API_KEY_PUBLIC_DOCS || ''
@@ -117,13 +185,18 @@ export function setupMapDemo({
   map.addEventListener('map:ready', () => {
     const emMap = map as EmMap
     const olMap = emMap.olMapInstance
-    const pos = emMap.positions
-    if (!olMap || !pos?.length) return
+    const mapPositions = emMap.positions
+    if (!olMap || !mapPositions?.length) return
+
+    const withMarkers = mapPositions.map((mapPosition, index) => {
+      const marker = getMarkerForMode(markerMode, index)
+      return marker ? { ...mapPosition, marker } : mapPosition
+    })
 
     const locationsLayer = emMap.addLayer(
       new LocationsLayer({
         title: 'pointsLayer',
-        positions: pos,
+        positions: withMarkers,
         visible: showPositions,
         zIndex: 4,
       }),
@@ -132,7 +205,7 @@ export function setupMapDemo({
     emMap.addLayer(
       new TracksLayer({
         title: 'tracksLayer',
-        positions: pos,
+        positions: mapPositions,
         visible: showTracks,
         zIndex: 1,
       }),
@@ -140,7 +213,7 @@ export function setupMapDemo({
 
     emMap.addLayer(
       new TextLayer({
-        positions: pos,
+        positions: withMarkers,
         textProperty: 'sequenceNumber',
         title: 'textLayer',
         visible: showText,
@@ -150,7 +223,7 @@ export function setupMapDemo({
 
     emMap.addLayer(
       new CirclesLayer({
-        positions: pos,
+        positions: mapPositions,
         id: 'confidence',
         title: 'confidenceLayer',
         visible: showCircles,

@@ -11,6 +11,39 @@ import { Position } from '../types/position'
 type OLVecSrc = VectorSource<Feature<Geometry>>
 type OLVecLayer = VectorLayer<OLVecSrc>
 
+export type MarkerType = 'point' | 'pin' | 'image'
+
+export type MarkerOptions = {
+  type?: MarkerType
+  scale?: number
+
+  point?: {
+    radius?: number
+    fill?: string | CanvasPattern | CanvasGradient
+    stroke?: {
+      color?: string
+      width?: number
+    }
+  }
+
+  pin?: {
+    color?: string
+    strokeColor?: string
+    iconSrc?: string
+    iconScale?: number
+    iconSvg?: string
+    scale?: number
+  }
+
+  image?: {
+    src?: string
+    svg?: string
+    name?: string
+    scale?: number
+    anchor?: [number, number]
+  }
+}
+
 export type LocationsLayerOptions = {
   id?: string
   title?: string
@@ -33,6 +66,7 @@ export type LocationsLayerOptions = {
     rotateWithView?: boolean
     scale?: number | [number, number]
   }
+  marker?: MarkerOptions
   positions?: Array<Position>
 }
 
@@ -63,6 +97,7 @@ export class LocationsLayer implements ComposableLayer<OLVecLayer> {
     this.olLayer = new OLLocationsLayer({
       positions: this.options.positions ?? [],
       style: this.options.style,
+      marker: this.options.marker,
       title: this.options.title ?? this.id,
       visible: layerStateOptions?.visible ?? this.options.visible,
       zIndex: layerStateOptions?.zIndex ?? this.options.zIndex,

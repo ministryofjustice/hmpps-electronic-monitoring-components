@@ -10,6 +10,13 @@ import positions from '../../../fixtures/positions.json'
 type OLVecSrc = VectorSource<Feature<Geometry>>
 type OLVecLayer = VectorLayer<OLVecSrc>
 
+// Helper function to extract the style for testing purposes
+function getStyle(layer: OLVecLayer): Style {
+  const styleFn = layer.getStyle() as any
+  const feature = layer.getSource()?.getFeatures()[0]
+  return styleFn(feature, 1)
+}
+
 describe('LocationLayer (OpenLayers library)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -31,7 +38,10 @@ describe('LocationLayer (OpenLayers library)', () => {
 
     expect(added.get('title')).toBe('Locations')
 
-    const style = added.getStyle()
+    const styleFn = added.getStyle()
+    expect(typeof styleFn).toBe('function')
+
+    const style = getStyle(added)
     expect(style).toBeInstanceOf(Style)
   })
 
@@ -71,7 +81,8 @@ describe('LocationLayer (OpenLayers library)', () => {
     layer.attach(adapter)
 
     const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
-    const style = added.getStyle() as Style
+    const style = getStyle(added)
+
     expect(style).toBeInstanceOf(Style)
     expect(style.getImage()).toBeDefined()
   })
@@ -90,7 +101,8 @@ describe('LocationLayer (OpenLayers library)', () => {
     layer.attach(adapter)
 
     const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
-    const style = added.getStyle() as Style
+    const style = getStyle(added)
+
     const image = style.getImage() as any
     const stroke = image.getStroke()
 
@@ -113,9 +125,9 @@ describe('LocationLayer (OpenLayers library)', () => {
     layer.attach(adapter)
 
     const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
-    const style = added.getStyle() as Style
-    const image: any = style.getImage()!
+    const style = getStyle(added)
 
+    const image: any = style.getImage()!
     expect(image.getFill()).toBeTruthy()
   })
 })
