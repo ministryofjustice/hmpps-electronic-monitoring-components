@@ -20,7 +20,9 @@ describe('OLLocationsLayer (OpenLayers library)', () => {
       positions,
       title: '',
     })
-    const style = layer.getStyle() as Style
+    const styleFn = layer.getStyle() as any
+    const feature = layer.getSource()?.getFeatures()[0]
+    const style = styleFn(feature, 1) as Style
     const image = style.getImage() as CircleStyle
 
     expect(image).toBeInstanceOf(CircleStyle)
@@ -43,7 +45,11 @@ describe('OLLocationsLayer (OpenLayers library)', () => {
       },
       title: '',
     })
-    const style = layer.getStyle() as Style
+
+    const styleFn = layer.getStyle() as any
+    const feature = layer.getSource()?.getFeatures()[0]
+    const style = styleFn(feature, 1) as Style
+
     const image = style.getImage() as CircleStyle
 
     expect(image).toBeInstanceOf(CircleStyle)

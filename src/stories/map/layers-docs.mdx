@@ -125,6 +125,125 @@ if (src) {
   }
 }
 ```
+---
+
+## Marker types (LocationsLayer)
+
+### Default (circle)
+
+```ts
+emMap.addLayer(new LocationsLayer({
+  positions,
+}))
+```
+
+### Pin markers
+
+```ts
+emMap.addLayer(new LocationsLayer({
+  positions,
+  marker: {
+    type: 'pin',
+    pin: { color: '#d4351c' },
+  },
+}))
+```
+
+### Pin with icon (PNG or SVG)
+
+```ts
+emMap.addLayer(new LocationsLayer({
+  positions,
+  marker: {
+    type: 'pin',
+    pin: {
+      color: '#1d70b8',
+      iconSrc: '/map-icons/house.png',
+      iconScale: 0.9,
+    },
+  },
+}))
+```
+
+### Image markers
+
+```ts
+emMap.addLayer(new LocationsLayer({
+  positions,
+  marker: {
+    type: 'image',
+    image: {
+      src: '/map-icons/house.png',
+      scale: 0.4,
+    },
+  },
+}))
+```
+
+### Built-in SVG icons
+
+```ts
+emMap.addLayer(new LocationsLayer({
+  positions,
+  marker: {
+    type: 'image',
+    image: {
+      name: 'person',
+    },
+  },
+}))
+```
+
+Available icons:
+- house
+- person
+
+---
+
+## Text positioning behaviour
+
+Text automatically adjusts based on marker type
+
+Text positioning is based on the marker type (`point`, `pin`, or `image`).  
+To enable this behaviour, ensure your positions include a `marker` property.
+
+```ts
+const positionsWithMarkers = positions.map(position => ({
+  ...position,
+  marker: {
+    type: 'pin',
+    pin: { color: '#d4351c' },
+  },
+}))
+
+emMap.addLayer(new LocationsLayer({
+  positions: positionsWithMarkers,
+}))
+
+emMap.addLayer(new TextLayer({
+  positions: positionsWithMarkers,
+  textProperty: 'crimeType',
+}))
+
+```ts
+emMap.addLayer(new TextLayer({
+  positions,
+  textProperty: 'crimeType',
+}))
+```
+
+### Override text positioning
+
+```ts
+emMap.addLayer(new TextLayer({
+  positions,
+  textProperty: 'crimeType',
+  style: {
+    offset: { x: 0, y: 30 },
+    textAlign: 'center',
+  },
+}))
+```
 
 ---
 

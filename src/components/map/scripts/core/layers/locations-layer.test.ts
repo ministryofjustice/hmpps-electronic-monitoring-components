@@ -10,6 +10,13 @@ import positions from '../../../fixtures/positions.json'
 type OLVecSrc = VectorSource<Feature<Geometry>>
 type OLVecLayer = VectorLayer<OLVecSrc>
 
+// Helper function to extract the style for testing purposes
+function getStyle(layer: OLVecLayer): Style {
+  const styleFn = layer.getStyle() as any
+  const feature = layer.getSource()?.getFeatures()[0]
+  return styleFn(feature, 1)
+}
+
 describe('LocationLayer (OpenLayers library)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -17,7 +24,12 @@ describe('LocationLayer (OpenLayers library)', () => {
 
   it('attaches a VectorLayer with expected properties and features', () => {
     const { adapter, olMapMock } = makeOpenLayersAdapter()
-    const layer = new LocationsLayer({ positions, id: 'locations', title: 'Locations' })
+    const layer = new LocationsLayer({
+      positions,
+      id: 'locations',
+      title: 'Locations',
+      renderer: 'vector',
+    })
 
     layer.attach(adapter)
 
@@ -31,13 +43,20 @@ describe('LocationLayer (OpenLayers library)', () => {
 
     expect(added.get('title')).toBe('Locations')
 
-    const style = added.getStyle()
+    const styleFn = added.getStyle()
+    expect(typeof styleFn).toBe('function')
+
+    const style = getStyle(added)
     expect(style).toBeInstanceOf(Style)
   })
 
   it('respects placement options: visible=false and zIndex', () => {
     const { adapter, olMapMock } = makeOpenLayersAdapter()
-    const layer = new LocationsLayer({ positions, id: 'locations' })
+    const layer = new LocationsLayer({
+      positions,
+      id: 'locations',
+      renderer: 'vector',
+    })
 
     layer.attach(adapter, { visible: false, zIndex: 10 })
 
@@ -48,7 +67,11 @@ describe('LocationLayer (OpenLayers library)', () => {
 
   it('detaches by removing the same VectorLayer from the map', () => {
     const { adapter, olMapMock } = makeOpenLayersAdapter()
-    const layer = new LocationsLayer({ positions, id: 'locations' })
+    const layer = new LocationsLayer({
+      positions,
+      id: 'locations',
+      renderer: 'vector',
+    })
 
     layer.attach(adapter)
     const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
@@ -71,7 +94,8 @@ describe('LocationLayer (OpenLayers library)', () => {
     layer.attach(adapter)
 
     const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
-    const style = added.getStyle() as Style
+    const style = getStyle(added)
+
     expect(style).toBeInstanceOf(Style)
     expect(style.getImage()).toBeDefined()
   })
@@ -85,12 +109,14 @@ describe('LocationLayer (OpenLayers library)', () => {
         fill: '#F5CA2C',
         stroke: { color: '#000', width: 2, lineDash: [4, 2] },
       },
+      renderer: 'vector',
     })
 
     layer.attach(adapter)
 
     const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
-    const style = added.getStyle() as Style
+    const style = getStyle(added)
+
     const image = style.getImage() as any
     const stroke = image.getStroke()
 
@@ -108,14 +134,15 @@ describe('LocationLayer (OpenLayers library)', () => {
         fill: pattern,
         stroke: { color: '#000', width: 1 },
       },
+      renderer: 'vector',
     })
 
     layer.attach(adapter)
 
     const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
-    const style = added.getStyle() as Style
-    const image: any = style.getImage()!
+    const style = getStyle(added)
 
+    const image: any = style.getImage()!
     expect(image.getFill()).toBeTruthy()
   })
 })

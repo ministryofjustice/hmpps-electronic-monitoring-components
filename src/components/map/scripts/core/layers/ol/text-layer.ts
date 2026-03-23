@@ -53,13 +53,10 @@ const DEFAULT_STROKE_WIDTH = 2
 const DEFAULT_OFFSET_X = 12
 const DEFAULT_OFFSET_Y = 1
 const DEFAULT_VISIBILITY = false
+
 const DEFAULT_STYLE: OLTextLayerStyle = {
   fill: DEFAULT_FILL,
   font: DEFAULT_FONT,
-  offset: {
-    x: DEFAULT_OFFSET_X,
-    y: DEFAULT_OFFSET_Y,
-  },
   stroke: {
     color: DEFAULT_STROKE_COLOR,
     width: DEFAULT_STROKE_WIDTH,
@@ -71,44 +68,75 @@ const createStyleFunction =
   (feature: FeatureLike): Array<Style> => {
     const value = feature.get(property)
 
-    if (value !== undefined) {
-      return [
-        new Style({
-          text: new Text({
-            text: String(value),
-            font: style.font ?? DEFAULT_FONT,
-            fill: new Fill({ color: style.fill ?? DEFAULT_FILL }),
-            stroke: new Stroke({
-              color: style.stroke?.color ?? DEFAULT_STROKE_COLOR,
-              width: style.stroke?.width ?? DEFAULT_STROKE_WIDTH,
-            }),
-            offsetX: style.offset?.x ?? DEFAULT_OFFSET_X,
-            offsetY: style.offset?.y ?? DEFAULT_OFFSET_Y,
-            textAlign: style.textAlign ?? 'left',
-            textBaseline: style.textBaseline ?? 'middle',
-            rotation: style.rotation,
-            scale: style.scale,
-            rotateWithView: style.rotateWithView,
-            maxAngle: style.maxAngle,
-            overflow: style.overflow,
-            padding: style.padding,
-            placement: style.placement,
-            keepUpright: style.keepUpright,
-            justify: style.justify,
-            backgroundFill: style.backgroundFill ? new Fill({ color: style.backgroundFill }) : undefined,
-            backgroundStroke: style.backgroundStroke
-              ? new Stroke({
-                  color: style.backgroundStroke.color,
-                  width: style.backgroundStroke.width,
-                  lineDash: style.backgroundStroke.lineDash,
-                })
-              : undefined,
-          }),
-        }),
-      ]
+    if (value === undefined) return []
+
+    const marker = feature.get('marker')
+
+    // Offset defaults to different values when using pin/image markers to better align with the icon,
+    // but can be overridden by style options if required
+    let offsetX = style.offset?.x
+    let offsetY = style.offset?.y
+
+    const hasCustomOffset = offsetX !== undefined || offsetY !== undefined
+
+    if (!hasCustomOffset) {
+      switch (marker?.type) {
+        case 'pin':
+          offsetX = 0
+          offsetY = 24
+          break
+
+        case 'image':
+          offsetX = 0
+          offsetY = 22
+          break
+
+        default:
+          offsetX = DEFAULT_OFFSET_X
+          offsetY = DEFAULT_OFFSET_Y
+      }
+    } else {
+      offsetX = offsetX ?? 0
+      offsetY = offsetY ?? 0
     }
 
-    return []
+    const isVertical = marker?.type === 'pin' || marker?.type === 'image'
+
+    return [
+      new Style({
+        zIndex: 3,
+        text: new Text({
+          text: String(value),
+          font: style.font ?? DEFAULT_FONT,
+          fill: new Fill({ color: style.fill ?? DEFAULT_FILL }),
+          stroke: new Stroke({
+            color: style.stroke?.color ?? DEFAULT_STROKE_COLOR,
+            width: style.stroke?.width ?? DEFAULT_STROKE_WIDTH,
+          }),
+          offsetX,
+          offsetY,
+          textAlign: isVertical ? 'center' : (style.textAlign ?? 'left'),
+          textBaseline: style.textBaseline ?? 'middle',
+          rotation: style.rotation,
+          scale: style.scale,
+          rotateWithView: style.rotateWithView,
+          maxAngle: style.maxAngle,
+          overflow: style.overflow,
+          padding: style.padding,
+          placement: style.placement,
+          keepUpright: style.keepUpright,
+          justify: style.justify,
+          backgroundFill: style.backgroundFill ? new Fill({ color: style.backgroundFill }) : undefined,
+          backgroundStroke: style.backgroundStroke
+            ? new Stroke({
+                color: style.backgroundStroke.color,
+                width: style.backgroundStroke.width,
+                lineDash: style.backgroundStroke.lineDash,
+              })
+            : undefined,
+        }),
+      }),
+    ]
   }
 
 export class OLTextLayer extends VectorLayer<VectorSource<Feature<Point>>> {
