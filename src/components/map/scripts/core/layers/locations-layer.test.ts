@@ -24,7 +24,12 @@ describe('LocationLayer (OpenLayers library)', () => {
 
   it('attaches a VectorLayer with expected properties and features', () => {
     const { adapter, olMapMock } = makeOpenLayersAdapter()
-    const layer = new LocationsLayer({ positions, id: 'locations', title: 'Locations' })
+    const layer = new LocationsLayer({
+      positions,
+      id: 'locations',
+      title: 'Locations',
+      renderer: 'vector',
+    })
 
     layer.attach(adapter)
 
@@ -47,7 +52,11 @@ describe('LocationLayer (OpenLayers library)', () => {
 
   it('respects placement options: visible=false and zIndex', () => {
     const { adapter, olMapMock } = makeOpenLayersAdapter()
-    const layer = new LocationsLayer({ positions, id: 'locations' })
+    const layer = new LocationsLayer({
+      positions,
+      id: 'locations',
+      renderer: 'vector',
+    })
 
     layer.attach(adapter, { visible: false, zIndex: 10 })
 
@@ -58,7 +67,11 @@ describe('LocationLayer (OpenLayers library)', () => {
 
   it('detaches by removing the same VectorLayer from the map', () => {
     const { adapter, olMapMock } = makeOpenLayersAdapter()
-    const layer = new LocationsLayer({ positions, id: 'locations' })
+    const layer = new LocationsLayer({
+      positions,
+      id: 'locations',
+      renderer: 'vector',
+    })
 
     layer.attach(adapter)
     const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
@@ -96,6 +109,7 @@ describe('LocationLayer (OpenLayers library)', () => {
         fill: '#F5CA2C',
         stroke: { color: '#000', width: 2, lineDash: [4, 2] },
       },
+      renderer: 'vector',
     })
 
     layer.attach(adapter)
@@ -120,6 +134,7 @@ describe('LocationLayer (OpenLayers library)', () => {
         fill: pattern,
         stroke: { color: '#000', width: 1 },
       },
+      renderer: 'vector',
     })
 
     layer.attach(adapter)

@@ -1,4 +1,3 @@
-import { isEmpty } from 'ol/extent'
 import { EmMap } from '../../components/map/scripts/em-map'
 import { CirclesLayer, LocationsLayer, TextLayer, TracksLayer } from '../../components/map/scripts/core/layers'
 import config from '../../components/map/scripts/core/config'
@@ -193,7 +192,7 @@ export function setupMapDemo({
       return marker ? { ...mapPosition, marker } : mapPosition
     })
 
-    const locationsLayer = emMap.addLayer(
+    emMap.addLayer(
       new LocationsLayer({
         title: 'pointsLayer',
         positions: withMarkers,
@@ -230,14 +229,6 @@ export function setupMapDemo({
         zIndex: 2,
       }),
     )
-
-    const locationSource = locationsLayer?.getSource()
-    if (locationSource) {
-      const extent = locationSource.getExtent()
-      if (extent && !isEmpty(extent)) {
-        olMap.getView().fit(extent, { maxZoom: 16, padding: [30, 30, 30, 30], size: olMap.getSize() })
-      }
-    }
   })
 
   return map
