@@ -51,7 +51,7 @@ export type LocationsLayerOptions = {
 
   style?: {
     radius?: number
-    fill?: string | CanvasPattern | CanvasGradient
+    fill?: string | CanvasPattern | CanvasGradient | null
     stroke?: {
       color?: string
       width?: number
@@ -69,6 +69,18 @@ export type LocationsLayerOptions = {
 
   marker?: MarkerOptions
   positions?: Array<Position>
+}
+
+function isWebGLCompatible(style?: LocationsLayerOptions['style']): boolean {
+  if (!style) return true
+
+  // dashed strokes not supported
+  if (style.stroke?.lineDash?.length) return false
+
+  // stroke-only shapes (confidence circles etc.)
+  if (style.fill === null) return false
+
+  return true
 }
 
 export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
@@ -94,8 +106,12 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
     }
 
     const { map } = adapter.openlayers!
+
     const renderer = this.options.renderer ?? 'auto'
-    const useWebGL = renderer === 'webgl' || (renderer === 'auto' && supportsWebGL())
+    const webglAllowed = isWebGLCompatible(this.options.style)
+
+    const useWebGL = webglAllowed && (renderer === 'webgl' || (renderer === 'auto' && supportsWebGL()))
+
     const positions = this.options.positions ?? []
 
     // Split positions into circle vs image/pin

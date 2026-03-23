@@ -9,7 +9,7 @@ import { createPointFeatureCollectionFromPositions } from '../../features/point'
 import { ICON_REGISTRY } from '../../icons/icon-registry'
 
 type OLLocationsLayerStyle = {
-  fill?: string | CanvasPattern | CanvasGradient
+  fill?: string | CanvasPattern | CanvasGradient | null
   radius?: number
   stroke?: {
     color?: string
