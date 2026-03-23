@@ -1,20 +1,34 @@
+import type BaseLayer from 'ol/layer/Base'
 import VectorLayer from 'ol/layer/Vector'
+import WebGLVectorLayer from 'ol/layer/WebGLVector'
 import VectorSource from 'ol/source/Vector'
 import type Feature from 'ol/Feature'
 import type Geometry from 'ol/geom/Geometry'
 import { Style } from 'ol/style'
-import { LocationsLayer } from './locations-layer'
+import * as browserHelpers from '../../helpers/browser'
+import { LocationsLayer, MarkerOptions } from './locations-layer'
 import makeOpenLayersAdapter from '../../../../../../tests/utils/openlayers-adapter'
 import positions from '../../../fixtures/positions.json'
+import type { Position } from '../types/position'
 
 type OLVecSrc = VectorSource<Feature<Geometry>>
 type OLVecLayer = VectorLayer<OLVecSrc>
 
+// Extend Position for tests to support marker
+type PositionWithMarker = Position & {
+  marker?: MarkerOptions
+}
+
 // Helper function to extract the style for testing purposes
 function getStyle(layer: OLVecLayer): Style {
   const styleFn = layer.getStyle() as any
-  const feature = layer.getSource()?.getFeatures()[0]
+  const feature = layer.getSource()!.getFeatures()[0]
   return styleFn(feature, 1)
+}
+
+// Helper for multi-layer support
+function getAddedLayers(mock: any): BaseLayer[] {
+  return mock.addLayer.mock.calls.map((call: any) => call[0])
 }
 
 describe('LocationLayer (OpenLayers library)', () => {
@@ -33,8 +47,11 @@ describe('LocationLayer (OpenLayers library)', () => {
 
     layer.attach(adapter)
 
-    expect(olMapMock.addLayer).toHaveBeenCalledTimes(1)
-    const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
+    const addedLayers = getAddedLayers(olMapMock)
+
+    expect(addedLayers).toHaveLength(1)
+
+    const added = addedLayers[0] as OLVecLayer
     expect(added).toBeInstanceOf(VectorLayer)
 
     const source = added.getSource() as OLVecSrc
@@ -60,7 +77,7 @@ describe('LocationLayer (OpenLayers library)', () => {
 
     layer.attach(adapter, { visible: false, zIndex: 10 })
 
-    const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
+    const added = getAddedLayers(olMapMock)[0] as OLVecLayer
     expect(added.getVisible()).toBe(false)
     expect(added.getZIndex()).toBe(10)
   })
@@ -74,7 +91,7 @@ describe('LocationLayer (OpenLayers library)', () => {
     })
 
     layer.attach(adapter)
-    const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
+    const added = getAddedLayers(olMapMock)[0]
 
     layer.detach(adapter)
 
@@ -89,11 +106,12 @@ describe('LocationLayer (OpenLayers library)', () => {
       positions,
       id: 'locations',
       style: { radius: 8, fill: '#0b0c0c', stroke: { color: '#ffffff', width: 1 } },
+      renderer: 'vector',
     })
 
     layer.attach(adapter)
 
-    const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
+    const added = getAddedLayers(olMapMock)[0] as OLVecLayer
     const style = getStyle(added)
 
     expect(style).toBeInstanceOf(Style)
@@ -114,7 +132,7 @@ describe('LocationLayer (OpenLayers library)', () => {
 
     layer.attach(adapter)
 
-    const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
+    const added = getAddedLayers(olMapMock)[0] as OLVecLayer
     const style = getStyle(added)
 
     const image = style.getImage() as any
@@ -139,10 +157,116 @@ describe('LocationLayer (OpenLayers library)', () => {
 
     layer.attach(adapter)
 
-    const added = olMapMock.addLayer.mock.calls[0][0] as OLVecLayer
+    const added = getAddedLayers(olMapMock)[0] as OLVecLayer
     const style = getStyle(added)
 
     const image: any = style.getImage()!
     expect(image.getFill()).toBeTruthy()
+  })
+
+  it('splits point and image markers into separate layers', () => {
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+
+    const mixedPositions: PositionWithMarker[] = [
+      { ...positions[0] },
+      {
+        ...positions[1],
+        marker: { type: 'image', image: { src: 'test.png' } },
+      },
+    ]
+
+    const layer = new LocationsLayer({
+      positions: mixedPositions,
+      renderer: 'vector',
+    })
+
+    layer.attach(adapter)
+
+    const addedLayers = getAddedLayers(olMapMock)
+
+    expect(addedLayers).toHaveLength(2)
+
+    expect(addedLayers[0]).toBeInstanceOf(VectorLayer)
+    expect(addedLayers[1]).toBeInstanceOf(VectorLayer)
+
+    const z0 = addedLayers[0].getZIndex() ?? 0
+    const z1 = addedLayers[1].getZIndex() ?? 0
+
+    expect(z1).toBeGreaterThan(z0)
+  })
+
+  it('uses WebGL layer when renderer is auto and supported', () => {
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+
+    jest.spyOn(browserHelpers, 'supportsWebGL').mockReturnValue(true)
+
+    const layer = new LocationsLayer({
+      positions,
+      renderer: 'auto',
+    })
+
+    layer.attach(adapter)
+
+    const addedLayers = getAddedLayers(olMapMock)
+
+    expect(addedLayers[0]).toBeInstanceOf(WebGLVectorLayer)
+  })
+
+  it('falls back to vector when style is not WebGL compatible', () => {
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+
+    const layer = new LocationsLayer({
+      positions,
+      renderer: 'auto',
+      style: {
+        fill: null,
+      },
+    })
+
+    layer.attach(adapter)
+
+    const addedLayers = getAddedLayers(olMapMock)
+
+    expect(addedLayers[0]).toBeInstanceOf(VectorLayer)
+  })
+
+  it('respects renderer=vector even if WebGL is available', () => {
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+
+    jest.spyOn(browserHelpers, 'supportsWebGL').mockReturnValue(true)
+
+    const layer = new LocationsLayer({
+      positions,
+      renderer: 'vector',
+    })
+
+    layer.attach(adapter)
+
+    const addedLayers = getAddedLayers(olMapMock)
+
+    expect(addedLayers[0]).toBeInstanceOf(VectorLayer)
+  })
+
+  it('detaches all created layers', () => {
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+
+    const mixedPositions: PositionWithMarker[] = [
+      { ...positions[0] },
+      {
+        ...positions[1],
+        marker: { type: 'image', image: { src: 'test.png' } },
+      },
+    ]
+
+    const layer = new LocationsLayer({
+      positions: mixedPositions,
+    })
+
+    layer.attach(adapter)
+    const addedLayers = getAddedLayers(olMapMock)
+
+    layer.detach(adapter)
+
+    expect(olMapMock.removeLayer).toHaveBeenCalledTimes(addedLayers.length)
   })
 })

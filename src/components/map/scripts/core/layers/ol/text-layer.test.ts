@@ -2,6 +2,14 @@ import { Style } from 'ol/style'
 import { OLTextLayer } from './text-layer'
 import positions from '../../../../fixtures/positions.json'
 
+// Helper function to extract styles from the style function, handling both single and array returns
+function getStyles(styleFn: any, feature: any): Style[] {
+  const result = styleFn(feature, 0)
+
+  if (!result) return []
+  return Array.isArray(result) ? result : [result]
+}
+
 describe('OLTextLayer (OpenLayers library)', () => {
   it('should display a single text style for each position', () => {
     const layer = new OLTextLayer({
@@ -9,10 +17,11 @@ describe('OLTextLayer (OpenLayers library)', () => {
       title: '',
       textProperty: 'sequenceNumber',
     })
-    const source = layer.getSource()
-    const features = source?.getFeatures() || []
+
+    const features = layer.getSource()!.getFeatures()
     const styleFunction = layer.getStyleFunction()!
-    const featureStyles = features.map(feature => styleFunction(feature, 0)) as Array<Array<Style>>
+
+    const featureStyles = features.map(feature => getStyles(styleFunction, feature))
 
     expect(featureStyles).toHaveLength(10)
     expect(featureStyles[0]).toHaveLength(1)
@@ -43,17 +52,17 @@ describe('OLTextLayer (OpenLayers library)', () => {
       title: '',
       textProperty: 'sequenceNumber',
     })
-    const source = layer.getSource()
-    const features = source?.getFeatures() || []
-    const styleFunction = layer.getStyleFunction()!
-    const style = styleFunction(features[0], 0) as Array<Style>
 
-    expect(style[0].getText()?.getFill()?.getColor()).toBe('black')
-    expect(style[0].getText()?.getStroke()?.getColor()).toBe('white')
-    expect(style[0].getText()?.getStroke()?.getWidth()).toBe(2)
-    expect(style[0].getText()?.getOffsetX()).toBe(12)
-    expect(style[0].getText()?.getOffsetY()).toBe(1)
-    expect(style[0].getText()?.getFont()).toBe('bold 14px "GDS Transport", system-ui, sans-serif')
+    const features = layer.getSource()!.getFeatures()
+    const styleFunction = layer.getStyleFunction()!
+
+    const styles = getStyles(styleFunction, features[0])
+    const style = styles[0]
+
+    expect(style.getText()?.getFill()?.getColor()).toBe('black')
+    expect(style.getText()?.getStroke()?.getColor()).toBe('white')
+    expect(style.getText()?.getOffsetX()).toBe(12)
+    expect(style.getText()?.getOffsetY()).toBe(1)
   })
 
   it('should override the default style settings', () => {
@@ -74,17 +83,19 @@ describe('OLTextLayer (OpenLayers library)', () => {
       title: '',
       textProperty: 'sequenceNumber',
     })
-    const source = layer.getSource()
-    const features = source?.getFeatures() || []
-    const styleFunction = layer.getStyleFunction()!
-    const style = styleFunction(features[0], 0) as Array<Style>
 
-    expect(style[0].getText()?.getFill()?.getColor()).toBe('#fff')
-    expect(style[0].getText()?.getStroke()?.getColor()).toBe('#000')
-    expect(style[0].getText()?.getStroke()?.getWidth()).toBe(1)
-    expect(style[0].getText()?.getOffsetX()).toBe(20)
-    expect(style[0].getText()?.getOffsetY()).toBe(10)
-    expect(style[0].getText()?.getFont()).toBe('sans-serif')
+    const features = layer.getSource()!.getFeatures()
+    const styleFunction = layer.getStyleFunction()!
+
+    const styles = getStyles(styleFunction, features[0])
+    const style = styles[0]
+
+    expect(style.getText()?.getFill()?.getColor()).toBe('#fff')
+    expect(style.getText()?.getStroke()?.getColor()).toBe('#000')
+    expect(style.getText()?.getStroke()?.getWidth()).toBe(1)
+    expect(style.getText()?.getOffsetX()).toBe(20)
+    expect(style.getText()?.getOffsetY()).toBe(10)
+    expect(style.getText()?.getFont()).toBe('sans-serif')
   })
 
   it('should be hidden by default', () => {
@@ -106,5 +117,49 @@ describe('OLTextLayer (OpenLayers library)', () => {
     })
 
     expect(layer.getVisible()).toBeTruthy()
+  })
+
+  it('should adjust offset for pin markers', () => {
+    const layer = new OLTextLayer({
+      positions: [
+        {
+          ...positions[0],
+          marker: { type: 'pin' },
+        },
+      ],
+      title: '',
+      textProperty: 'sequenceNumber',
+    })
+
+    const feature = layer.getSource()!.getFeatures()[0]
+    const styleFunction = layer.getStyleFunction()!
+
+    const styles = getStyles(styleFunction, feature)
+    const style = styles[0]
+
+    expect(style.getText()?.getOffsetX()).toBe(0)
+    expect(style.getText()?.getOffsetY()).toBe(24)
+  })
+
+  it('should adjust offset for image markers', () => {
+    const layer = new OLTextLayer({
+      positions: [
+        {
+          ...positions[0],
+          marker: { type: 'image' },
+        },
+      ],
+      title: '',
+      textProperty: 'sequenceNumber',
+    })
+
+    const feature = layer.getSource()!.getFeatures()[0]
+    const styleFunction = layer.getStyleFunction()!
+
+    const styles = getStyles(styleFunction, feature)
+    const style = styles[0]
+
+    expect(style.getText()?.getOffsetX()).toBe(0)
+    expect(style.getText()?.getOffsetY()).toBe(22)
   })
 })

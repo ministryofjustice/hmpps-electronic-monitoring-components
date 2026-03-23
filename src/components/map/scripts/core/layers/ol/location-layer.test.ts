@@ -1,4 +1,4 @@
-import { Style } from 'ol/style'
+import { Style, Icon } from 'ol/style'
 import CircleStyle from 'ol/style/Circle'
 import { OLLocationsLayer } from './locations-layer'
 import positions from '../../../../fixtures/positions.json'
@@ -76,5 +76,71 @@ describe('OLLocationsLayer (OpenLayers library)', () => {
     })
 
     expect(layer.getVisible()).toBeFalsy()
+  })
+
+  it('should render image marker using Icon style', () => {
+    const layer = new OLLocationsLayer({
+      positions: [
+        {
+          ...positions[0],
+          marker: {
+            type: 'image',
+            image: {
+              src: 'test.png',
+              scale: 1,
+            },
+          },
+        },
+      ],
+      title: '',
+    })
+
+    const styleFn = layer.getStyle() as any
+    const feature = layer.getSource()?.getFeatures()[0]
+    const style = styleFn(feature, 1) as Style
+
+    const image = style.getImage()
+    expect(image).toBeInstanceOf(Icon)
+  })
+
+  it('should render pin marker using Icon style', () => {
+    const layer = new OLLocationsLayer({
+      positions: [
+        {
+          ...positions[0],
+          marker: {
+            type: 'pin',
+            pin: {
+              color: '#ff0000',
+            },
+          },
+        },
+      ],
+      title: '',
+    })
+
+    const styleFn = layer.getStyle() as any
+    const feature = layer.getSource()?.getFeatures()[0]
+    const style = styleFn(feature, 1) as Style
+
+    const image = style.getImage()
+    expect(image).toBeInstanceOf(Icon)
+  })
+
+  it('should fallback to point style when marker type is not provided', () => {
+    const layer = new OLLocationsLayer({
+      positions: [
+        {
+          ...positions[0],
+        },
+      ],
+      title: '',
+    })
+
+    const styleFn = layer.getStyle() as any
+    const feature = layer.getSource()?.getFeatures()[0]
+    const style = styleFn(feature, 1) as Style
+
+    expect(style.getImage()).toBeInstanceOf(CircleStyle)
   })
 })
