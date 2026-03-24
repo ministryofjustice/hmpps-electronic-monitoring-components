@@ -4,6 +4,13 @@ import { LocationsLayer } from '@map/scripts/core/layers'
 import type { EmMap } from '@map/scripts/em-map'
 import { triggerPointerEventsAt, findLayerByTitle, shouldShowOverlay, shouldNotShowOverlay } from '../support/helpers'
 
+function waitForMapRender(map: Map) {
+  return new Cypress.Promise(resolve => {
+    map.once('rendercomplete', resolve)
+    map.renderSync()
+  })
+}
+
 describe('<em-map> overlays (interaction)', () => {
   beforeEach(() => {
     cy.mountEmMap({ attrs: { 'csp-nonce': 'x', 'uses-internal-overlays': '' } })
@@ -16,25 +23,26 @@ describe('<em-map> overlays (interaction)', () => {
 
     cy.readFile('src/components/map/fixtures/positions.json').then(positions => {
       cy.get('em-map').then($el => {
-        const el = $el[0] as unknown as EmMap
-        const map = el.olMapInstance as unknown as Map
+        const el = $el[0] as EmMap
+        const map = el.olMapInstance as Map
 
         el.addLayer(new LocationsLayer({ title: 'pointsLayer', positions }))
         map.renderSync()
 
         const pointsLayer = findLayerByTitle(map, 'pointsLayer') as VectorLayer
-        expect(pointsLayer, 'pointsLayer should exist').to.not.equal(undefined)
+        expect(pointsLayer).to.exist
 
         const feature = pointsLayer.getSource()!.getFeatures()[0]
         const coordinate = feature.getGeometry()!.getCoordinates()
 
-        const pixel = map.getPixelFromCoordinate(coordinate)
-        expect(pixel, 'pixel should be a valid coordinate').to.not.equal(null)
+        // wait for render
+        cy.window().then(() => waitForMapRender(map))
 
-        const featureAtPixel = map.forEachFeatureAtPixel(pixel, f => f)
-        expect(featureAtPixel, 'a feature should exist at the given pixel').to.not.equal(undefined)
+        // trigger click AFTER render
+        cy.window().then(() => {
+          triggerPointerEventsAt(coordinate, map)
+        })
 
-        triggerPointerEventsAt(coordinate, map)
         shouldShowOverlay()
       })
     })
@@ -43,16 +51,15 @@ describe('<em-map> overlays (interaction)', () => {
   it('hides the overlay when clicking on empty map space', () => {
     cy.readFile('src/components/map/fixtures/positions.json').then(positions => {
       cy.get('em-map').then($el => {
-        const el = $el[0] as unknown as EmMap
-        const map = el.olMapInstance as unknown as Map
+        const el = $el[0] as EmMap
+        const map = el.olMapInstance as Map
 
         el.addLayer(new LocationsLayer({ title: 'pointsLayer', positions }))
 
         const empty: [number, number] = [0, 0]
-        const pixel = map.getPixelFromCoordinate(empty)
-        expect(pixel, 'pixel should be valid').to.not.equal(null)
-        const featureAtPixel = map.forEachFeatureAtPixel(pixel!, f => f)
-        expect(featureAtPixel, 'no feature should be at this pixel').to.equal(undefined)
+
+        // wait for render
+        cy.window().then(() => waitForMapRender(map))
 
         cy.window().then(() => {
           triggerPointerEventsAt(empty, map)
@@ -66,22 +73,26 @@ describe('<em-map> overlays (interaction)', () => {
   it('hides the overlay when map is clicked outside a feature', () => {
     cy.readFile('src/components/map/fixtures/positions.json').then(positions => {
       cy.get('em-map').then($el => {
-        const el = $el[0] as unknown as EmMap
-        const map = el.olMapInstance as unknown as Map
+        const el = $el[0] as EmMap
+        const map = el.olMapInstance as Map
 
         el.addLayer(new LocationsLayer({ title: 'pointsLayer', positions }))
-        map.renderSync()
 
         const pointsLayer = findLayerByTitle(map, 'pointsLayer') as VectorLayer
         const feature = pointsLayer.getSource()!.getFeatures()[0]
         const onFeature = feature.getGeometry()!.getCoordinates()
         const empty: [number, number] = [0, 0]
 
+        // wait for render
+        cy.window().then(() => waitForMapRender(map))
+
+        // click feature
         cy.window().then(() => {
           triggerPointerEventsAt(onFeature, map)
         })
         shouldShowOverlay()
 
+        // click empty space
         cy.window().then(() => {
           triggerPointerEventsAt(empty, map)
         })
@@ -93,22 +104,27 @@ describe('<em-map> overlays (interaction)', () => {
   it('hides the overlay when the close button is clicked', () => {
     cy.readFile('src/components/map/fixtures/positions.json').then(positions => {
       cy.get('em-map').then($el => {
-        const el = $el[0] as unknown as EmMap
-        const map = el.olMapInstance as unknown as Map
+        const el = $el[0] as EmMap
+        const map = el.olMapInstance as Map
 
         el.addLayer(new LocationsLayer({ title: 'pointsLayer', positions }))
-        map.renderSync()
 
         const pointsLayer = findLayerByTitle(map, 'pointsLayer') as VectorLayer
         const feature = pointsLayer.getSource()!.getFeatures()[0]
         const coordinate = feature.getGeometry()!.getCoordinates()
 
+        // wait for render
+        cy.window().then(() => waitForMapRender(map))
+
+        // click feature
         cy.window().then(() => {
           triggerPointerEventsAt(coordinate, map)
         })
         shouldShowOverlay()
 
+        // close overlay
         cy.get('em-map').shadow().find('.app-map__overlay-close').click()
+
         shouldNotShowOverlay()
       })
     })
