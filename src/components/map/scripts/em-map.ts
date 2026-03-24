@@ -1,5 +1,8 @@
 import maplibreCss from 'maplibre-gl/dist/maplibre-gl.css?raw'
 import type { FeatureCollection } from 'geojson'
+import { boundingExtent, extend, isEmpty } from 'ol/extent'
+import type { Extent } from 'ol/extent'
+import { fromLonLat } from 'ol/proj'
 import { OLMapInstance, OLMapOptions } from './core/open-layers-map-instance'
 import { MapLibreMapInstance } from './core/maplibre-map-instance'
 import { setupOpenLayersMap } from './core/setup/setup-openlayers-map'
@@ -27,6 +30,16 @@ type EmMapOptions = {
 }
 
 type OLMapInstanceWithOverlay = OLMapInstance & { featureOverlay?: FeatureOverlay }
+
+type FitTarget = { type: 'points'; points: Position[] } | { type: 'layer'; layerId: string }
+
+type FitToOptions = {
+  targets: FitTarget[]
+  padding?: number | [number, number, number, number]
+  maxZoom?: number
+  animate?: boolean
+  durationMs?: number
+}
 
 export class EmMap extends HTMLElement {
   private mapNonce: string | null = null
@@ -137,8 +150,119 @@ export class EmMap extends HTMLElement {
     this.featureOverlay?.close()
   }
 
+  // Fits the map view to the given targets, which can be a mix of point sets and/or layer ids.
+  // If fitting to a single point, it will apply a default zoom level.
+  public fitTo(options: FitToOptions) {
+    if (!this.adapter) {
+      requestAnimationFrame(() => this.fitTo(options))
+      return
+    }
+
+    if (this.adapter.mapLibrary !== 'openlayers') {
+      console.warn('[EmMap] fitTo not implemented for MapLibre yet')
+      return
+    }
+
+    const { map } = this.adapter.openlayers!
+    const view = map.getView()
+
+    const extents: Extent[] = []
+
+    for (const target of options.targets) {
+      if (target.type === 'points' && target.points.length > 0) {
+        const coords = target.points.map(position => fromLonLat([position.longitude, position.latitude]))
+        extents.push(boundingExtent(coords))
+      }
+
+      if (target.type === 'layer') {
+        const layer = this.layers.get(target.layerId)
+        const extent = layer?.getExtent?.()
+        if (extent) extents.push(extent)
+      }
+    }
+
+    if (!extents.length) return
+
+    const merged: Extent = extents.reduce((acc, ext) => extend(acc, ext))
+
+    if (isEmpty(merged)) return
+
+    // Handle single-point edge case
+    const width = merged[2] - merged[0]
+    const height = merged[3] - merged[1]
+
+    const isSinglePoint = width === 0 && height === 0
+
+    if (isSinglePoint) {
+      const center: [number, number] = [(merged[0] + merged[2]) / 2, (merged[1] + merged[3]) / 2]
+
+      view.animate({
+        center,
+        zoom: Math.min(options.maxZoom ?? 18, 16),
+        duration: options.animate === false ? 0 : (options.durationMs ?? 500),
+      })
+
+      return
+    }
+
+    view.fit(merged, {
+      padding: this.normalizePadding(options.padding ?? 40),
+      maxZoom: options.maxZoom ?? 18,
+      duration: options.animate === false ? 0 : (options.durationMs ?? 500),
+      size: map.getSize(),
+    })
+  }
+
+  // Focuses the map view on a specific center point, with an optional zoom level.
+  // If animate is true, it will smoothly transition to the new view.
+  public focusOn({
+    center,
+    zoom,
+    animate = true,
+    durationMs = 500,
+  }: {
+    center: Position
+    zoom?: number
+    animate?: boolean
+    durationMs?: number
+  }) {
+    if (!this.adapter || this.adapter.mapLibrary !== 'openlayers') return
+
+    const { map } = this.adapter.openlayers!
+    const view = map.getView()
+
+    const projected = fromLonLat([center.longitude, center.latitude])
+
+    view.animate({
+      center: projected,
+      zoom: zoom ?? view.getZoom(),
+      duration: animate ? durationMs : 0,
+    })
+  }
+
+  // Zooms the map view to a specific zoom level, optionally animating the transition.
+  public zoomTo({ zoom, animate = true, durationMs = 300 }: { zoom: number; animate?: boolean; durationMs?: number }) {
+    if (!this.adapter || this.adapter.mapLibrary !== 'openlayers') return
+
+    const view = this.adapter.openlayers!.map.getView()
+
+    view.animate({
+      zoom,
+      duration: animate ? durationMs : 0,
+    })
+  }
+
+  // Use padding to specify extra space (in pixels) around the target when fitting the view.
+  private normalizePadding(padding: number | [number, number, number, number]): [number, number, number, number] {
+    if (typeof padding === 'number') {
+      return [padding, padding, padding, padding]
+    }
+    return padding
+  }
+
   private parseAttributes(): EmMapOptions {
     const renderer: MapLibrary = this.getAttribute('renderer') === 'maplibre' ? 'maplibre' : 'openlayers'
+
     const vectorAttr = this.getAttribute('vector-url') || this.getAttribute('vector-test-url')
     const vectorUrl = vectorAttr && vectorAttr.trim() ? vectorAttr : config.tiles.urls.localVectorStyleUrl
 

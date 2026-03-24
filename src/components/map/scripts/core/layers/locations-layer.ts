@@ -1,4 +1,7 @@
 import type BaseLayer from 'ol/layer/Base'
+import { fromLonLat } from 'ol/proj'
+import { boundingExtent } from 'ol/extent'
+import type { Extent } from 'ol/extent'
 import { supportsWebGL } from '../../helpers/browser'
 import { OLLocationsLayer } from './ol/locations-layer'
 import { OLWebGLCircleLayer } from './ol/locations-layer-webgl'
@@ -93,6 +96,14 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
   constructor(options: LocationsLayerOptions) {
     this.options = options
     this.id = options.id ?? 'locations'
+  }
+
+  getExtent(): Extent | null {
+    const positions = this.options.positions ?? []
+    if (!positions.length) return null
+
+    const coords = positions.map(position => fromLonLat([position.longitude, position.latitude]))
+    return boundingExtent(coords)
   }
 
   getNativeLayer(): BaseLayer[] {

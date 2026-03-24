@@ -1,3 +1,4 @@
+import type { Extent } from 'ol/extent'
 import type { MapAdapter } from '../map-adapter'
 
 // Map-level placement hierarchy/display options for layers.
@@ -16,4 +17,5 @@ export interface ComposableLayer<NativeLayer = unknown> {
   attach(adapter: MapAdapter, options?: LayerStateOptions): void
   detach(adapter: MapAdapter): void
   getNativeLayer?(): NativeLayer | undefined
+  getExtent?(): Extent | null
 }
