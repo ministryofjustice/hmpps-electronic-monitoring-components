@@ -17,6 +17,7 @@ export default defineConfig({
               'ol/Map',
               'ol/View',
               'ol/layer/Vector',
+              'ol/layer/WebGLVector',
               'ol/source/Vector',
               'ol/style',
               'ol/style/Circle',
