@@ -33,12 +33,15 @@ type OLMapInstanceWithOverlay = OLMapInstance & { featureOverlay?: FeatureOverla
 
 type FitTarget = { type: 'points'; points: Position[] } | { type: 'layer'; layerId: string }
 
-type FitToOptions = {
-  targets: FitTarget[]
+type ViewportOptions = {
   padding?: number | [number, number, number, number]
   maxZoom?: number
   animate?: boolean
   durationMs?: number
+}
+
+type FitToOptions = ViewportOptions & {
+  targets: FitTarget[]
 }
 
 export class EmMap extends HTMLElement {
@@ -150,8 +153,7 @@ export class EmMap extends HTMLElement {
     this.featureOverlay?.close()
   }
 
-  // Fits the map view to the given targets, which can be a mix of point sets and/or layer ids.
-  // If fitting to a single point, it will apply a default zoom level.
+  // Fits the map view to the given targets (layers or points), with options for padding, max zoom, and animation.
   public fitTo(options: FitToOptions) {
     if (!this.adapter) {
       requestAnimationFrame(() => this.fitTo(options))
@@ -213,8 +215,41 @@ export class EmMap extends HTMLElement {
     })
   }
 
-  // Focuses the map view on a specific center point, with an optional zoom level.
-  // If animate is true, it will smoothly transition to the new view.
+  // Fits the map view to points from a specific layer, with options for padding, max zoom, and animation.
+  public fitToLayer(layerOrId: string | ComposableLayer, options?: ViewportOptions) {
+    const layerId = typeof layerOrId === 'string' ? layerOrId : layerOrId.id
+
+    this.fitTo({
+      ...options,
+      targets: [{ type: 'layer', layerId }],
+    })
+  }
+
+  // Fits the map view to points from specific layers, with options for padding, max zoom, and animation.
+  public fitToLayers(layerIds: Array<string | ComposableLayer>, options?: ViewportOptions) {
+    this.fitTo({
+      ...options,
+      targets: layerIds.map(layer => ({
+        type: 'layer',
+        layerId: typeof layer === 'string' ? layer : layer.id,
+      })),
+    })
+  }
+
+  // Fits the map view to specific points, with options for padding, max zoom, and animation.
+  public fitToPoints(points: Position[], options?: ViewportOptions) {
+    this.fitTo({
+      ...options,
+      targets: [{ type: 'points', points }],
+    })
+  }
+
+  // Fits the map view to points from the position data slot, with options for padding, max zoom, and animation.
+  public fitToPositions(options?: ViewportOptions) {
+    this.fitToPoints(this.positionData, options)
+  }
+
+  // Focuses the map view on a specific point, with options for zoom level, animation, and animation duration.
   public focusOn({
     center,
     zoom,
