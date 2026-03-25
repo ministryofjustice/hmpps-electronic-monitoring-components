@@ -194,15 +194,41 @@ export function setupMapDemo({
 
     emMap.addLayer(
       new LocationsLayer({
-        title: 'pointsLayer',
+        id: 'locations',
+        title: 'locationsLayer',
         positions: withMarkers,
         visible: showPositions,
         zIndex: 4,
+        style: {
+          radius: 8,
+          fill: '#d4351c',
+        },
+      }),
+    )
+
+    const subsetOfPositions = mapPositions.slice(0, 5)
+    const shiftedCoordinates = subsetOfPositions.map(position => ({
+      ...position,
+      latitude: position.latitude + 0.01,
+      longitude: position.longitude + 0.01,
+    }))
+
+    emMap.addLayer(
+      new LocationsLayer({
+        id: 'locations-secondary',
+        positions: shiftedCoordinates,
+        visible: true,
+        zIndex: 5,
+        style: {
+          radius: 6,
+          fill: '#28a197',
+        },
       }),
     )
 
     emMap.addLayer(
       new TracksLayer({
+        id: 'tracks',
         title: 'tracksLayer',
         positions: mapPositions,
         visible: showTracks,
@@ -214,6 +240,7 @@ export function setupMapDemo({
       new TextLayer({
         positions: withMarkers,
         textProperty: 'sequenceNumber',
+        id: 'text',
         title: 'textLayer',
         visible: showText,
         zIndex: 3,
@@ -229,6 +256,8 @@ export function setupMapDemo({
         zIndex: 2,
       }),
     )
+
+    emMap.fitToPositions()
   })
 
   return map

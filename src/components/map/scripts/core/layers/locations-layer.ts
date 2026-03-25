@@ -64,10 +64,6 @@ export type LocationsLayerOptions = {
       lineDashOffset?: number
       miterLimit?: number
     }
-    displacement?: [number, number]
-    rotation?: number
-    rotateWithView?: boolean
-    scale?: number | [number, number]
   }
 
   marker?: MarkerOptions
@@ -82,6 +78,9 @@ function isWebGLCompatible(style?: LocationsLayerOptions['style']): boolean {
 
   // stroke-only shapes (confidence circles etc.)
   if (style.fill === null) return false
+
+  // WebGL only supports string colors
+  if (typeof style.fill !== 'string' && style.fill !== undefined) return false
 
   return true
 }
@@ -98,12 +97,46 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
     this.id = options.id ?? 'locations'
   }
 
+  // Exposed for testing - not part of public API
+  private toWebGLStyle(style?: LocationsLayerOptions['style']) {
+    if (!style) return undefined
+
+    return {
+      radius: style.radius,
+      fill: typeof style.fill === 'string' ? style.fill : undefined,
+      stroke: {
+        color: style.stroke?.color,
+        width: style.stroke?.width,
+      },
+    }
+  }
+
+  // Exposed for testing - not part of public API
+  private toWebGLMarker(marker?: MarkerOptions) {
+    if (!marker) return undefined
+
+    return {
+      point: {
+        radius: marker.point?.radius,
+        fill: typeof marker.point?.fill === 'string' ? marker.point.fill : undefined,
+        stroke: {
+          color: marker.point?.stroke?.color,
+          width: marker.point?.stroke?.width,
+        },
+      },
+    }
+  }
+
   getExtent(): Extent | null {
     const positions = this.options.positions ?? []
     if (!positions.length) return null
 
-    const coords = positions.map(position => fromLonLat([position.longitude, position.latitude]))
+    const coords = positions.map(p => fromLonLat([p.longitude, p.latitude]))
     return boundingExtent(coords)
+  }
+
+  getPositions(): Position[] {
+    return this.options.positions ?? []
   }
 
   getNativeLayer(): BaseLayer[] {
@@ -150,21 +183,24 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
 
     // WebGL circles layer
     if (useWebGL && circlePositions.length > 0) {
-      const circleLayer = new OLWebGLCircleLayer({
+      const webglStyle = this.toWebGLStyle(this.options.style)
+
+      const layer = new OLWebGLCircleLayer({
         positions: circlePositions,
-        markerOptions: this.options.marker,
+        style: webglStyle,
+        markerOptions: this.toWebGLMarker(this.options.marker),
         title: this.options.title ?? this.id,
         visible,
         zIndex: baseZIndex,
       })
 
-      map.addLayer(circleLayer)
-      this.olLayers.push(circleLayer)
+      map.addLayer(layer)
+      this.olLayers.push(layer)
     }
 
     // Vector circles fallback (if WebGL not supported or renderer explicitly set to 'vector')
     if (!useWebGL && circlePositions.length > 0) {
-      const circleLayer = new OLLocationsLayer({
+      const layer = new OLLocationsLayer({
         positions: circlePositions,
         style: this.options.style,
         marker: this.options.marker,
@@ -173,13 +209,13 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
         zIndex: baseZIndex,
       })
 
-      map.addLayer(circleLayer)
-      this.olLayers.push(circleLayer)
+      map.addLayer(layer)
+      this.olLayers.push(layer)
     }
 
     // Vector images/pins
     if (imagePositions.length > 0) {
-      const imageLayer = new OLLocationsLayer({
+      const layer = new OLLocationsLayer({
         positions: imagePositions,
         style: this.options.style,
         marker: this.options.marker,
@@ -188,8 +224,8 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
         zIndex: baseZIndex + 1,
       })
 
-      map.addLayer(imageLayer)
-      this.olLayers.push(imageLayer)
+      map.addLayer(layer)
+      this.olLayers.push(layer)
     }
   }
 

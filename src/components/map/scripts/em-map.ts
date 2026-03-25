@@ -211,7 +211,6 @@ export class EmMap extends HTMLElement {
       padding: this.normalizePadding(options.padding ?? 40),
       maxZoom: options.maxZoom ?? 18,
       duration: options.animate === false ? 0 : (options.durationMs ?? 500),
-      size: map.getSize(),
     })
   }
 
@@ -247,6 +246,11 @@ export class EmMap extends HTMLElement {
   // Fits the map view to points from the position data slot, with options for padding, max zoom, and animation.
   public fitToPositions(options?: ViewportOptions) {
     this.fitToPoints(this.positionData, options)
+  }
+
+  // Fits the map view to all layers currently on the map, with options for padding, max zoom, and animation.
+  public fitToAllLayers(options?: ViewportOptions) {
+    this.fitToLayers(Array.from(this.layers.keys()), options)
   }
 
   // Focuses the map view on a specific point, with options for zoom level, animation, and animation duration.
