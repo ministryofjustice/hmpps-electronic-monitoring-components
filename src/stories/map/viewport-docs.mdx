@@ -1,0 +1,170 @@
+import { Meta, Title, Subtitle, Canvas, Controls } from '@storybook/addon-docs/blocks';
+import * as ViewportCSF from './viewport-example.stories';
+
+<Meta title="Components/Map/Viewport/Docs" />
+
+<Title>Map viewport</Title>
+<Subtitle>Controlling map position, zoom, and fitting to data</Subtitle>
+
+---
+
+## Live example
+
+<Canvas of={ViewportCSF.Example} className="map-docs-canvas" />
+
+## Try the options
+
+<Controls of={ViewportCSF.Example} />
+
+---
+
+## Public API for controlling the viewport
+
+The `<em-map>` component exposes methods for controlling the map view (position, zoom, and fitting to data).
+
+---
+
+## Common usage
+
+```ts
+map.fitToLayer('locations-green')
+map.fitToLayers(['locations-red', 'locations-green'])
+map.fitToAllLayers()
+
+map.fitToPoints(positions)
+map.fitToPositions()
+
+map.focusOn({ center, zoom })
+map.zoomTo({ zoom: 12 })
+```
+
+---
+
+## Fitting the map to data
+
+### Dataset-based
+
+```ts
+map.fitToPositions()
+map.fitToPoints(positions)
+```
+
+- Uses original data passed into `<em-map>`
+- Ignores layers and transformations
+
+---
+
+### Layer-based
+
+```ts
+map.fitToLayer('locations-green')
+map.fitToLayers(['locations-red', 'locations-green'])
+map.fitToAllLayers()
+```
+
+- Uses rendered layer data
+- Includes derived or transformed points
+
+---
+
+### Fit to all layers
+
+```ts
+map.fitToAllLayers()
+```
+
+Fits the map to all layers currently added to the map.
+
+> Use this when you want to show all data currently visible on the map.
+
+---
+
+## Animation
+
+Viewport methods animate by default.
+
+### Default animation
+
+```ts
+map.fitToLayer('locations-green')
+```
+
+Uses default animation (~500ms)
+
+---
+
+### Fast animation
+
+```ts
+map.fitToLayer('locations-green', {
+  durationMs: 200,
+})
+```
+
+---
+
+### Slow animation
+
+```ts
+map.fitToLayer('locations-green', {
+  durationMs: 1200,
+})
+```
+
+---
+
+### No animation
+
+```ts
+map.fitToLayer('locations-green', {
+  animate: false,
+})
+```
+
+---
+
+## Focus and zoom
+
+### Focus on a location
+
+```ts
+map.focusOn({
+  center: { latitude: 51.5, longitude: -0.12 },
+  zoom: 14,
+})
+```
+
+---
+
+### Set zoom level
+
+```ts
+map.zoomTo({ zoom: 10 })
+```
+
+---
+
+## Advanced usage
+
+### Full control
+
+```ts
+map.fitTo({
+  targets: [
+    { type: 'layer', layerId: 'locations-green' },
+    { type: 'points', points }
+  ],
+  padding: 80,
+  maxZoom: 16,
+})
+```
+
+---
+
+## Notes
+
+- If no data is available, the map will not move.
+- Single-point fits apply a default zoom level.
+- Padding adds spacing around the fitted area.
+- Animation is enabled by default.
+- Use `animate: false` to disable transitions.

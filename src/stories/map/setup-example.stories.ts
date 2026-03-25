@@ -1,6 +1,7 @@
 import type { Meta, StoryObj, StoryContext } from '@storybook/web-components-vite'
 import { setupMapDemo } from './setupMapDemo'
 import positions from '../../components/map/fixtures/positions.json'
+import type { EmMap } from '../../components/map/scripts/em-map'
 
 const meta = {
   title: 'Components/Map/Setup',
@@ -42,7 +43,7 @@ const meta = {
     const container = document.createElement('div')
     container.classList.add('map-container')
 
-    setupMapDemo({
+    const mapEl = setupMapDemo({
       container,
       positions: args.positions,
       renderer: args.renderer,
@@ -61,6 +62,19 @@ const meta = {
       showTracks: false,
       showText: false,
       showCircles: false,
+    })
+
+    mapEl.addEventListener('map:ready', () => {
+      const emMap = mapEl as EmMap
+      const olMap = emMap.olMapInstance
+      if (!olMap) return
+
+      // Wait for OL render
+      olMap.once('rendercomplete', () => {
+        emMap.fitToAllLayers({
+          padding: 40,
+        })
+      })
     })
 
     return container
