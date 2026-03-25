@@ -97,7 +97,6 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
     this.id = options.id ?? 'locations'
   }
 
-  // Exposed for testing - not part of public API
   private toWebGLStyle(style?: LocationsLayerOptions['style']) {
     if (!style) return undefined
 
@@ -111,7 +110,6 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
     }
   }
 
-  // Exposed for testing - not part of public API
   private toWebGLMarker(marker?: MarkerOptions) {
     if (!marker) return undefined
 

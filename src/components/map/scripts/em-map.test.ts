@@ -20,9 +20,26 @@ jest.mock('./core/config', () => ({
   },
 }))
 
-jest.mock('./core/setup/setup-openlayers-map', () => ({
-  setupOpenLayersMap: jest.fn().mockResolvedValue({ addLayer: jest.fn() }),
-}))
+jest.mock('./core/setup/setup-openlayers-map', () => {
+  const mockView = {
+    fit: jest.fn(),
+    animate: jest.fn(),
+    setCenter: jest.fn(),
+    setResolution: jest.fn(),
+    getResolutionForExtent: jest.fn(() => 123),
+    getZoom: jest.fn(() => 10),
+  }
+
+  const mockMap = {
+    getView: () => mockView,
+    getSize: jest.fn(() => [800, 600]),
+  }
+
+  return {
+    setupOpenLayersMap: jest.fn().mockResolvedValue(mockMap),
+    getMockView: () => mockView,
+  }
+})
 
 jest.mock('./core/setup/setup-maplibre-map', () => ({
   setupMapLibreMap: jest.fn().mockResolvedValue({ addLayer: jest.fn() }),
@@ -35,6 +52,8 @@ jest.mock('maplibre-gl', () => ({
     on: jest.fn(),
   })),
 }))
+
+const { getMockView } = jest.requireMock('./core/setup/setup-openlayers-map')
 
 describe('EmMap', () => {
   beforeEach(() => {
@@ -241,5 +260,189 @@ describe('EmMap', () => {
 
     expect(opts.controls.olRotateTooltip).toBe(true)
     expect(emMap.classList.contains('ol-rotate-tooltip')).toBe(true)
+  })
+
+  // Viewport tests
+  it('fitTo calls view.fit with merged extent', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+
+    await new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+      document.body.appendChild(emMap)
+    })
+
+    const view = getMockView()
+    const fitSpy = jest.spyOn(view, 'fit')
+
+    emMap.fitTo({
+      targets: [
+        {
+          type: 'points',
+          points: [
+            { latitude: 0, longitude: 0 },
+            { latitude: 1, longitude: 1 },
+          ],
+        },
+      ],
+    })
+
+    expect(fitSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it('fitTo does nothing when no valid targets', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+
+    await new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+      document.body.appendChild(emMap)
+    })
+
+    const view = getMockView()
+    const fitSpy = jest.spyOn(view, 'fit')
+
+    emMap.fitTo({
+      targets: [{ type: 'points', points: [] }],
+    })
+
+    expect(fitSpy).not.toHaveBeenCalled()
+  })
+
+  it('fitTo uses view.animate for a single-point extent', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+
+    await new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+      document.body.appendChild(emMap)
+    })
+
+    const view = getMockView()
+    const animateSpy = jest.spyOn(view, 'animate')
+
+    emMap.fitTo({
+      targets: [{ type: 'points', points: [{ latitude: 1, longitude: 1 }] }],
+    })
+
+    expect(animateSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it('fitTo with animate=false sets center and resolution directly', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+
+    await new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+      document.body.appendChild(emMap)
+    })
+
+    const view = getMockView()
+
+    const setCenterSpy = jest.spyOn(view, 'setCenter')
+    const setResolutionSpy = jest.spyOn(view, 'setResolution')
+    const fitSpy = jest.spyOn(view, 'fit')
+
+    emMap.fitTo({
+      animate: false,
+      targets: [
+        {
+          type: 'points',
+          points: [
+            { latitude: 0, longitude: 0 },
+            { latitude: 1, longitude: 1 },
+          ],
+        },
+      ],
+    })
+
+    expect(fitSpy).not.toHaveBeenCalled()
+    expect(setCenterSpy).toHaveBeenCalled()
+    expect(setResolutionSpy).toHaveBeenCalled()
+  })
+
+  it('fitTo passes duration when animate=true', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+
+    await new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+      document.body.appendChild(emMap)
+    })
+
+    const view = getMockView()
+    const fitSpy = jest.spyOn(view, 'fit')
+
+    emMap.fitTo({
+      animate: true,
+      durationMs: 999,
+      targets: [
+        {
+          type: 'points',
+          points: [
+            { latitude: 0, longitude: 0 },
+            { latitude: 1, longitude: 1 },
+          ],
+        },
+      ],
+    })
+
+    const [, options] = fitSpy.mock.calls[0] as [unknown, { duration?: number }]
+    expect(options.duration).toBe(999)
+  })
+
+  it('fitTo uses layer extent when target is layer', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+
+    await new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+      document.body.appendChild(emMap)
+    })
+
+    const fakeLayer = {
+      id: 'test-layer',
+      attach: jest.fn(),
+      detach: jest.fn(),
+      getExtent: jest.fn(() => [0, 0, 100, 100]),
+    }
+
+    emMap.addLayer(fakeLayer as any)
+
+    const view = getMockView()
+    const fitSpy = jest.spyOn(view, 'fit')
+
+    emMap.fitTo({
+      targets: [{ type: 'layer', layerId: 'test-layer' }],
+    })
+
+    expect(fakeLayer.getExtent).toHaveBeenCalled()
+    expect(fitSpy).toHaveBeenCalled()
+  })
+
+  it('fitTo ignores missing layer', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+
+    await new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+      document.body.appendChild(emMap)
+    })
+
+    const view = getMockView()
+    const fitSpy = jest.spyOn(view, 'fit')
+
+    emMap.fitTo({
+      targets: [{ type: 'layer', layerId: 'does-not-exist' }],
+    })
+
+    expect(fitSpy).not.toHaveBeenCalled()
   })
 })
