@@ -79,6 +79,50 @@ Fits the map to all layers currently added to the map.
 
 ---
 
+## Animation
+
+Viewport methods animate by default.
+
+### Default animation
+
+```ts
+map.fitToLayer('locations-green')
+```
+
+Uses default animation (~500ms)
+
+---
+
+### Fast animation
+
+```ts
+map.fitToLayer('locations-green', {
+  durationMs: 200,
+})
+```
+
+---
+
+### Slow animation
+
+```ts
+map.fitToLayer('locations-green', {
+  durationMs: 1200,
+})
+```
+
+---
+
+### No animation
+
+```ts
+map.fitToLayer('locations-green', {
+  animate: false,
+})
+```
+
+---
+
 ## Focus and zoom
 
 ### Focus on a location
@@ -123,3 +167,4 @@ map.fitTo({
 - Single-point fits apply a default zoom level.
 - Padding adds spacing around the fitted area.
 - Animation is enabled by default.
+- Use `animate: false` to disable transitions.

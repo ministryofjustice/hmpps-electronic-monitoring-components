@@ -256,8 +256,6 @@ export function setupMapDemo({
         zIndex: 2,
       }),
     )
-
-    emMap.fitToPositions()
   })
 
   return map

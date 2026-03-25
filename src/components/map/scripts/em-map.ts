@@ -207,10 +207,34 @@ export class EmMap extends HTMLElement {
       return
     }
 
+    // If no animation, set view immediately and return
+    if (options.animate === false) {
+      const size = map.getSize()
+      if (!size) return
+
+      const padding = this.normalizePadding(options.padding ?? 40)
+
+      // Adjust size for padding
+      const paddedSize: [number, number] = [
+        size[0] - padding[1] - padding[3], // width - left - right
+        size[1] - padding[0] - padding[2], // height - top - bottom
+      ]
+
+      const resolution = view.getResolutionForExtent(merged, paddedSize)
+
+      view.setCenter([(merged[0] + merged[2]) / 2, (merged[1] + merged[3]) / 2])
+
+      if (resolution) {
+        view.setResolution(resolution)
+      }
+
+      return
+    }
+
     view.fit(merged, {
       padding: this.normalizePadding(options.padding ?? 40),
       maxZoom: options.maxZoom ?? 18,
-      duration: options.animate === false ? 0 : (options.durationMs ?? 500),
+      duration: options.durationMs ?? 500,
     })
   }
 
