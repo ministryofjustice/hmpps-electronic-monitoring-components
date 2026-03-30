@@ -1,3 +1,11 @@
+import Feature from 'ol/Feature'
+import Point from 'ol/geom/Point'
+import { circular as circularPolygon } from 'ol/geom/Polygon'
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
+import { Fill, Stroke, Style, RegularShape } from 'ol/style'
+import { fromLonLat } from 'ol/proj'
+
 import { EmMap } from '../../components/map/scripts/em-map'
 import { CirclesLayer, LocationsLayer, TextLayer, TracksLayer } from '../../components/map/scripts/core/layers'
 import config from '../../components/map/scripts/core/config'
@@ -5,6 +13,10 @@ import '../../components/map/styles/em-map.scss'
 
 import defaultPositions from '../../components/map/fixtures/positions.json'
 import type { MarkerOptions } from '../../components/map/scripts/core/layers/locations-layer'
+
+const DEMO_CENTRE: [number, number] = [-2.2434, 53.48015]
+
+type DirectionUnits = 'degrees' | 'radians'
 
 interface MapDemoOptions {
   container?: HTMLElement
@@ -21,11 +33,62 @@ interface MapDemoOptions {
     grabCursor?: boolean
   }
   showPositions?: boolean
-  showTracks?: boolean
   showText?: boolean
   showCircles?: boolean
+  showTracks?: boolean
+  entryExit?: {
+    enabled?: boolean
+    extensionDistanceMeters?: number
+    direction?: {
+      property?: string
+      units?: DirectionUnits
+    }
+  }
   usesInternalOverlays?: boolean
   markerMode?: 'default' | 'pin' | 'pin-with-icon' | 'image' | 'mixed'
+  includeViewportDemoLayers?: boolean
+}
+
+// Demo crime layers (centre + 100m radius)
+function addDemoCrimeLayers(map: any, centreLonLat: [number, number]) {
+  const centre = fromLonLat(centreLonLat)
+
+  // Marker
+  const marker = new Feature({ geometry: new Point(centre) })
+  marker.setStyle(
+    new Style({
+      image: new RegularShape({
+        points: 4,
+        radius: 10,
+        angle: Math.PI / 4,
+        fill: new Fill({ color: 'rgba(220,0,0,1)' }),
+        stroke: new Stroke({ color: '#fff', width: 2 }),
+      }),
+    }),
+  )
+
+  const markerLayer = new VectorLayer({
+    source: new VectorSource({ features: [marker] }),
+  })
+  markerLayer.setZIndex(10)
+  map.addLayer(markerLayer)
+
+  // Circle (100m)
+  const geom = circularPolygon(centreLonLat, 100, 96).transform('EPSG:4326', map.getView().getProjection())
+
+  const circleFeature = new Feature({ geometry: geom })
+  circleFeature.setStyle(
+    new Style({
+      fill: new Fill({ color: 'rgba(0,0,0,0.1)' }),
+      stroke: new Stroke({ color: 'rgba(0,0,0,0.5)', width: 2 }),
+    }),
+  )
+
+  const circleLayer = new VectorLayer({
+    source: new VectorSource({ features: [circleFeature] }),
+  })
+  circleLayer.setZIndex(0)
+  map.addLayer(circleLayer)
 }
 
 function ensureOverlayTemplatesOnce() {
@@ -141,6 +204,8 @@ export function setupMapDemo({
   showCircles = false,
   usesInternalOverlays = true,
   markerMode = 'default',
+  includeViewportDemoLayers = false,
+  entryExit,
 }: MapDemoOptions = {}): HTMLElement {
   const map = document.createElement('em-map')
   const apiKey = import.meta.env.STORYBOOK_OS_MAPS_API_KEY_PUBLIC_DOCS || ''
@@ -184,12 +249,17 @@ export function setupMapDemo({
   map.addEventListener('map:ready', () => {
     const emMap = map as EmMap
     const olMap = emMap.olMapInstance
-    const mapPositions = emMap.positions
+    let mapPositions = emMap.positions
     if (!olMap || !mapPositions?.length) return
 
-    const withMarkers = mapPositions.map((mapPosition, index) => {
-      const marker = getMarkerForMode(markerMode, index)
-      return marker ? { ...mapPosition, marker } : mapPosition
+    if (entryExit?.enabled) {
+      mapPositions = mapPositions.slice(0, 5)
+      addDemoCrimeLayers(olMap, DEMO_CENTRE)
+    }
+
+    const withMarkers = mapPositions.map((p, i) => {
+      const marker = getMarkerForMode(markerMode, i)
+      return marker ? { ...p, marker } : p
     })
 
     emMap.addLayer(
@@ -206,25 +276,27 @@ export function setupMapDemo({
       }),
     )
 
-    const subsetOfPositions = mapPositions.slice(0, 5)
-    const shiftedCoordinates = subsetOfPositions.map(position => ({
-      ...position,
-      latitude: position.latitude + 0.01,
-      longitude: position.longitude + 0.01,
-    }))
+    if (includeViewportDemoLayers) {
+      const subsetOfPositions = mapPositions.slice(0, 5)
+      const shiftedCoordinates = subsetOfPositions.map(position => ({
+        ...position,
+        latitude: position.latitude + 0.01,
+        longitude: position.longitude + 0.01,
+      }))
 
-    emMap.addLayer(
-      new LocationsLayer({
-        id: 'locations-secondary',
-        positions: shiftedCoordinates,
-        visible: true,
-        zIndex: 5,
-        style: {
-          radius: 6,
-          fill: '#28a197',
-        },
-      }),
-    )
+      emMap.addLayer(
+        new LocationsLayer({
+          id: 'locations-secondary',
+          positions: shiftedCoordinates,
+          visible: true,
+          zIndex: 5,
+          style: {
+            radius: 6,
+            fill: '#28a197',
+          },
+        }),
+      )
+    }
 
     emMap.addLayer(
       new TracksLayer({
@@ -232,6 +304,13 @@ export function setupMapDemo({
         title: 'tracksLayer',
         positions: mapPositions,
         visible: showTracks,
+        entryExit: {
+          enabled: entryExit?.enabled,
+          extensionDistanceMeters: entryExit?.extensionDistanceMeters,
+          direction: entryExit?.direction,
+          centre: DEMO_CENTRE,
+          radiusMeters: 100,
+        },
         zIndex: 1,
       }),
     )

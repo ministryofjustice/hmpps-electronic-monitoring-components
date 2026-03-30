@@ -34,6 +34,7 @@ const meta: Meta = {
       showTracks: false,
       showCircles: false,
       showText: false,
+      includeViewportDemoLayers: true,
     })
 
     // Animation helper
