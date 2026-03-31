@@ -12,28 +12,14 @@ export default defineConfig({
         bundler: 'vite',
         viteConfig: {
           build: { target: 'esnext' },
-          publicDir: resolve(__dirname, '../public'),
           optimizeDeps: {
-            include: [
-              'ol/Map',
-              'ol/View',
-              'ol/layer/Vector',
-              'ol/layer/WebGLVector',
-              'ol/source/Vector',
-              'ol/style',
-              'ol/style/Circle',
-              'ol/geom',
-            ],
+            exclude: ['ol'],
           },
+          root: resolve(__dirname, '..'),
           resolve: {
             alias: {
               '@': resolve(__dirname, '../src'),
               '@map': resolve(__dirname, '../src/components/map'),
-            },
-          },
-          server: {
-            fs: {
-              allow: ['..'], // allow access outside root
             },
           },
         },
