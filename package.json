@@ -1,6 +1,6 @@
 {
   "name": "@ministryofjustice/hmpps-electronic-monitoring-components",
-  "version": "0.1.0-beta.1",
+  "version": "0.2.0-beta.1",
   "description": "HMPPS Electronic Monitoring Frontend Components",
   "repository": {
     "type": "git",
