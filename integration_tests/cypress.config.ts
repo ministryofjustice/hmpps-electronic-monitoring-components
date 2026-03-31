@@ -12,6 +12,7 @@ export default defineConfig({
         bundler: 'vite',
         viteConfig: {
           build: { target: 'esnext' },
+          publicDir: resolve(__dirname, '../public'),
           optimizeDeps: {
             exclude: ['ol'],
           },
@@ -20,6 +21,11 @@ export default defineConfig({
             alias: {
               '@': resolve(__dirname, '../src'),
               '@map': resolve(__dirname, '../src/components/map'),
+            },
+          },
+          server: {
+            fs: {
+              allow: ['..'], // allow access outside root
             },
           },
         },
