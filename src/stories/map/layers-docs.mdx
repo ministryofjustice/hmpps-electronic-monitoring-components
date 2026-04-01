@@ -288,6 +288,106 @@ emMap.addLayer(new TracksLayer({
 }))
 ```
 
+## TracksLayer – Entry/Exit extensions
+
+The `TracksLayer` can render **entry and exit lines** to show direction of travel **into and out of an area** (e.g. a proximity zone).
+
+These lines are derived from:
+- the **first and last positions**
+- an optional **direction property**
+- or fallback to **track geometry**
+
+---
+
+## Basic usage
+
+```ts
+emMap.addLayer(new TracksLayer({
+  positions,
+  visible: true,
+
+  entryExit: {
+    enabled: true,
+  },
+}))
+```
+
+---
+
+## Direction-aware behaviour
+
+If your data includes a direction (bearing), you can use it.cCan specify degrees or radians:
+
+```ts
+emMap.addLayer(new TracksLayer({
+  positions,
+
+  entryExit: {
+    enabled: true,
+    direction: {
+      property: 'direction',
+      units: 'degrees',
+    },
+  },
+}))
+```
+
+---
+
+## Behaviour rules
+
+### When `direction.property` is provided
+
+Entry - Uses **first point direction**, reversed
+Exit - Uses **last point direction**, as-is
+
+---
+
+### When `direction.property` is NOT provided
+
+Entry - Uses **first segment (line between points) direction**, reversed
+Exit - Uses **last segment (line between points) direction**, as-is
+
+---
+
+## Extension distance
+
+```ts
+entryExit: {
+  enabled: true,
+  extensionDistanceMeters: 75,
+}
+```
+
+- Default: **50 metres**
+
+---
+
+## Circle-aware extensions
+
+```ts
+entryExit: {
+  enabled: true,
+  extensionDistanceMeters: 100,
+  centre: [-2.243, 53.4805],
+  radiusMeters: 100,
+}
+```
+
+### Behaviour
+
+- Extends line to **circle boundary**
+- Then continues **beyond boundary**
+
+---
+
+## Notes
+
+- Entry/exit are **additional features**
+- Do not mutate original track geometry
+- Requires at least 2 points
+
+
 ### CirclesLayer
 
 ```ts

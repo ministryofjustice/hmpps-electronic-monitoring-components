@@ -10,6 +10,8 @@ import { Position } from '../types/position'
 type OLVecSource = VectorSource<Feature<Geometry>>
 type OLVecLayer = VectorLayer<OLVecSource>
 
+export type DirectionUnits = 'degrees' | 'radians'
+
 export type TracksLayerOptions = {
   id?: string
   title?: string
@@ -22,6 +24,17 @@ export type TracksLayerOptions = {
   }
   avoidPositions?: Array<Position>
   positions: Array<Position>
+
+  entryExit?: {
+    enabled?: boolean
+    extensionDistanceMeters?: number
+    direction?: {
+      property?: string // e.g. "direction"
+      units?: DirectionUnits
+    }
+    centre?: [number, number]
+    radiusMeters?: number
+  }
 }
 
 export class TracksLayer implements ComposableLayer<OLVecLayer> {
@@ -55,6 +68,7 @@ export class TracksLayer implements ComposableLayer<OLVecLayer> {
       visible: this.options.visible,
       zIndex: this.options.zIndex,
       avoidPositions: this.options.avoidPositions,
+      entryExit: this.options.entryExit,
     })
 
     map.addLayer(this.olLayer)

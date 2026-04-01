@@ -13,17 +13,9 @@ export default defineConfig({
         viteConfig: {
           build: { target: 'esnext' },
           optimizeDeps: {
-            include: [
-              'ol/Map',
-              'ol/View',
-              'ol/layer/Vector',
-              'ol/layer/WebGLVector',
-              'ol/source/Vector',
-              'ol/style',
-              'ol/style/Circle',
-              'ol/geom',
-            ],
+            exclude: ['ol'],
           },
+          root: resolve(__dirname, '..'),
           resolve: {
             alias: {
               '@': resolve(__dirname, '../src'),
