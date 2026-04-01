@@ -1,9 +1,16 @@
 import { Style } from 'ol/style'
-import { Point } from 'ol/geom'
+import { Point, LineString } from 'ol/geom'
 import { Coordinate } from 'ol/coordinate'
+import Feature from 'ol/Feature'
 import ArrowStyle from '../../styles/arrow'
 import LineStyle from '../../styles/line'
-import { OLTracksLayer } from './tracks-layer'
+import {
+  OLTracksLayer,
+  getEntryVector,
+  getExitVector,
+  extendBeyondCircle,
+  applyEntryExitToFeatures,
+} from './tracks-layer'
 import positions from '../../../../fixtures/positions.json'
 
 describe('OLTracksLayer (OpenLayers library)', () => {
@@ -101,5 +108,114 @@ describe('OLTracksLayer (OpenLayers library)', () => {
 
     // Expect one less arrow
     expect(avoidArrowStyles.length).toBe(arrowStyles.length - 1)
+  })
+})
+
+describe('Entry / Exit vector logic', () => {
+  it('getEntryVector uses direction property (reversed)', () => {
+    const testPositions = [{ longitude: 0, latitude: 0, direction: 90 }] as any
+
+    const result = getEntryVector(testPositions, 'direction', 'degrees')
+
+    expect(result![0]).toBeCloseTo(-1)
+    expect(result![1]).toBeCloseTo(0)
+  })
+
+  it('getEntryVector falls back to segment direction', () => {
+    const testPositions = [
+      { longitude: 0, latitude: 0 },
+      { longitude: 10, latitude: 0 },
+    ] as any
+
+    const result = getEntryVector(testPositions)
+
+    expect(result![0]).toBeCloseTo(-1)
+  })
+
+  it('getExitVector uses direction property', () => {
+    const testPositions = [{ longitude: 0, latitude: 0, direction: 90 }] as any
+
+    const result = getExitVector(testPositions, 'direction', 'degrees')
+
+    expect(result![0]).toBeCloseTo(1)
+    expect(result![1]).toBeCloseTo(0)
+  })
+
+  it('getExitVector falls back to segment direction', () => {
+    const testPositions = [
+      { longitude: 0, latitude: 0 },
+      { longitude: 10, latitude: 0 },
+    ] as any
+
+    const result = getExitVector(testPositions)
+
+    expect(result![0]).toBeCloseTo(1)
+  })
+})
+
+describe('extendBeyondCircle', () => {
+  it('extends beyond boundary when intersecting', () => {
+    const coord: Coordinate = [1, 0]
+    const direction: [number, number] = [1, 0]
+    const centre: Coordinate = [5, 0]
+
+    const result = extendBeyondCircle(coord, direction, centre, 5, 5)
+
+    expect(result[0]).toBeGreaterThan(5)
+  })
+
+  it('falls back when no intersection', () => {
+    const coord: Coordinate = [0, 0]
+    const direction: [number, number] = [1, 0]
+    const centre: Coordinate = [0, 1000]
+
+    const result = extendBeyondCircle(coord, direction, centre, 5, 5)
+
+    expect(result[0]).toBeGreaterThan(0)
+  })
+})
+
+describe('applyEntryExitToFeatures', () => {
+  it('adds entry and exit features', () => {
+    const features = [
+      new Feature({
+        geometry: new LineString([
+          [0, 0],
+          [10, 0],
+        ]),
+      }),
+    ]
+
+    const testPositions = [
+      { longitude: 0, latitude: 0 },
+      { longitude: 10, latitude: 0 },
+    ] as any
+
+    applyEntryExitToFeatures(features, testPositions, {
+      enabled: true,
+      extensionDistanceMeters: 10,
+    })
+
+    expect(features.length).toBe(3)
+  })
+
+  it('does nothing when disabled', () => {
+    const features = [
+      new Feature({
+        geometry: new LineString([
+          [0, 0],
+          [10, 0],
+        ]),
+      }),
+    ]
+
+    const testPositions = [
+      { longitude: 0, latitude: 0 },
+      { longitude: 10, latitude: 0 },
+    ] as any
+
+    applyEntryExitToFeatures(features, testPositions, { enabled: false })
+
+    expect(features.length).toBe(1)
   })
 })

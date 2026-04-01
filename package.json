@@ -1,6 +1,6 @@
 {
   "name": "@ministryofjustice/hmpps-electronic-monitoring-components",
-  "version": "0.2.0-beta.1",
+  "version": "0.2.1-beta.1",
   "description": "HMPPS Electronic Monitoring Frontend Components",
   "repository": {
     "type": "git",
@@ -150,6 +150,15 @@
   },
   "overrides": {
     "tar": "^7.5.7",
-    "@isaacs/brace-expansion": "^5.0.1"
+    "@isaacs/brace-expansion": "^5.0.1",
+    "brace-expansion": "^2.0.1",
+    "glob": "^10.4.1",
+    "handlebars": "^4.7.8",
+    "picomatch": "^4.0.1",
+    "qs": "^6.14.2",
+    "flatted": "^3.4.1",
+    "immutable": "^5.1.5",
+    "systeminformation": "^5.30.8",
+    "path-to-regexp": "0.1.13"
   }
 }

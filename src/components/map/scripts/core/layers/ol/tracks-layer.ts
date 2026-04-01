@@ -343,3 +343,5 @@ export class OLTracksLayer extends VectorLayer<VectorSource<Feature<LineString>>
     })
   }
 }
+
+export { getEntryVector, getExitVector, extendBeyondCircle, applyEntryExitToFeatures }
