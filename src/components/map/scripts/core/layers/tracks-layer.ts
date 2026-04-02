@@ -49,11 +49,19 @@ export class TracksLayer implements ComposableLayer<OLVecLayer> {
     this.id = options.id ?? 'tracks'
   }
 
-  getNativeLayer(): OLVecLayer | undefined {
+  public getNativeLayer(): OLVecLayer | undefined {
     return this.olLayer
   }
 
-  attach(adapter: MapAdapter): void {
+  public getPrimaryLayer(): OLVecLayer {
+    if (!this.olLayer) {
+      throw new Error(`[TracksLayer] Layer "${this.id}" has not been attached yet`)
+    }
+
+    return this.olLayer
+  }
+
+  public attach(adapter: MapAdapter): void {
     if (adapter.mapLibrary !== 'openlayers') {
       console.warn(`[TracksLayer] MapLibre support is not implemented yet (layer "${this.id}")`)
       return
@@ -74,7 +82,7 @@ export class TracksLayer implements ComposableLayer<OLVecLayer> {
     map.addLayer(this.olLayer)
   }
 
-  detach(adapter: MapAdapter): void {
+  public detach(adapter: MapAdapter): void {
     if (adapter.mapLibrary !== 'openlayers') return
     if (this.olLayer) {
       adapter.openlayers!.map.removeLayer(this.olLayer)
