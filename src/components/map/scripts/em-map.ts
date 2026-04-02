@@ -3,6 +3,7 @@ import type { FeatureCollection } from 'geojson'
 import { boundingExtent, extend, isEmpty } from 'ol/extent'
 import type { Extent } from 'ol/extent'
 import { fromLonLat } from 'ol/proj'
+import type BaseLayer from 'ol/layer/Base'
 import { OLMapInstance, OLMapOptions } from './core/open-layers-map-instance'
 import { MapLibreMapInstance } from './core/maplibre-map-instance'
 import { setupOpenLayersMap } from './core/setup/setup-openlayers-map'
@@ -102,15 +103,44 @@ export class EmMap extends HTMLElement {
     return this.mapInstance instanceof MapLibreMapInstance ? this.mapInstance : null
   }
 
-  public addLayer<LNative>(
-    layer: ComposableLayer<LNative>,
-    layerStateOptions?: LayerStateOptions,
-  ): LNative | undefined {
+  // Composable layer
+  public addLayer<T extends ComposableLayer>(layer: T, layerStateOptions?: LayerStateOptions): T
+
+  // Native OpenLayers layer
+  public addLayer<T extends BaseLayer>(layer: T, layerStateOptions?: LayerStateOptions): T
+
+  // Implementation
+  public addLayer(layer: ComposableLayer | BaseLayer, layerStateOptions?: LayerStateOptions) {
     if (!this.adapter) throw new Error('Map not ready')
-    if (this.layers.has(layer.id)) this.removeLayer(layer.id)
-    layer.attach(this.adapter, layerStateOptions)
-    this.layers.set(layer.id, layer)
-    return typeof layer.getNativeLayer === 'function' ? layer.getNativeLayer() : undefined
+
+    if (this.isComposableLayer(layer)) {
+      if (this.layers.has(layer.id)) this.removeLayer(layer.id)
+
+      layer.attach(this.adapter, layerStateOptions)
+      this.layers.set(layer.id, layer)
+
+      return layer
+    }
+
+    if (this.adapter.mapLibrary !== 'openlayers') {
+      console.warn('[EmMap] Native layers are only supported with OpenLayers')
+      return layer
+    }
+
+    const map = this.olMapInstance
+    if (!map) throw new Error('OpenLayers map not available')
+
+    if (layerStateOptions?.zIndex !== undefined) {
+      layer.setZIndex(layerStateOptions.zIndex)
+    }
+
+    if (layerStateOptions?.visible !== undefined) {
+      layer.setVisible(layerStateOptions.visible)
+    }
+
+    map.addLayer(layer)
+
+    return layer
   }
 
   public removeLayer(idOrTitle: string): void {
@@ -143,6 +173,13 @@ export class EmMap extends HTMLElement {
 
     layer.detach(this.adapter)
     this.layers.delete(layer.id)
+  }
+
+  public removeNativeLayer(layer: BaseLayer): void {
+    const map = this.olMapInstance
+    if (!map) return
+
+    map.removeLayer(layer)
   }
 
   public getLayer(id: string) {
@@ -313,6 +350,15 @@ export class EmMap extends HTMLElement {
       zoom,
       duration: animate ? durationMs : 0,
     })
+  }
+
+  private isComposableLayer(layer: unknown): layer is ComposableLayer<unknown> {
+    return (
+      typeof layer === 'object' &&
+      layer !== null &&
+      'attach' in layer &&
+      typeof (layer as { attach?: unknown }).attach === 'function'
+    )
   }
 
   // Use padding to specify extra space (in pixels) around the target when fitting the view.
