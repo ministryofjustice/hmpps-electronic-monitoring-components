@@ -129,6 +129,81 @@ if (src) {
 
 ## Marker types (LocationsLayer)
 
+### Marker resolution behaviour
+
+Markers can be defined at two levels:
+
+- Layer-level -> applies to all positions
+- Position-level -> overrides per position
+
+The map resolves markers using:
+
+```ts
+resolvedMarker = position.marker ?? layer.marker
+```
+
+###Layer-level markers (uniform styling)
+
+Use this when all points should look the same (e.g. crime locations):
+
+```ts
+emMap.addLayer(new LocationsLayer({
+  positions,
+  marker: {
+    type: 'pin',
+    pin: { color: '#d4351c' },
+  },
+}))
+```
+
+### Position-level markers (mixed styling)
+
+Use this when each point may differ:
+
+```ts
+const positionsWithMarkers = positions.map((p, i) => ({
+  ...p,
+  marker: i % 2 === 0
+    ? { type: 'pin', pin: { color: '#d4351c' } }
+    : { type: 'image', image: { src: '/map-icons/person.png' } },
+}))
+
+emMap.addLayer(new LocationsLayer({
+  positions: positionsWithMarkers,
+}))
+```
+
+Each position controls its own marker.
+
+### Combined (layer default + overrides)
+
+You can combine both — this is the most flexible pattern:
+
+```ts
+const positionsWithOverrides = positions.map((p, i) => ({
+  ...p,
+  marker: i === 0
+    ? {
+        type: 'image',
+        image: { src: '/map-icons/house.png' },
+      }
+    : undefined,
+}))
+
+emMap.addLayer(new LocationsLayer({
+  positions: positionsWithOverrides,
+  marker: {
+    type: 'pin',
+    pin: { color: '#1d70b8' },
+  },
+}))
+```
+
+Result:
+
+- First point -> image marker
+- All others -> blue pins
+
 ### Default (circle)
 
 ```ts

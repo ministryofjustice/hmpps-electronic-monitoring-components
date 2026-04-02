@@ -1,6 +1,12 @@
 import type { Extent } from 'ol/extent'
 import type { MapAdapter } from '../map-adapter'
 
+export type VisibilityLayer = {
+  getVisible(): boolean
+  setVisible(v: boolean): void
+  setZIndex(z: number): void
+}
+
 // Map-level placement hierarchy/display options for layers.
 export type LayerStateOptions = {
   // MapLibre only: insert before this layer id. (OpenLayers ignores this)
@@ -17,5 +23,6 @@ export interface ComposableLayer<NativeLayer = unknown> {
   attach(adapter: MapAdapter, options?: LayerStateOptions): void
   detach(adapter: MapAdapter): void
   getNativeLayer?(): NativeLayer | undefined
+  getPrimaryLayer(): VisibilityLayer
   getExtent?(): Extent | null
 }
