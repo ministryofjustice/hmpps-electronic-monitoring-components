@@ -63,10 +63,20 @@
       "import": "./dist/components/map/layers/index.es.js",
       "require": "./dist/components/map/layers/index.cjs.js"
     },
+    "./map/layers/ol": {
+      "types": "./dist/types/components/map/scripts/core/layers/ol/index.d.ts",
+      "import": "./dist/components/map/layers/ol/index.es.js",
+      "require": "./dist/components/map/layers/ol/index.cjs.js"
+    },
     "./map/ordnance-survey-auth": {
       "types": "./dist/types/components/map/server/ordnance-survey-auth/index.d.ts",
       "import": "./dist/components/map/ordnance-survey-auth/index.es.js",
       "require": "./dist/components/map/ordnance-survey-auth/index.cjs.js"
+    },
+    "./map/types": {
+      "types": "./dist/types/components/map/scripts/core/types/index.d.ts",
+      "import": "./dist/components/map/types/index.es.js",
+      "require": "./dist/components/map/types/index.cjs.js"
     }
   },
   "files": [
