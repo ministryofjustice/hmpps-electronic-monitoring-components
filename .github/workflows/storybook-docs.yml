@@ -49,15 +49,6 @@ jobs:
             echo "dir=${GITHUB_REF_NAME//\//-}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@4f9cc6602d3f66b9c108549d475ec49e8ef4d45e # v4.0.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./storybook-static
-          publish_branch: gh-pages
-          destination_dir: ${{ steps.destdir.outputs.dir }}
-          keep_files: true
-
   cleanup:
     name: Cleanup deleted branch previews
     if: github.event_name == 'delete'
