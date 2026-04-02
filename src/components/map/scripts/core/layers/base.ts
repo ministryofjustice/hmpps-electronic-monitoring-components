@@ -1,6 +1,11 @@
 import type { Extent } from 'ol/extent'
-import type BaseLayer from 'ol/layer/Base'
 import type { MapAdapter } from '../map-adapter'
+
+export type VisibilityLayer = {
+  getVisible(): boolean
+  setVisible(v: boolean): void
+  setZIndex(z: number): void
+}
 
 // Map-level placement hierarchy/display options for layers.
 export type LayerStateOptions = {
@@ -13,10 +18,11 @@ export type LayerStateOptions = {
 }
 
 // A layer that can be added/removed from a map via a MapAdapter.
-export interface ComposableLayer<NativeLayer = BaseLayer | BaseLayer[]> {
+export interface ComposableLayer<NativeLayer = unknown> {
   id: string
   attach(adapter: MapAdapter, options?: LayerStateOptions): void
   detach(adapter: MapAdapter): void
   getNativeLayer?(): NativeLayer | undefined
+  getPrimaryLayer(): VisibilityLayer
   getExtent?(): Extent | null
 }

@@ -16,6 +16,11 @@ import styles from '../styles/em-map.raw.css?raw'
 import { Position } from './core/types/position'
 import config from './core/config'
 
+type NativeOlLayer = {
+  setVisible(v: boolean): void
+  setZIndex(z: number): void
+}
+
 type EmMapControls = OLMapOptions['controls'] & {
   enable3DBuildings?: boolean
   olRotationMode?: 'default' | 'right-drag'
@@ -107,10 +112,13 @@ export class EmMap extends HTMLElement {
   public addLayer<T extends ComposableLayer>(layer: T, layerStateOptions?: LayerStateOptions): T
 
   // Native OpenLayers layer
-  public addLayer<T extends BaseLayer>(layer: T, layerStateOptions?: LayerStateOptions): T
+  public addLayer(layer: NativeOlLayer, layerStateOptions?: LayerStateOptions): NativeOlLayer
 
   // Implementation
-  public addLayer(layer: ComposableLayer | BaseLayer, layerStateOptions?: LayerStateOptions) {
+  public addLayer(
+    layer: ComposableLayer | NativeOlLayer,
+    layerStateOptions?: LayerStateOptions,
+  ): ComposableLayer | NativeOlLayer {
     if (!this.adapter) throw new Error('Map not ready')
 
     if (this.isComposableLayer(layer)) {
@@ -138,7 +146,7 @@ export class EmMap extends HTMLElement {
       layer.setVisible(layerStateOptions.visible)
     }
 
-    map.addLayer(layer)
+    map.addLayer(layer as unknown as Parameters<typeof map.addLayer>[0])
 
     return layer
   }
