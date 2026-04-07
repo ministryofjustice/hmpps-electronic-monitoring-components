@@ -856,13 +856,13 @@ app.use(
         defaultSrc: [&quot;&#39;self&#39;&quot;],
         scriptSrc: [
           &quot;&#39;self&#39;&quot;,
-          &#39;blob:&#39;, // Required for WebGL (OpenLayers workers)
           (_req, res) =&gt; `&#39;nonce-${res.locals.cspNonce}&#39;`,
         ],
         styleSrc: [&quot;&#39;self&#39;&quot;, &#39;cdn.jsdelivr.net&#39;, &quot;&#39;unsafe-inline&#39;&quot;],
         fontSrc: [&quot;&#39;self&#39;&quot;, &#39;cdn.jsdelivr.net&#39;],
         imgSrc: [&quot;&#39;self&#39;&quot;, &#39;data:&#39;],
         connectSrc: [&quot;&#39;self&#39;&quot;],
+        workerSrc: [&quot;&#39;self&#39;&quot;, &quot;blob:&quot;], // Required for WebGL (OpenLayers workers)
       },
     },
   }),
@@ -872,7 +872,7 @@ app.use(
 **Why these rules:**
 - `cdn.jsdelivr.net`: loads OpenLayers font assets.
 - `&#39;unsafe-inline&#39;`: required for small inline styles OpenLayers applies dynamically.
-- &#39;blob:&#39; in script-src: required for WebGL rendering
+- &#39;blob:&#39; in workerSrc required for WebGL rendering
 OpenLayers uses Web Workers created from blob: URLs. Without this, maps using WebGL layers will fail to load due to CSP violations.
 - Keeps `script-src` strict (nonce-based).
 
@@ -1095,6 +1095,57 @@ emMap.removeLayer(&#39;Locations&#39;)  // by title
 &lt;/table&gt;
 
 &lt;p&gt;&lt;em&gt;MapLibre support is planned; these layers currently attach to OpenLayers.&lt;/em&gt;&lt;/p&gt;
+
+## Using native OpenLayers layers
+
+In addition to the built-in composable layers, you can use native OpenLayers layers via the NativeLayerWrapper.
+
+This allows you to:
+
+reuse existing OpenLayers code
+use advanced OpenLayers features not exposed by composable layers
+mix native and composable layers together
+
+### Basic usage
+
+```ts
+import VectorLayer from &#39;ol/layer/Vector&#39;
+import VectorSource from &#39;ol/source/Vector&#39;
+import { NativeLayerWrapper } from &#39;@ministryofjustice/hmpps-electronic-monitoring-components/map/layers&#39;
+
+const newLayer = new VectorLayer({
+  source: new VectorSource(),
+})
+
+emMap.addLayer(new NativeLayerWrapper(newLayer))
+```
+
+### Mixing with custom layers
+
+Native layers can be used alongside composable layers:
+
+```ts
+emMap.addLayer(new LocationsLayer({ positions }))
+
+emMap.addLayer(
+  new NativeLayerWrapper(
+    new VectorLayer({ source: new VectorSource() }),
+  ),
+)
+```
+
+### Interaction
+
+All wrapped native layers support the same interaction API:
+
+```ts
+const layer = new NativeLayerWrapper(new VectorLayer(...))
+
+emMap.addLayer(layer)
+
+layer.getPrimaryLayer().setVisible(false)
+layer.getPrimaryLayer().setZIndex(10)
+```
 
 ---
 
