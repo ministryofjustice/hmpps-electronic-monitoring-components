@@ -87,6 +87,57 @@ emMap.removeLayer('Locations')  // by title
 
 <p><em>MapLibre support is planned; these layers currently attach to OpenLayers.</em></p>
 
+## Using native OpenLayers layers
+
+In addition to the built-in composable layers, you can use native OpenLayers layers via the NativeLayerWrapper.
+
+This allows you to:
+
+reuse existing OpenLayers code
+use advanced OpenLayers features not exposed by composable layers
+mix native and composable layers together
+
+### Basic usage
+
+```ts
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
+import { NativeLayerWrapper } from '@ministryofjustice/hmpps-electronic-monitoring-components/map/layers'
+
+const newLayer = new VectorLayer({
+  source: new VectorSource(),
+})
+
+emMap.addLayer(new NativeLayerWrapper(newLayer))
+```
+
+### Mixing with custom layers
+
+Native layers can be used alongside composable layers:
+
+```ts
+emMap.addLayer(new LocationsLayer({ positions }))
+
+emMap.addLayer(
+  new NativeLayerWrapper(
+    new VectorLayer({ source: new VectorSource() }),
+  ),
+)
+```
+
+### Interaction
+
+All wrapped native layers support the same interaction API:
+
+```ts
+const layer = new NativeLayerWrapper(new VectorLayer(...))
+
+emMap.addLayer(layer)
+
+layer.getPrimaryLayer().setVisible(false)
+layer.getPrimaryLayer().setZIndex(10)
+```
+
 ---
 
 ## Quick start (full example)

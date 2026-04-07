@@ -1,18 +1,13 @@
+import BaseLayer from 'ol/layer/Base'
 import type { ComposableLayer, LayerStateOptions } from './base'
 import type { MapAdapter } from '../map-adapter'
 
-type OlLayerLike = {
-  getVisible(): boolean
-  setVisible(v: boolean): void
-  setZIndex(z: number): void
-}
-
-export class NativeLayerWrapper implements ComposableLayer<OlLayerLike> {
+export class NativeLayerWrapper implements ComposableLayer<BaseLayer> {
   public readonly id: string
 
-  private readonly layer: OlLayerLike
+  private readonly layer: BaseLayer
 
-  constructor(layer: OlLayerLike, id = 'native-layer') {
+  constructor(layer: BaseLayer, id = 'native-layer') {
     this.layer = layer
     this.id = id
   }
@@ -33,21 +28,21 @@ export class NativeLayerWrapper implements ComposableLayer<OlLayerLike> {
       this.layer.setVisible(options.visible)
     }
 
-    map.addLayer(this.layer as unknown as Parameters<typeof map.addLayer>[0])
+    map.addLayer(this.layer)
   }
 
   public detach(adapter: MapAdapter): void {
     if (adapter.mapLibrary !== 'openlayers') return
 
     const { map } = adapter.openlayers!
-    map.removeLayer(this.layer as unknown as Parameters<typeof map.removeLayer>[0])
+    map.removeLayer(this.layer)
   }
 
-  public getPrimaryLayer(): OlLayerLike {
+  public getPrimaryLayer(): BaseLayer {
     return this.layer
   }
 
-  public getNativeLayer(): OlLayerLike {
+  public getNativeLayer(): BaseLayer {
     return this.layer
   }
 }

@@ -3,7 +3,6 @@ import type { FeatureCollection } from 'geojson'
 import { boundingExtent, extend, isEmpty } from 'ol/extent'
 import type { Extent } from 'ol/extent'
 import { fromLonLat } from 'ol/proj'
-import type BaseLayer from 'ol/layer/Base'
 import { OLMapInstance, OLMapOptions } from './core/open-layers-map-instance'
 import { MapLibreMapInstance } from './core/maplibre-map-instance'
 import { setupOpenLayersMap } from './core/setup/setup-openlayers-map'
@@ -15,11 +14,6 @@ import { type MapAdapter, type MapLibrary, createOpenLayersAdapter, createMapLib
 import styles from '../styles/em-map.raw.css?raw'
 import { Position } from './core/types/position'
 import config from './core/config'
-
-type NativeOlLayer = {
-  setVisible(v: boolean): void
-  setZIndex(z: number): void
-}
 
 type EmMapControls = OLMapOptions['controls'] & {
   enable3DBuildings?: boolean
@@ -108,47 +102,15 @@ export class EmMap extends HTMLElement {
     return this.mapInstance instanceof MapLibreMapInstance ? this.mapInstance : null
   }
 
-  // Composable layer
-  public addLayer<T extends ComposableLayer>(layer: T, layerStateOptions?: LayerStateOptions): T
-
-  // Native OpenLayers layer
-  public addLayer(layer: NativeOlLayer, layerStateOptions?: LayerStateOptions): NativeOlLayer
-
-  // Implementation
-  public addLayer(
-    layer: ComposableLayer | NativeOlLayer,
+  public addLayer<LNative>(
+    layer: ComposableLayer<LNative>,
     layerStateOptions?: LayerStateOptions,
-  ): ComposableLayer | NativeOlLayer {
+  ): LNative | undefined {
     if (!this.adapter) throw new Error('Map not ready')
-
-    if (this.isComposableLayer(layer)) {
-      if (this.layers.has(layer.id)) this.removeLayer(layer.id)
-
-      layer.attach(this.adapter, layerStateOptions)
-      this.layers.set(layer.id, layer)
-
-      return layer
-    }
-
-    if (this.adapter.mapLibrary !== 'openlayers') {
-      console.warn('[EmMap] Native layers are only supported with OpenLayers')
-      return layer
-    }
-
-    const map = this.olMapInstance
-    if (!map) throw new Error('OpenLayers map not available')
-
-    if (layerStateOptions?.zIndex !== undefined) {
-      layer.setZIndex(layerStateOptions.zIndex)
-    }
-
-    if (layerStateOptions?.visible !== undefined) {
-      layer.setVisible(layerStateOptions.visible)
-    }
-
-    map.addLayer(layer as unknown as Parameters<typeof map.addLayer>[0])
-
-    return layer
+    if (this.layers.has(layer.id)) this.removeLayer(layer.id)
+    layer.attach(this.adapter, layerStateOptions)
+    this.layers.set(layer.id, layer)
+    return typeof layer.getNativeLayer === 'function' ? layer.getNativeLayer() : undefined
   }
 
   public removeLayer(idOrTitle: string): void {
@@ -181,13 +143,6 @@ export class EmMap extends HTMLElement {
 
     layer.detach(this.adapter)
     this.layers.delete(layer.id)
-  }
-
-  public removeNativeLayer(layer: BaseLayer): void {
-    const map = this.olMapInstance
-    if (!map) return
-
-    map.removeLayer(layer)
   }
 
   public getLayer(id: string) {
