@@ -1,6 +1,6 @@
 {
   "name": "@ministryofjustice/hmpps-electronic-monitoring-components",
-  "version": "0.2.2-beta.1",
+  "version": "0.2.3-beta.1",
   "description": "HMPPS Electronic Monitoring Frontend Components",
   "repository": {
     "type": "git",
@@ -121,7 +121,7 @@
     "lint-staged": "^16.1.5",
     "lit": "^3.3.1",
     "npm-run-all": "^4.1.5",
-    "ol": "^10.6.1",
+    "ol": "10.8.0",
     "playwright": "^1.56.1",
     "prettier": "^3.6.2",
     "prettier-plugin-jinja-template": "^2.1.0",
@@ -138,7 +138,7 @@
   },
   "peerDependencies": {
     "govuk-frontend": ">=5",
-    "ol": "^10.6.1"
+    "ol": "10.8.x"
   },
   "peerDependenciesMeta": {
     "ol": {
