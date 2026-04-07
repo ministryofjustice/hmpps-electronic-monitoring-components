@@ -1,3 +1,4 @@
+import type { Request } from 'express'
 import express, { Router } from 'express'
 import config from '@map/scripts/core/config'
 import { getAccessToken } from './auth'
@@ -32,6 +33,10 @@ export type CachedToken = {
   expires_in: number
   issued_at: number
   token_type: string
+}
+
+type AssetParams = {
+  assetPath: string
 }
 
 const BASE_PATH = config.tiles.urls.localBasePath
@@ -120,8 +125,8 @@ export function emOrdnanceSurveyAuth(options: OrdnanceSurveyAuthOptions): Router
   })
 
   // Assets endpoint (fonts and resources)
-  router.get(`${BASE_PATH}/assets/:assetPath(*)`, async (req, res, next) => {
-    const assetPath = req.params['assetPath(*)']
+  router.get(`${BASE_PATH}/assets/:assetPath(*)`, async (req: Request<AssetParams>, res, next) => {
+    const { assetPath } = req.params
     const token = await getAccessToken(options)
     const url = `${vectorRoot}/resources/${assetPath}`
     await fetchFromOrdnanceSurvey(req, res, next, url, token, { cache, cacheKeyPrefix: 'tile' })

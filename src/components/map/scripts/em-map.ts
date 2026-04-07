@@ -315,6 +315,15 @@ export class EmMap extends HTMLElement {
     })
   }
 
+  private isComposableLayer(layer: unknown): layer is ComposableLayer<unknown> {
+    return (
+      typeof layer === 'object' &&
+      layer !== null &&
+      'attach' in layer &&
+      typeof (layer as { attach?: unknown }).attach === 'function'
+    )
+  }
+
   // Use padding to specify extra space (in pixels) around the target when fitting the view.
   private normalizePadding(padding: number | [number, number, number, number]): [number, number, number, number] {
     if (typeof padding === 'number') {

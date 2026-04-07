@@ -3,6 +3,7 @@ import VectorSource from 'ol/source/Vector'
 import { Circle } from 'ol/geom'
 import Feature from 'ol/Feature'
 
+import BaseLayer from 'ol/layer/Base'
 import type { ComposableLayer } from './base'
 import type { MapAdapter } from '../map-adapter'
 import { OLCirclesLayer } from './ol/circles-layer'
@@ -48,11 +49,19 @@ export class CirclesLayer implements ComposableLayer<OLVecLayer> {
     this.id = options.id ?? 'circles'
   }
 
-  getNativeLayer(): OLVecLayer | undefined {
+  public getPrimaryLayer(): BaseLayer {
+    if (!this.olLayer) {
+      throw new Error(`[CirclesLayer] Layer "${this.id}" has not been attached yet`)
+    }
+
     return this.olLayer
   }
 
-  attach(adapter: MapAdapter): void {
+  public getNativeLayer(): OLVecLayer | undefined {
+    return this.olLayer
+  }
+
+  public attach(adapter: MapAdapter): void {
     if (adapter.mapLibrary !== 'openlayers') {
       console.warn(`[CirclesLayer] MapLibre support is not implemented yet (layer "${this.id}")`)
       return
@@ -74,7 +83,7 @@ export class CirclesLayer implements ComposableLayer<OLVecLayer> {
     map.addLayer(this.olLayer)
   }
 
-  detach(adapter: MapAdapter): void {
+  public detach(adapter: MapAdapter): void {
     if (adapter.mapLibrary !== 'openlayers') return
     if (this.olLayer) {
       adapter.openlayers!.map.removeLayer(this.olLayer)

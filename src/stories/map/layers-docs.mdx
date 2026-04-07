@@ -87,6 +87,57 @@ emMap.removeLayer('Locations')  // by title
 
 <p><em>MapLibre support is planned; these layers currently attach to OpenLayers.</em></p>
 
+## Using native OpenLayers layers
+
+In addition to the built-in composable layers, you can use native OpenLayers layers via the NativeLayerWrapper.
+
+This allows you to:
+
+reuse existing OpenLayers code
+use advanced OpenLayers features not exposed by composable layers
+mix native and composable layers together
+
+### Basic usage
+
+```ts
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
+import { NativeLayerWrapper } from '@ministryofjustice/hmpps-electronic-monitoring-components/map/layers'
+
+const newLayer = new VectorLayer({
+  source: new VectorSource(),
+})
+
+emMap.addLayer(new NativeLayerWrapper(newLayer))
+```
+
+### Mixing with custom layers
+
+Native layers can be used alongside composable layers:
+
+```ts
+emMap.addLayer(new LocationsLayer({ positions }))
+
+emMap.addLayer(
+  new NativeLayerWrapper(
+    new VectorLayer({ source: new VectorSource() }),
+  ),
+)
+```
+
+### Interaction
+
+All wrapped native layers support the same interaction API:
+
+```ts
+const layer = new NativeLayerWrapper(new VectorLayer(...))
+
+emMap.addLayer(layer)
+
+layer.getPrimaryLayer().setVisible(false)
+layer.getPrimaryLayer().setZIndex(10)
+```
+
 ---
 
 ## Quick start (full example)
@@ -128,6 +179,81 @@ if (src) {
 ---
 
 ## Marker types (LocationsLayer)
+
+### Marker resolution behaviour
+
+Markers can be defined at two levels:
+
+- Layer-level -> applies to all positions
+- Position-level -> overrides per position
+
+The map resolves markers using:
+
+```ts
+resolvedMarker = position.marker ?? layer.marker
+```
+
+### Layer-level markers (uniform styling)
+
+Use this when all points should look the same (e.g. crime locations):
+
+```ts
+emMap.addLayer(new LocationsLayer({
+  positions,
+  marker: {
+    type: 'pin',
+    pin: { color: '#d4351c' },
+  },
+}))
+```
+
+### Position-level markers (mixed styling)
+
+Use this when each point may differ:
+
+```ts
+const positionsWithMarkers = positions.map((p, i) => ({
+  ...p,
+  marker: i % 2 === 0
+    ? { type: 'pin', pin: { color: '#d4351c' } }
+    : { type: 'image', image: { src: '/map-icons/person.png' } },
+}))
+
+emMap.addLayer(new LocationsLayer({
+  positions: positionsWithMarkers,
+}))
+```
+
+Each position controls its own marker.
+
+### Combined (layer default + overrides)
+
+You can combine both — this is the most flexible pattern:
+
+```ts
+const positionsWithOverrides = positions.map((p, i) => ({
+  ...p,
+  marker: i === 0
+    ? {
+        type: 'image',
+        image: { src: '/map-icons/house.png' },
+      }
+    : undefined,
+}))
+
+emMap.addLayer(new LocationsLayer({
+  positions: positionsWithOverrides,
+  marker: {
+    type: 'pin',
+    pin: { color: '#1d70b8' },
+  },
+}))
+```
+
+Result:
+
+- First point -> image marker
+- All others -> blue pins
 
 ### Default (circle)
 

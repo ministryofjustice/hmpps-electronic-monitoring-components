@@ -2,6 +2,7 @@ import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import type Feature from 'ol/Feature'
 import type Geometry from 'ol/geom/Geometry'
+import BaseLayer from 'ol/layer/Base'
 import type { ComposableLayer } from './base'
 import type { MapAdapter } from '../map-adapter'
 import { Position } from '../types/position'
@@ -65,11 +66,19 @@ export class TextLayer implements ComposableLayer<OLVecLayer> {
     this.id = options.id ?? 'text'
   }
 
-  getNativeLayer(): OLVecLayer | undefined {
+  public getPrimaryLayer(): BaseLayer {
+    if (!this.olLayer) {
+      throw new Error(`[TextLayer] Layer "${this.id}" has not been attached yet`)
+    }
+
     return this.olLayer
   }
 
-  attach(adapter: MapAdapter): void {
+  public getNativeLayer(): OLVecLayer | undefined {
+    return this.olLayer
+  }
+
+  public attach(adapter: MapAdapter): void {
     if (adapter.mapLibrary !== 'openlayers') {
       console.warn(`[TextLayer] MapLibre support is not implemented yet (layer "${this.id}")`)
       return

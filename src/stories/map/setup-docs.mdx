@@ -138,11 +138,15 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", (_req, res) => "'nonce-' + res.locals.cspNonce"],
+        scriptSrc: [
+          "'self'",
+          (_req, res) => `'nonce-${res.locals.cspNonce}'`,
+        ],
         styleSrc: ["'self'", 'cdn.jsdelivr.net', "'unsafe-inline'"],
         fontSrc: ["'self'", 'cdn.jsdelivr.net'],
         imgSrc: ["'self'", 'data:'],
         connectSrc: ["'self'"],
+        workerSrc: ["'self'", "blob:"], // Required for WebGL (OpenLayers workers)
       },
     },
   }),
@@ -152,6 +156,8 @@ app.use(
 **Why these rules:**
 - `cdn.jsdelivr.net`: loads OpenLayers font assets.
 - `'unsafe-inline'`: required for small inline styles OpenLayers applies dynamically.
+- 'blob:' in workerSrc required for WebGL rendering
+OpenLayers uses Web Workers created from blob: URLs. Without this, maps using WebGL layers will fail to load due to CSP violations.
 - Keeps `script-src` strict (nonce-based).
 
 ---

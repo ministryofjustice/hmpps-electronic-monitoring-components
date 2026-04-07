@@ -2,6 +2,7 @@ import type BaseLayer from 'ol/layer/Base'
 import { fromLonLat } from 'ol/proj'
 import { boundingExtent } from 'ol/extent'
 import type { Extent } from 'ol/extent'
+import VectorLayer from 'ol/layer/Vector'
 import { supportsWebGL } from '../../helpers/browser'
 import { OLLocationsLayer } from './ol/locations-layer'
 import { OLWebGLCircleLayer } from './ol/locations-layer-webgl'
@@ -108,6 +109,20 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
         width: style.stroke?.width,
       },
     }
+  }
+
+  public getPrimaryLayer(): BaseLayer {
+    if (this.olLayers.length === 0) {
+      throw new Error(`[LocationsLayer] No layers available for "${this.id}"`)
+    }
+
+    // Find first VectorLayer (skip WebGL layer if present)
+    const vectorLayer = this.olLayers.find(layer => layer instanceof VectorLayer)
+
+    if (vectorLayer) return vectorLayer
+
+    // Fallback: return first layer (e.g. WebGL)
+    return this.olLayers[0]
   }
 
   private toWebGLMarker(marker?: MarkerOptions) {

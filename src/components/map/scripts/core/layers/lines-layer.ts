@@ -2,6 +2,7 @@ import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import type Feature from 'ol/Feature'
 import type { LineString } from 'ol/geom'
+import BaseLayer from 'ol/layer/Base'
 import type { ComposableLayer, LayerStateOptions } from './base'
 import type { MapAdapter } from '../map-adapter'
 import { OLLinesLayer } from './ol/lines-layer'
@@ -36,11 +37,19 @@ export class LinesLayer implements ComposableLayer<OLVecLayer> {
     this.id = options.id ?? 'lines'
   }
 
-  getNativeLayer(): OLVecLayer | undefined {
+  public getPrimaryLayer(): BaseLayer {
+    if (!this.olLayer) {
+      throw new Error(`[LinesLayer] Layer "${this.id}" has not been attached yet`)
+    }
+
     return this.olLayer
   }
 
-  attach(adapter: MapAdapter, layerStateOptions?: LayerStateOptions): void {
+  public getNativeLayer(): OLVecLayer | undefined {
+    return this.olLayer
+  }
+
+  public attach(adapter: MapAdapter, layerStateOptions?: LayerStateOptions): void {
     if (adapter.mapLibrary !== 'openlayers') {
       console.warn(`[LinesLayer] MapLibre support is not implemented yet (layer "${this.id}")`)
       return
@@ -59,7 +68,7 @@ export class LinesLayer implements ComposableLayer<OLVecLayer> {
     map.addLayer(this.olLayer)
   }
 
-  detach(adapter: MapAdapter): void {
+  public detach(adapter: MapAdapter): void {
     if (adapter.mapLibrary !== 'openlayers') return
     if (this.olLayer) {
       adapter.openlayers!.map.removeLayer(this.olLayer)
