@@ -2,6 +2,7 @@ import VectorLayer from 'ol/layer/Vector'
 import { Feature } from 'ol'
 import { Geometry } from 'ol/geom'
 import VectorSource from 'ol/source/Vector'
+import BaseLayer from 'ol/layer/Base'
 import type { ComposableLayer } from './base'
 import type { MapAdapter } from '../map-adapter'
 import { OLTracksLayer } from './ol/tracks-layer'
@@ -53,7 +54,7 @@ export class TracksLayer implements ComposableLayer<OLVecLayer> {
     return this.olLayer
   }
 
-  public getPrimaryLayer(): OLVecLayer {
+  public getPrimaryLayer(): BaseLayer {
     if (!this.olLayer) {
       throw new Error(`[TracksLayer] Layer "${this.id}" has not been attached yet`)
     }

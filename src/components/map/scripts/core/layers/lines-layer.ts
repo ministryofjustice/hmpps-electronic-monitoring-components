@@ -2,6 +2,7 @@ import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import type Feature from 'ol/Feature'
 import type { LineString } from 'ol/geom'
+import BaseLayer from 'ol/layer/Base'
 import type { ComposableLayer, LayerStateOptions } from './base'
 import type { MapAdapter } from '../map-adapter'
 import { OLLinesLayer } from './ol/lines-layer'
@@ -36,7 +37,7 @@ export class LinesLayer implements ComposableLayer<OLVecLayer> {
     this.id = options.id ?? 'lines'
   }
 
-  public getPrimaryLayer(): OLVecLayer {
+  public getPrimaryLayer(): BaseLayer {
     if (!this.olLayer) {
       throw new Error(`[LinesLayer] Layer "${this.id}" has not been attached yet`)
     }

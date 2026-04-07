@@ -3,6 +3,7 @@ import VectorSource from 'ol/source/Vector'
 import { Circle } from 'ol/geom'
 import Feature from 'ol/Feature'
 
+import BaseLayer from 'ol/layer/Base'
 import type { ComposableLayer } from './base'
 import type { MapAdapter } from '../map-adapter'
 import { OLCirclesLayer } from './ol/circles-layer'
@@ -48,7 +49,7 @@ export class CirclesLayer implements ComposableLayer<OLVecLayer> {
     this.id = options.id ?? 'circles'
   }
 
-  public getPrimaryLayer(): OLVecLayer {
+  public getPrimaryLayer(): BaseLayer {
     if (!this.olLayer) {
       throw new Error(`[CirclesLayer] Layer "${this.id}" has not been attached yet`)
     }
