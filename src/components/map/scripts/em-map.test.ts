@@ -33,6 +33,9 @@ jest.mock('./core/setup/setup-openlayers-map', () => {
   const mockMap = {
     getView: () => mockView,
     getSize: jest.fn(() => [800, 600]),
+    getLayers: jest.fn(() => ({
+      getArray: jest.fn(() => []),
+    })),
   }
 
   return {

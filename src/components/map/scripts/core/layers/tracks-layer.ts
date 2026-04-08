@@ -1,15 +1,8 @@
-import VectorLayer from 'ol/layer/Vector'
-import { Feature } from 'ol'
-import { Geometry } from 'ol/geom'
-import VectorSource from 'ol/source/Vector'
 import BaseLayer from 'ol/layer/Base'
-import type { ComposableLayer } from './base'
+import type { ComposableLayer, LayerStateOptions } from './base'
 import type { MapAdapter } from '../map-adapter'
 import { OLTracksLayer } from './ol/tracks-layer'
 import { Position } from '../types/position'
-
-type OLVecSource = VectorSource<Feature<Geometry>>
-type OLVecLayer = VectorLayer<OLVecSource>
 
 export type DirectionUnits = 'degrees' | 'radians'
 
@@ -38,56 +31,78 @@ export type TracksLayerOptions = {
   }
 }
 
-export class TracksLayer implements ComposableLayer<OLVecLayer> {
+export class TracksLayer implements ComposableLayer<BaseLayer[]> {
   public readonly id: string
 
   private readonly options: TracksLayerOptions
 
-  private olLayer?: OLVecLayer
+  private olLayers: BaseLayer[] = []
 
   constructor(options: TracksLayerOptions) {
     this.options = options
     this.id = options.id ?? 'tracks'
   }
 
-  public getNativeLayer(): OLVecLayer | undefined {
-    return this.olLayer
+  private createLayers(): BaseLayer[] {
+    return [
+      new OLTracksLayer({
+        positions: this.options.positions,
+        style: this.options.style,
+        title: this.options.title ?? this.id,
+        visible: this.options.visible,
+        zIndex: this.options.zIndex,
+        avoidPositions: this.options.avoidPositions,
+        entryExit: this.options.entryExit,
+      }),
+    ]
+  }
+
+  public getLayers(): BaseLayer[] {
+    if (this.olLayers.length === 0) {
+      this.olLayers = this.createLayers()
+    }
+    return this.olLayers
+  }
+
+  public getNativeLayer(): BaseLayer[] {
+    return this.getLayers()
   }
 
   public getPrimaryLayer(): BaseLayer {
-    if (!this.olLayer) {
-      throw new Error(`[TracksLayer] Layer "${this.id}" has not been attached yet`)
-    }
-
-    return this.olLayer
+    return this.getLayers()[0]
   }
 
-  public attach(adapter: MapAdapter): void {
+  public attach(adapter: MapAdapter, layerStateOptions?: LayerStateOptions): void {
     if (adapter.mapLibrary !== 'openlayers') {
       console.warn(`[TracksLayer] MapLibre support is not implemented yet (layer "${this.id}")`)
       return
     }
 
     const { map } = adapter.openlayers!
+    const layers = this.getLayers()
+    const visible = layerStateOptions?.visible ?? this.options.visible ?? true
 
-    this.olLayer = new OLTracksLayer({
-      positions: this.options.positions,
-      style: this.options.style,
-      title: this.options.title ?? this.id,
-      visible: this.options.visible,
-      zIndex: this.options.zIndex,
-      avoidPositions: this.options.avoidPositions,
-      entryExit: this.options.entryExit,
+    layers.forEach(layer => {
+      layer.setVisible(visible)
+
+      if (layerStateOptions?.zIndex !== undefined) {
+        const existingZIndex = layer.getZIndex() ?? 0
+        const baseZIndex = this.options.zIndex ?? 0
+        const relativeOffset = existingZIndex - baseZIndex
+        layer.setZIndex(layerStateOptions.zIndex + relativeOffset)
+      }
+
+      map.addLayer(layer)
     })
-
-    map.addLayer(this.olLayer)
   }
 
   public detach(adapter: MapAdapter): void {
     if (adapter.mapLibrary !== 'openlayers') return
-    if (this.olLayer) {
-      adapter.openlayers!.map.removeLayer(this.olLayer)
-      this.olLayer = undefined
-    }
+
+    this.getLayers().forEach(layer => {
+      adapter.openlayers!.map.removeLayer(layer)
+    })
+
+    this.olLayers = []
   }
 }

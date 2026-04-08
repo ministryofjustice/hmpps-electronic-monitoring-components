@@ -3,7 +3,6 @@ export { CirclesLayer } from './circles-layer'
 export { LinesLayer } from './lines-layer'
 export { TracksLayer } from './tracks-layer'
 export { TextLayer } from './text-layer'
-export { NativeLayerWrapper } from './native-layer-wrapper'
 
 export type { LocationsLayerOptions } from './locations-layer'
 export type { CirclesLayerOptions } from './circles-layer'

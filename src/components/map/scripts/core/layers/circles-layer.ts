@@ -1,17 +1,8 @@
-import VectorLayer from 'ol/layer/Vector'
-import VectorSource from 'ol/source/Vector'
-import { Circle } from 'ol/geom'
-import Feature from 'ol/Feature'
-
 import BaseLayer from 'ol/layer/Base'
-import type { ComposableLayer } from './base'
+import type { ComposableLayer, LayerStateOptions } from './base'
 import type { MapAdapter } from '../map-adapter'
 import { OLCirclesLayer } from './ol/circles-layer'
 import type { Position, PositionWithPrecision } from '../types/position'
-
-type OLCircleFeature = Feature<Circle>
-type OLVecSource = VectorSource<OLCircleFeature>
-type OLVecLayer = VectorLayer<OLVecSource>
 
 export type CirclesLayerOptions = {
   id?: string
@@ -37,57 +28,79 @@ function hasPrecision(position: Position): position is PositionWithPrecision {
   return 'precision' in position && typeof position.precision === 'number'
 }
 
-export class CirclesLayer implements ComposableLayer<OLVecLayer> {
+export class CirclesLayer implements ComposableLayer<BaseLayer[]> {
   public readonly id: string
 
   private readonly options: CirclesLayerOptions
 
-  private olLayer?: OLVecLayer
+  private olLayers: BaseLayer[] = []
 
   constructor(options: CirclesLayerOptions) {
     this.options = options
     this.id = options.id ?? 'circles'
   }
 
-  public getPrimaryLayer(): BaseLayer {
-    if (!this.olLayer) {
-      throw new Error(`[CirclesLayer] Layer "${this.id}" has not been attached yet`)
+  private createLayers(): BaseLayer[] {
+    const allPositions = this.options.positions ?? []
+    const precisePositions = allPositions.filter(hasPrecision)
+
+    return [
+      new OLCirclesLayer({
+        positions: precisePositions,
+        style: this.options.style,
+        title: this.options.title ?? this.id,
+        visible: this.options.visible,
+        zIndex: this.options.zIndex,
+      }),
+    ]
+  }
+
+  public getLayers(): BaseLayer[] {
+    if (this.olLayers.length === 0) {
+      this.olLayers = this.createLayers()
     }
-
-    return this.olLayer
+    return this.olLayers
   }
 
-  public getNativeLayer(): OLVecLayer | undefined {
-    return this.olLayer
+  public getPrimaryLayer(): BaseLayer {
+    return this.getLayers()[0]
   }
 
-  public attach(adapter: MapAdapter): void {
+  public getNativeLayer(): BaseLayer[] {
+    return this.getLayers()
+  }
+
+  public attach(adapter: MapAdapter, layerStateOptions?: LayerStateOptions): void {
     if (adapter.mapLibrary !== 'openlayers') {
       console.warn(`[CirclesLayer] MapLibre support is not implemented yet (layer "${this.id}")`)
       return
     }
 
     const { map } = adapter.openlayers!
+    const layers = this.getLayers()
+    const visible = layerStateOptions?.visible ?? this.options.visible ?? true
 
-    const allPositions = this.options.positions ?? []
-    const precisePositions = allPositions.filter(hasPrecision)
+    layers.forEach(layer => {
+      layer.setVisible(visible)
 
-    this.olLayer = new OLCirclesLayer({
-      positions: precisePositions,
-      style: this.options.style,
-      title: this.options.title ?? this.id,
-      visible: this.options.visible,
-      zIndex: this.options.zIndex,
+      if (layerStateOptions?.zIndex !== undefined) {
+        const existingZIndex = layer.getZIndex() ?? 0
+        const baseZIndex = this.options.zIndex ?? 0
+        const relativeOffset = existingZIndex - baseZIndex
+        layer.setZIndex(layerStateOptions.zIndex + relativeOffset)
+      }
+
+      map.addLayer(layer)
     })
-
-    map.addLayer(this.olLayer)
   }
 
   public detach(adapter: MapAdapter): void {
     if (adapter.mapLibrary !== 'openlayers') return
-    if (this.olLayer) {
-      adapter.openlayers!.map.removeLayer(this.olLayer)
-      this.olLayer = undefined
-    }
+
+    this.getLayers().forEach(layer => {
+      adapter.openlayers!.map.removeLayer(layer)
+    })
+
+    this.olLayers = []
   }
 }
