@@ -22,7 +22,7 @@ export interface ComposableLayer<NativeLayer = unknown> {
   id: string
   attach(adapter: MapAdapter, options?: LayerStateOptions): void
   detach(adapter: MapAdapter): void
-  getNativeLayer?(): NativeLayer | undefined
+  getNativeLayer(): NativeLayer | undefined
   getPrimaryLayer(): VisibilityLayer
   getExtent?(): Extent | null
 }
