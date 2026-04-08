@@ -33,7 +33,7 @@ export class OLMapInstance extends Map {
     const layers = options.layers || []
     const controlOptions = options.controls || {}
 
-    const controls = defaultControls({ rotate: false })
+    const controls = defaultControls({ rotate: false, attribution: false })
 
     // Rotate control
     if (controlOptions.rotate !== false) {

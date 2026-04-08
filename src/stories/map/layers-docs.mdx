@@ -87,9 +87,9 @@ emMap.removeLayer('Locations')  // by title
 
 <p><em>MapLibre support is planned; these layers currently attach to OpenLayers.</em></p>
 
-## Using native OpenLayers layers
+## Using native OpenLayers layers and layer groups
 
-In addition to the built-in composable layers, you can add native OpenLayers layers directly with emMap.addLayer(...).
+In addition to the built-in composable layers, you can add native OpenLayers layers directly with `emMap.addLayer(...)`.
 
 This allows you to:
 
@@ -132,7 +132,7 @@ emMap.addLayer(
 
 ### Using OpenLayers layer groups
 
-You can also add native OpenLayers LayerGroup instances.
+If you want to preserve native OpenLayers `LayerGroup` hierarchy and behaviour, add groups with `emMap.addLayerGroup(...)`.
 
 ```ts
 import LayerGroup from 'ol/layer/Group'
@@ -145,12 +145,12 @@ const group = new LayerGroup({
   ],
 })
 
-emMap.addLayer(group)
+emMap.addLayerGroup(group)
 ```
 
 ### Mixing composable layers inside a native group
 
-Composable layers expose their underlying OpenLayers layers through getLayers(). This makes it possible to combine composable layers with native OpenLayers groups.
+Composable layers expose their underlying OpenLayers layers through `getLayers()`. This makes it possible to combine composable layers with native OpenLayers groups.
 
 ```ts
 import LayerGroup from 'ol/layer/Group'
@@ -166,12 +166,12 @@ const group = new LayerGroup({
   ],
 })
 
-emMap.addLayer(group)
+emMap.addLayerGroup(group)
 ```
 
 ### Accessing the underlying OpenLayers layers
 
-Composable layers provide getLayers() to return their native OpenLayers layers.
+Composable layers provide `getLayers()` to return their native OpenLayers layers.
 
 ```ts
 const locationsLayer = new LocationsLayer({ positions })

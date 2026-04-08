@@ -16,6 +16,10 @@ import styles from '../styles/em-map.raw.css?raw'
 import { Position } from './core/types/position'
 import config from './core/config'
 
+type NativeOlLayerGroup = BaseLayer & {
+  getLayers(): { getArray(): BaseLayer[] }
+}
+
 type EmMapControls = OLMapOptions['controls'] & {
   enable3DBuildings?: boolean
   olRotationMode?: 'default' | 'right-drag'
@@ -103,10 +107,38 @@ export class EmMap extends HTMLElement {
     return this.mapInstance instanceof MapLibreMapInstance ? this.mapInstance : null
   }
 
+  public addLayerGroup(group: NativeOlLayerGroup, layerStateOptions?: LayerStateOptions): BaseLayer {
+    if (!this.adapter) throw new Error('Map not ready')
+
+    if (!this.isNativeOlLayerGroup(group)) {
+      throw new Error('[EmMap] addLayerGroup expects a native OpenLayers LayerGroup')
+    }
+
+    if (this.adapter.mapLibrary !== 'openlayers') {
+      console.warn('[EmMap] Native layer groups are only supported with OpenLayers')
+      return group
+    }
+
+    const map = this.olMapInstance
+    if (!map) throw new Error('OpenLayers map not available')
+
+    if (layerStateOptions?.zIndex !== undefined) {
+      group.setZIndex(layerStateOptions.zIndex)
+    }
+
+    if (layerStateOptions?.visible !== undefined) {
+      group.setVisible(layerStateOptions.visible)
+    }
+
+    map.addLayer(group)
+
+    return group
+  }
+
   // Composable layer
   public addLayer<T>(layer: ComposableLayer<T>, layerStateOptions?: LayerStateOptions): ComposableLayer<T>
 
-  // Native OpenLayers layer or group
+  // Native OpenLayers layer
   public addLayer(layer: BaseLayer, layerStateOptions?: LayerStateOptions): BaseLayer
 
   // Implementation
@@ -129,29 +161,12 @@ export class EmMap extends HTMLElement {
       return layer
     }
 
+    if (this.isNativeOlLayerGroup(layer)) {
+      throw new Error('[EmMap] Use addLayerGroup() for native OpenLayers LayerGroup instances')
+    }
+
     const map = this.olMapInstance
     if (!map) throw new Error('OpenLayers map not available')
-
-    if (this.isNativeOlLayerGroup(layer)) {
-      const childLayers = layer.getLayers().getArray()
-
-      childLayers.forEach(child => {
-        if (layerStateOptions?.visible !== undefined) {
-          child.setVisible(layerStateOptions.visible)
-        }
-
-        if (layerStateOptions?.zIndex !== undefined) {
-          const groupBaseZ = layer.getZIndex() ?? 0
-          const childZ = child.getZIndex() ?? 0
-          const relativeOffset = childZ - groupBaseZ
-          child.setZIndex(layerStateOptions.zIndex + relativeOffset)
-        }
-
-        map.addLayer(child)
-      })
-
-      return layer
-    }
 
     if (layerStateOptions?.zIndex !== undefined) {
       layer.setZIndex(layerStateOptions.zIndex)
@@ -406,7 +421,7 @@ export class EmMap extends HTMLElement {
     })
   }
 
-  private isNativeOlLayerGroup(layer: unknown): layer is BaseLayer & { getLayers(): { getArray(): BaseLayer[] } } {
+  private isNativeOlLayerGroup(layer: unknown): layer is NativeOlLayerGroup {
     return (
       typeof layer === 'object' &&
       layer !== null &&
@@ -440,7 +455,7 @@ export class EmMap extends HTMLElement {
       const id = layer.get('id')
       const title = layer.get('title')
 
-      if (id === idOrTitle || title === idOrTitle) {
+      if ((typeof id === 'string' && id === idOrTitle) || (typeof title === 'string' && title === idOrTitle)) {
         matches.push(layer)
       }
 
