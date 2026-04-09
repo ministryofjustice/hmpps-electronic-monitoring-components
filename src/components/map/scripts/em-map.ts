@@ -3,6 +3,7 @@ import type { FeatureCollection } from 'geojson'
 import { boundingExtent, extend, isEmpty } from 'ol/extent'
 import type { Extent } from 'ol/extent'
 import { fromLonLat } from 'ol/proj'
+import type BaseLayer from 'ol/layer/Base'
 import { OLMapInstance, OLMapOptions } from './core/open-layers-map-instance'
 import { MapLibreMapInstance } from './core/maplibre-map-instance'
 import { setupOpenLayersMap } from './core/setup/setup-openlayers-map'
@@ -14,6 +15,10 @@ import { type MapAdapter, type MapLibrary, createOpenLayersAdapter, createMapLib
 import styles from '../styles/em-map.raw.css?raw'
 import { Position } from './core/types/position'
 import config from './core/config'
+
+type NativeOlLayerGroup = BaseLayer & {
+  getLayers(): { getArray(): BaseLayer[] }
+}
 
 type EmMapControls = OLMapOptions['controls'] & {
   enable3DBuildings?: boolean
@@ -49,7 +54,7 @@ export class EmMap extends HTMLElement {
 
   private adapter?: MapAdapter
 
-  private layers = new Map<string, ComposableLayer>()
+  private layers = new Map<string, ComposableLayer<unknown>>()
 
   private shadow: ShadowRoot
 
@@ -102,15 +107,78 @@ export class EmMap extends HTMLElement {
     return this.mapInstance instanceof MapLibreMapInstance ? this.mapInstance : null
   }
 
-  public addLayer<LNative>(
-    layer: ComposableLayer<LNative>,
-    layerStateOptions?: LayerStateOptions,
-  ): LNative | undefined {
+  public addLayerGroup(group: NativeOlLayerGroup, layerStateOptions?: LayerStateOptions): BaseLayer {
     if (!this.adapter) throw new Error('Map not ready')
-    if (this.layers.has(layer.id)) this.removeLayer(layer.id)
-    layer.attach(this.adapter, layerStateOptions)
-    this.layers.set(layer.id, layer)
-    return typeof layer.getNativeLayer === 'function' ? layer.getNativeLayer() : undefined
+
+    if (!this.isNativeOlLayerGroup(group)) {
+      throw new Error('[EmMap] addLayerGroup expects a native OpenLayers LayerGroup')
+    }
+
+    if (this.adapter.mapLibrary !== 'openlayers') {
+      console.warn('[EmMap] Native layer groups are only supported with OpenLayers')
+      return group
+    }
+
+    const map = this.olMapInstance
+    if (!map) throw new Error('OpenLayers map not available')
+
+    if (layerStateOptions?.zIndex !== undefined) {
+      group.setZIndex(layerStateOptions.zIndex)
+    }
+
+    if (layerStateOptions?.visible !== undefined) {
+      group.setVisible(layerStateOptions.visible)
+    }
+
+    map.addLayer(group)
+
+    return group
+  }
+
+  // Composable layer
+  public addLayer<T>(layer: ComposableLayer<T>, layerStateOptions?: LayerStateOptions): ComposableLayer<T>
+
+  // Native OpenLayers layer
+  public addLayer(layer: BaseLayer, layerStateOptions?: LayerStateOptions): BaseLayer
+
+  // Implementation
+  public addLayer<T>(
+    layer: ComposableLayer<T> | BaseLayer,
+    layerStateOptions?: LayerStateOptions,
+  ): ComposableLayer<T> | BaseLayer {
+    if (!this.adapter) throw new Error('Map not ready')
+
+    if (this.isComposableLayer(layer)) {
+      if (this.layers.has(layer.id)) this.removeLayer(layer.id)
+
+      layer.attach(this.adapter, layerStateOptions)
+      this.layers.set(layer.id, layer)
+      return layer
+    }
+
+    if (this.adapter.mapLibrary !== 'openlayers') {
+      console.warn('[EmMap] Native layers are only supported with OpenLayers')
+      return layer
+    }
+
+    if (this.isNativeOlLayerGroup(layer)) {
+      throw new Error('[EmMap] Use addLayerGroup() for native OpenLayers LayerGroup instances')
+    }
+
+    const map = this.olMapInstance
+    if (!map) throw new Error('OpenLayers map not available')
+
+    if (layerStateOptions?.zIndex !== undefined) {
+      layer.setZIndex(layerStateOptions.zIndex)
+    }
+
+    if (layerStateOptions?.visible !== undefined) {
+      layer.setVisible(layerStateOptions.visible)
+    }
+
+    map.addLayer(layer)
+
+    return layer
   }
 
   public removeLayer(idOrTitle: string): void {
@@ -179,7 +247,16 @@ export class EmMap extends HTMLElement {
       if (target.type === 'layer') {
         const layer = this.layers.get(target.layerId)
         const extent = layer?.getExtent?.()
-        if (extent) extents.push(extent)
+
+        if (extent) {
+          extents.push(extent)
+        } else {
+          const nativeLayers = this.findNativeLayersByIdOrTitle(target.layerId)
+          nativeLayers.forEach(nativeLayer => {
+            const nativeExtent = this.getNativeLayerExtent(nativeLayer)
+            if (nativeExtent) extents.push(nativeExtent)
+          })
+        }
       }
     }
 
@@ -274,7 +351,36 @@ export class EmMap extends HTMLElement {
 
   // Fits the map view to all layers currently on the map, with options for padding, max zoom, and animation.
   public fitToAllLayers(options?: ViewportOptions) {
-    this.fitToLayers(Array.from(this.layers.keys()), options)
+    const layerIds = new Set<string>(Array.from(this.layers.keys()))
+
+    if (this.adapter?.mapLibrary === 'openlayers') {
+      const { map } = this.adapter.openlayers!
+
+      const visit = (layer: BaseLayer) => {
+        const id = layer.get('id')
+        const title = layer.get('title')
+
+        if (typeof id === 'string' && id.length > 0) {
+          layerIds.add(id)
+        } else if (typeof title === 'string' && title.length > 0) {
+          layerIds.add(title)
+        }
+
+        if (this.isNativeOlLayerGroup(layer)) {
+          layer
+            .getLayers()
+            .getArray()
+            .forEach(child => visit(child))
+        }
+      }
+
+      map
+        .getLayers()
+        .getArray()
+        .forEach(layer => visit(layer))
+    }
+
+    this.fitToLayers(Array.from(layerIds), options)
   }
 
   // Focuses the map view on a specific point, with options for zoom level, animation, and animation duration.
@@ -315,6 +421,15 @@ export class EmMap extends HTMLElement {
     })
   }
 
+  private isNativeOlLayerGroup(layer: unknown): layer is NativeOlLayerGroup {
+    return (
+      typeof layer === 'object' &&
+      layer !== null &&
+      'getLayers' in layer &&
+      typeof (layer as { getLayers?: unknown }).getLayers === 'function'
+    )
+  }
+
   private isComposableLayer(layer: unknown): layer is ComposableLayer<unknown> {
     return (
       typeof layer === 'object' &&
@@ -322,6 +437,65 @@ export class EmMap extends HTMLElement {
       'attach' in layer &&
       typeof (layer as { attach?: unknown }).attach === 'function'
     )
+  }
+
+  private isSourceBackedLayer(
+    layer: BaseLayer,
+  ): layer is BaseLayer & { getSource(): { getExtent(): Extent } | null | undefined } {
+    return 'getSource' in layer && typeof (layer as { getSource?: unknown }).getSource === 'function'
+  }
+
+  private findNativeLayersByIdOrTitle(idOrTitle: string): BaseLayer[] {
+    if (!this.adapter || this.adapter.mapLibrary !== 'openlayers') return []
+
+    const { map } = this.adapter.openlayers!
+    const matches: BaseLayer[] = []
+
+    const visit = (layer: BaseLayer) => {
+      const id = layer.get('id')
+      const title = layer.get('title')
+
+      if ((typeof id === 'string' && id === idOrTitle) || (typeof title === 'string' && title === idOrTitle)) {
+        matches.push(layer)
+      }
+
+      if (this.isNativeOlLayerGroup(layer)) {
+        layer
+          .getLayers()
+          .getArray()
+          .forEach(child => visit(child))
+      }
+    }
+
+    map
+      .getLayers()
+      .getArray()
+      .forEach(layer => visit(layer))
+    return matches
+  }
+
+  private getNativeLayerExtent(layer: BaseLayer): Extent | null {
+    if (this.isNativeOlLayerGroup(layer)) {
+      const childExtents = layer
+        .getLayers()
+        .getArray()
+        .map(child => this.getNativeLayerExtent(child))
+        .filter((extent): extent is Extent => !!extent && !isEmpty(extent))
+
+      if (!childExtents.length) return null
+
+      return childExtents.reduce((acc, ext) => extend(acc, ext))
+    }
+
+    if (this.isSourceBackedLayer(layer)) {
+      const source = layer.getSource()
+      if (!source || !('getExtent' in source) || typeof source.getExtent !== 'function') return null
+
+      const extent = source.getExtent()
+      return extent && !isEmpty(extent) ? extent : null
+    }
+
+    return null
   }
 
   // Use padding to specify extra space (in pixels) around the target when fitting the view.

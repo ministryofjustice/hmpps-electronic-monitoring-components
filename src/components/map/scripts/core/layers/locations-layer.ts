@@ -112,17 +112,12 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
   }
 
   public getPrimaryLayer(): BaseLayer {
-    if (this.olLayers.length === 0) {
-      throw new Error(`[LocationsLayer] No layers available for "${this.id}"`)
-    }
+    const layers = this.getLayers()
 
-    // Find first VectorLayer (skip WebGL layer if present)
-    const vectorLayer = this.olLayers.find(layer => layer instanceof VectorLayer)
-
+    const vectorLayer = layers.find(layer => layer instanceof VectorLayer)
     if (vectorLayer) return vectorLayer
 
-    // Fallback: return first layer (e.g. WebGL)
-    return this.olLayers[0]
+    return layers[0]
   }
 
   private toWebGLMarker(marker?: MarkerOptions) {
@@ -140,29 +135,10 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
     }
   }
 
-  getExtent(): Extent | null {
-    const positions = this.options.positions ?? []
-    if (!positions.length) return null
-
-    const coords = positions.map(p => fromLonLat([p.longitude, p.latitude]))
-    return boundingExtent(coords)
-  }
-
-  getPositions(): Position[] {
-    return this.options.positions ?? []
-  }
-
-  getNativeLayer(): BaseLayer[] {
-    return this.olLayers
-  }
-
-  attach(adapter: MapAdapter, layerStateOptions?: LayerStateOptions): void {
-    if (adapter.mapLibrary !== 'openlayers') {
-      console.warn(`[LocationLayer] MapLibre support is not implemented yet (layer "${this.id}")`)
-      return
-    }
-
-    const { map } = adapter.openlayers!
+  // Create OL layers with the provided options.
+  // Layers are created lazily (only when getPrimaryLayer or getNativeLayer is called)
+  private createLayers(): BaseLayer[] {
+    const layers: BaseLayer[] = []
 
     const renderer = this.options.renderer ?? 'auto'
     const webglAllowed = isWebGLCompatible(this.options.style)
@@ -186,72 +162,110 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
       }
     })
 
-    // Clear existing layers
-    this.olLayers.forEach(layer => map.removeLayer(layer))
-    this.olLayers = []
-
-    const visible = layerStateOptions?.visible ?? this.options.visible ?? true
-
-    const baseZIndex = layerStateOptions?.zIndex ?? this.options.zIndex ?? 0
+    const visible = this.options.visible ?? true
+    const baseZIndex = this.options.zIndex ?? 0
 
     // WebGL circles layer
     if (useWebGL && circlePositions.length > 0) {
-      const webglStyle = this.toWebGLStyle(this.options.style)
-
-      const layer = new OLWebGLCircleLayer({
-        positions: circlePositions,
-        style: webglStyle,
-        markerOptions: this.toWebGLMarker(this.options.marker),
-        title: this.options.title ?? this.id,
-        visible,
-        zIndex: baseZIndex,
-      })
-
-      map.addLayer(layer)
-      this.olLayers.push(layer)
+      layers.push(
+        new OLWebGLCircleLayer({
+          positions: circlePositions,
+          style: this.toWebGLStyle(this.options.style),
+          markerOptions: this.toWebGLMarker(this.options.marker),
+          title: this.options.title ?? this.id,
+          visible,
+          zIndex: baseZIndex,
+        }),
+      )
     }
 
     // Vector circles fallback (if WebGL not supported or renderer explicitly set to 'vector')
     if (!useWebGL && circlePositions.length > 0) {
-      const layer = new OLLocationsLayer({
-        positions: circlePositions,
-        style: this.options.style,
-        marker: this.options.marker,
-        title: this.options.title ?? this.id,
-        visible,
-        zIndex: baseZIndex,
-      })
-
-      map.addLayer(layer)
-      this.olLayers.push(layer)
+      layers.push(
+        new OLLocationsLayer({
+          positions: circlePositions,
+          style: this.options.style,
+          marker: this.options.marker,
+          title: this.options.title ?? this.id,
+          visible,
+          zIndex: baseZIndex,
+        }),
+      )
     }
 
     // Vector images/pins
     if (imagePositions.length > 0) {
-      const layer = new OLLocationsLayer({
-        positions: imagePositions,
-        style: this.options.style,
-        marker: this.options.marker,
-        title: this.options.title ?? this.id,
-        visible,
-        zIndex: baseZIndex + 1,
-      })
-
-      map.addLayer(layer)
-      this.olLayers.push(layer)
+      layers.push(
+        new OLLocationsLayer({
+          positions: imagePositions,
+          style: this.options.style,
+          marker: this.options.marker,
+          title: this.options.title ?? this.id,
+          visible,
+          zIndex: baseZIndex + 1,
+        }),
+      )
     }
+
+    return layers
   }
 
-  detach(adapter: MapAdapter): void {
-    if (adapter.mapLibrary === 'openlayers') {
-      this.olLayers.forEach(layer => {
-        adapter.openlayers!.map.removeLayer(layer)
-      })
+  public getLayers(): BaseLayer[] {
+    if (this.olLayers.length === 0) {
+      this.olLayers = this.createLayers()
+    }
+    return this.olLayers
+  }
 
-      this.olLayers = []
+  public getNativeLayer(): BaseLayer[] {
+    return this.getLayers()
+  }
+
+  getExtent(): Extent | null {
+    const positions = this.options.positions ?? []
+    if (!positions.length) return null
+
+    const coords = positions.map(p => fromLonLat([p.longitude, p.latitude]))
+    return boundingExtent(coords)
+  }
+
+  getPositions(): Position[] {
+    return this.options.positions ?? []
+  }
+
+  public attach(adapter: MapAdapter, layerStateOptions?: LayerStateOptions): void {
+    if (adapter.mapLibrary !== 'openlayers') {
+      console.warn(`[LocationLayer] MapLibre not implemented ("${this.id}")`)
       return
     }
 
-    console.warn(`[LocationLayer] MapLibre detach is not implemented yet (layer "${this.id}")`)
+    const { map } = adapter.openlayers!
+
+    const layers = this.getLayers()
+    const visible = layerStateOptions?.visible ?? this.options.visible ?? true
+
+    layers.forEach(layer => {
+      layer.setVisible(visible)
+
+      if (layerStateOptions?.zIndex !== undefined) {
+        const existingZIndex = layer.getZIndex() ?? 0
+        const baseZIndex = this.options.zIndex ?? 0
+        const relativeOffset = existingZIndex - baseZIndex
+        layer.setZIndex(layerStateOptions.zIndex + relativeOffset)
+      }
+
+      map.addLayer(layer)
+    })
+  }
+
+  public detach(adapter: MapAdapter): void {
+    if (adapter.mapLibrary === 'openlayers') {
+      this.getLayers().forEach(layer => {
+        adapter.openlayers!.map.removeLayer(layer)
+      })
+      return
+    }
+
+    console.warn(`[LocationLayer] MapLibre detach not implemented ("${this.id}")`)
   }
 }

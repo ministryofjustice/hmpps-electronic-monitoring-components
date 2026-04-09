@@ -1,15 +1,8 @@
-import VectorLayer from 'ol/layer/Vector'
-import VectorSource from 'ol/source/Vector'
-import type Feature from 'ol/Feature'
-import type Geometry from 'ol/geom/Geometry'
 import BaseLayer from 'ol/layer/Base'
-import type { ComposableLayer } from './base'
+import type { ComposableLayer, LayerStateOptions } from './base'
 import type { MapAdapter } from '../map-adapter'
 import { Position } from '../types/position'
 import { OLTextLayer } from './ol/text-layer'
-
-type OLVecSource = VectorSource<Feature<Geometry>>
-type OLVecLayer = VectorLayer<OLVecSource>
 
 export type TextLayerOptions = {
   id?: string
@@ -54,55 +47,77 @@ export type TextLayerOptions = {
   positions: Array<Position>
 }
 
-export class TextLayer implements ComposableLayer<OLVecLayer> {
+export class TextLayer implements ComposableLayer<BaseLayer[]> {
   public readonly id: string
 
   private readonly options: TextLayerOptions
 
-  private olLayer?: OLVecLayer
+  private olLayers: BaseLayer[] = []
 
   constructor(options: TextLayerOptions) {
     this.options = options
     this.id = options.id ?? 'text'
   }
 
-  public getPrimaryLayer(): BaseLayer {
-    if (!this.olLayer) {
-      throw new Error(`[TextLayer] Layer "${this.id}" has not been attached yet`)
+  private createLayers(): BaseLayer[] {
+    return [
+      new OLTextLayer({
+        textProperty: this.options.textProperty,
+        positions: this.options.positions,
+        style: this.options.style,
+        title: this.options.title ?? this.id,
+        visible: this.options.visible,
+        zIndex: this.options.zIndex,
+      }),
+    ]
+  }
+
+  public getLayers(): BaseLayer[] {
+    if (this.olLayers.length === 0) {
+      this.olLayers = this.createLayers()
     }
-
-    return this.olLayer
+    return this.olLayers
   }
 
-  public getNativeLayer(): OLVecLayer | undefined {
-    return this.olLayer
+  public getPrimaryLayer(): BaseLayer {
+    return this.getLayers()[0]
   }
 
-  public attach(adapter: MapAdapter): void {
+  public getNativeLayer(): BaseLayer[] {
+    return this.getLayers()
+  }
+
+  public attach(adapter: MapAdapter, layerStateOptions?: LayerStateOptions): void {
     if (adapter.mapLibrary !== 'openlayers') {
       console.warn(`[TextLayer] MapLibre support is not implemented yet (layer "${this.id}")`)
       return
     }
 
     const { map } = adapter.openlayers!
+    const layers = this.getLayers()
+    const visible = layerStateOptions?.visible ?? this.options.visible ?? true
 
-    this.olLayer = new OLTextLayer({
-      textProperty: this.options.textProperty,
-      positions: this.options.positions,
-      style: this.options.style,
-      title: this.options.title ?? this.id,
-      visible: this.options.visible,
-      zIndex: this.options.zIndex,
+    layers.forEach(layer => {
+      layer.setVisible(visible)
+
+      if (layerStateOptions?.zIndex !== undefined) {
+        const existingZIndex = layer.getZIndex() ?? 0
+        const baseZIndex = this.options.zIndex ?? 0
+        const relativeOffset = existingZIndex - baseZIndex
+        layer.setZIndex(layerStateOptions.zIndex + relativeOffset)
+      }
+
+      map.addLayer(layer)
     })
-
-    map.addLayer(this.olLayer)
   }
 
-  detach(adapter: MapAdapter): void {
+  public detach(adapter: MapAdapter): void {
     if (adapter.mapLibrary !== 'openlayers') return
-    if (this.olLayer) {
-      adapter.openlayers!.map.removeLayer(this.olLayer)
-      this.olLayer = undefined
-    }
+
+    this.getLayers().forEach(layer => {
+      adapter.openlayers!.map.removeLayer(layer)
+    })
+
+    this.olLayers = []
   }
 }

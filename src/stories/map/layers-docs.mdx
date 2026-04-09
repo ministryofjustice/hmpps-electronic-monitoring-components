@@ -87,55 +87,100 @@ emMap.removeLayer('Locations')  // by title
 
 <p><em>MapLibre support is planned; these layers currently attach to OpenLayers.</em></p>
 
-## Using native OpenLayers layers
+## Using native OpenLayers layers and layer groups
 
-In addition to the built-in composable layers, you can use native OpenLayers layers via the NativeLayerWrapper.
+In addition to the built-in composable layers, you can add native OpenLayers layers directly with `emMap.addLayer(...)`.
 
 This allows you to:
 
-reuse existing OpenLayers code
-use advanced OpenLayers features not exposed by composable layers
-mix native and composable layers together
+- reuse existing OpenLayers code
+- use OpenLayers features not exposed by composable layers
+- mix native and composable layers together
 
 ### Basic usage
 
 ```ts
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
-import { NativeLayerWrapper } from '@ministryofjustice/hmpps-electronic-monitoring-components/map/layers'
 
-const newLayer = new VectorLayer({
+const layer = new VectorLayer({
   source: new VectorSource(),
 })
 
-emMap.addLayer(new NativeLayerWrapper(newLayer))
+emMap.addLayer(layer)
 ```
 
-### Mixing with custom layers
+### Mixing native and composable layers
 
-Native layers can be used alongside composable layers:
+Native OpenLayers layers can be used alongside composable layers:
 
 ```ts
-emMap.addLayer(new LocationsLayer({ positions }))
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
+import { LocationsLayer } from '@ministryofjustice/hmpps-electronic-monitoring-components/map/layers'
+
+const locationsLayer = new LocationsLayer({ positions })
+
+emMap.addLayer(locationsLayer)
 
 emMap.addLayer(
-  new NativeLayerWrapper(
-    new VectorLayer({ source: new VectorSource() }),
-  ),
+  new VectorLayer({
+    source: new VectorSource(),
+  }),
 )
 ```
 
-### Interaction
+### Using OpenLayers layer groups
 
-All wrapped native layers support the same interaction API:
+If you want to preserve native OpenLayers `LayerGroup` hierarchy and behaviour, add groups with `emMap.addLayerGroup(...)`.
 
 ```ts
-const layer = new NativeLayerWrapper(new VectorLayer(...))
+import LayerGroup from 'ol/layer/Group'
+import VectorLayer from 'ol/layer/Vector'
+import VectorSource from 'ol/source/Vector'
 
-emMap.addLayer(layer)
+const group = new LayerGroup({
+  layers: [
+    new VectorLayer({ source: new VectorSource() }),
+  ],
+})
 
-layer.getPrimaryLayer().setVisible(false)
-layer.getPrimaryLayer().setZIndex(10)
+emMap.addLayerGroup(group)
+```
+
+### Mixing composable layers inside a native group
+
+Composable layers expose their underlying OpenLayers layers through `getLayers()`. This makes it possible to combine composable layers with native OpenLayers groups.
+
+```ts
+import LayerGroup from 'ol/layer/Group'
+import { LocationsLayer, TracksLayer } from '@ministryofjustice/hmpps-electronic-monitoring-components/map/layers'
+
+const locationsLayer = new LocationsLayer({ positions })
+const tracksLayer = new TracksLayer({ positions })
+
+const group = new LayerGroup({
+  layers: [
+    ...locationsLayer.getLayers(),
+    ...tracksLayer.getLayers(),
+  ],
+})
+
+emMap.addLayerGroup(group)
+```
+
+### Accessing the underlying OpenLayers layers
+
+Composable layers provide `getLayers()` to return their native OpenLayers layers.
+
+```ts
+const locationsLayer = new LocationsLayer({ positions })
+
+const nativeLayers = locationsLayer.getLayers()
+const primaryLayer = locationsLayer.getPrimaryLayer()
+
+primaryLayer.setVisible(false)
+primaryLayer.setZIndex(10)
 ```
 
 ---
