@@ -169,7 +169,7 @@ const group = new LayerGroup({
 emMap.addLayerGroup(group)
 ```
 
-### Accessing the underlying OpenLayers layers
+### Accessing the underlying OpenLayers layers from a composable layer
 
 Composable layers provide `getLayers()` to return their native OpenLayers layers.
 
@@ -182,6 +182,40 @@ const primaryLayer = locationsLayer.getPrimaryLayer()
 primaryLayer.setVisible(false)
 primaryLayer.setZIndex(10)
 ```
+
+### Accessing native OpenLayers layers
+
+If you need full OpenLayers control, you can access the underlying layer by passing the id or title:
+
+```ts
+const layer = emMap.getNativeLayer('analysisNumberingGroup')
+
+layer?.setVisible(false)
+layer?.setZIndex(10)
+```
+
+This returns:
+
+- a native VectorLayer, WebGLVectorLayer, etc.
+- or a LayerGroup
+
+## Controlling visibility (layers and groups)
+
+You can control visibility of both composable layers and native OpenLayers layers (including LayerGroups) using the map API.
+
+### Simple visibility control
+
+```ts
+emMap.setLayerVisibility('tracks', false)
+emMap.setLayerVisibility('analysisNumberingGroup', true)
+```
+
+This works for:
+
+- composable layers (LocationsLayer, TracksLayer, etc.)
+- native OpenLayers layers
+- native OpenLayers LayerGroups
+- nested groups
 
 ---
 
