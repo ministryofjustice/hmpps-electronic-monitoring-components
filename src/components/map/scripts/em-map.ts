@@ -217,8 +217,27 @@ export class EmMap extends HTMLElement {
     return this.layers.get(id)
   }
 
+  public getNativeLayer(idOrTitle: string): BaseLayer | undefined {
+    return this.findNativeLayersByIdOrTitle(idOrTitle)[0]
+  }
+
   public closeOverlay() {
     this.featureOverlay?.close()
+  }
+
+  public setLayerVisibility(idOrTitle: string, visible: boolean): void {
+    // Try composable layer first
+    const composable = this.getLayer(idOrTitle)
+    if (composable) {
+      composable.getPrimaryLayer().setVisible(visible)
+      return
+    }
+
+    // Fallback to native layers/groups
+    const native = this.getNativeLayer(idOrTitle)
+    if (native) {
+      native.setVisible(visible)
+    }
   }
 
   // Fits the map view to the given targets (layers or points), with options for padding, max zoom, and animation.
