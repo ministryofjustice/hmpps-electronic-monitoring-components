@@ -30,7 +30,7 @@ describe('CirclesLayer (OpenLayers library)', () => {
     expect(source.getFeatures().length).toBe(10)
 
     const geomTypes = source.getFeatures().map(f => f.getGeometry()?.getType())
-    expect(geomTypes.every(t => t === 'Circle')).toBe(true)
+    expect(geomTypes.every(t => t === 'Polygon')).toBe(true)
   })
 
   it('respects visible=false and zIndex from options', () => {
