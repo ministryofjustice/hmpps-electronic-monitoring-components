@@ -1,9 +1,9 @@
 import { Style } from 'ol/style'
 import { Polygon } from 'ol/geom'
 import { getDistance } from 'ol/sphere'
+import { toLonLat } from 'ol/proj'
 import { OLCirclesLayer } from './circles-layer'
 import positions from '../../../../fixtures/positions.json'
-import { toLonLat } from 'ol/proj'
 
 // Helper function to get radius of polygon
 function getPolygonRadiusInMeters(polygon: Polygon): number {
@@ -23,7 +23,7 @@ describe('OLCirclesLayer (OpenLayers library)', () => {
 
     expect(features).toHaveLength(10)
     expect(features.map(f => Math.round(getPolygonRadiusInMeters(f.getGeometry() as Polygon)))).toEqual([
-      80, 60, 50, 200, 30, 500, 400, 40, 20, 120
+      80, 60, 50, 200, 30, 500, 400, 40, 20, 120,
     ])
   })
 
