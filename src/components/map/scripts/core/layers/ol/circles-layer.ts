@@ -1,5 +1,5 @@
 import { Feature } from 'ol'
-import { Circle } from 'ol/geom'
+import { Polygon } from 'ol/geom'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import { Fill, Stroke, Style } from 'ol/style'
@@ -32,7 +32,7 @@ const DEFAULT_STROKE_COLOR = 'orange'
 const DEFAULT_STROKE_WIDTH = 2
 const DEFAULT_VISIBILITY = false
 
-export class OLCirclesLayer extends VectorLayer<VectorSource<Feature<Circle>>> {
+export class OLCirclesLayer extends VectorLayer<VectorSource<Feature<Polygon>>> {
   constructor({ positions, style, title, visible = DEFAULT_VISIBILITY, zIndex }: OLCirclesLayerOptions) {
     // Resolve fill: null explicitly disables it
     let fillColor: string | CanvasPattern | CanvasGradient | undefined

@@ -1,8 +1,16 @@
 import { Style } from 'ol/style'
-import { Circle } from 'ol/geom'
-import { Feature } from 'ol'
+import { Polygon } from 'ol/geom'
+import { getDistance } from 'ol/sphere'
+import { toLonLat } from 'ol/proj'
 import { OLCirclesLayer } from './circles-layer'
 import positions from '../../../../fixtures/positions.json'
+
+// Helper function to get radius of polygon
+function getPolygonRadiusInMeters(polygon: Polygon): number {
+  const center = toLonLat(polygon.getInteriorPoint().getCoordinates())
+  const edge = toLonLat(polygon.getCoordinates()[0][0])
+  return getDistance(center, edge)
+}
 
 describe('OLCirclesLayer (OpenLayers library)', () => {
   it('should display a single circle using the precision as radius for each position', () => {
@@ -14,7 +22,7 @@ describe('OLCirclesLayer (OpenLayers library)', () => {
     const features = source?.getFeatures() || []
 
     expect(features).toHaveLength(10)
-    expect(features.map(feature => (feature as Feature<Circle>).getGeometry()?.getRadius())).toEqual([
+    expect(features.map(f => Math.round(getPolygonRadiusInMeters(f.getGeometry() as Polygon)))).toEqual([
       80, 60, 50, 200, 30, 500, 400, 40, 20, 120,
     ])
   })

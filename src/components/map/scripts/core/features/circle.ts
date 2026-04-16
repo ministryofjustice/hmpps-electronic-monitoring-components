@@ -1,17 +1,18 @@
 import { Feature } from 'ol'
-import { Circle } from 'ol/geom'
-import { fromLonLat } from 'ol/proj'
+import Polygon, { circular as circularPolygon } from 'ol/geom/Polygon'
 import { PositionWithPrecision } from '../types/position'
 
-const createCircleFeatureFromPosition = (position: PositionWithPrecision): Feature<Circle> => {
+const createCircleFeatureFromPosition = (position: PositionWithPrecision): Feature<Polygon> => {
+  const center = [position.longitude, position.latitude]
+  const circle = circularPolygon(center, position.precision, 64).transform('EPSG:4326', 'EPSG:3857')
   return new Feature({
-    geometry: new Circle(fromLonLat([position.longitude, position.latitude]), position.precision),
+    geometry: circle,
   })
 }
 
 const createCircleFeatureCollectionFromPositions = (
   positions: Array<PositionWithPrecision>,
-): Array<Feature<Circle>> => {
+): Array<Feature<Polygon>> => {
   return positions.map(createCircleFeatureFromPosition)
 }
 
