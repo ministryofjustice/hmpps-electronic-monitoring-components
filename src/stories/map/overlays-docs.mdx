@@ -108,6 +108,36 @@ emMap.closeOverlay()
 
 ---
 
+### 4) Copy link functionality
+
+Overlays rows are capable of making use of copy link functionality which allows the user to copy a value to their clipboard via a copy anchor element.
+
+To enable this on a row you need to add an anchor element with the class `app-map__copy-link` and another element with the attribute `data-copy-value`
+
+Example usage:
+```njk
+<div class="app-map__overlay-row app-map__overlay-row--location">
+  <span class="app-map__overlay-label">Latitude</span>
+  <span
+    class="app-map__overlay-value app-map__overlay-value--with-action"
+    data-copy-value="{{ latitude }}">
+    
+    <span class="app-map__overlay-text">
+      {{ latitude }}
+    </span>
+
+    <a
+      href="#"
+      class="app-map__copy-link"
+      aria-label="Copy latitude">
+      Copy
+    </a>
+  </span>
+</div>
+```
+
+---
+
 ### Related Stories
 
 - [**Layers Story**](?path=/docs/components-map-layers-docs--docs) - how to add data layers that can trigger overlays

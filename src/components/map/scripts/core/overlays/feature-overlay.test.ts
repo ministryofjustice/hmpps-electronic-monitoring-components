@@ -31,7 +31,14 @@ describe('FeatureOverlay', () => {
       <button class="app-map__overlay-close"></button>
     </div>
     <template id="title-template"><p>Device: {{deviceId}}</p></template>
-    <template id="content-template"><p>Latitude: {{lat}}</p></template>
+    <template id="content-template">
+      <div class="app-map__overlay-row">
+        <span data-copy-value="51.5761">
+          Latitude: {{lat}}
+        </span>
+        <a class="app-map__copy-link">Copy</a>
+      </div>
+    </template>
     `
     container = document.getElementById('overlay') as HTMLElement
     header = container.querySelector('.app-map__overlay-header')!
@@ -94,5 +101,27 @@ describe('FeatureOverlay', () => {
     const spy = jest.spyOn(overlay, 'close')
     close.click()
     expect(spy).toHaveBeenCalled()
+  })
+
+  it('copies the value to clipboard when a copy link is clicked', async () => {
+    // Mock clipboard
+    const writeTextMock = jest.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, {
+      clipboard: { writeText: writeTextMock },
+    })
+
+    overlay.showAtCoordinate([10, 20], {
+      overlayBodyTemplateId: 'content-template',
+      lat: '51.5761',
+    })
+
+    const copyLink = body.querySelector('.app-map__copy-link') as HTMLAnchorElement
+
+    expect(copyLink).not.toBeNull()
+
+    copyLink.click()
+
+    expect(writeTextMock).toHaveBeenCalledTimes(1)
+    expect(writeTextMock).toHaveBeenCalledWith('51.5761')
   })
 })
