@@ -133,7 +133,7 @@ const meta: Meta = {
 
         case 'focusOn':
           map.focusOn({
-            center: { latitude: 53.48, longitude: -2.24 },
+            center: { latitude: 53.48, longitude: -2.24, precision: 0 },
             zoom: 12,
             ...animationOpts,
           })
