@@ -117,4 +117,14 @@
   overflow-wrap: break-word;
   word-break: break-word;
   text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.app-map__copy-link,
+:host::part(app-map__overlay-value) {
+  color: rgba(49, 101, 166, 1);
+  text-decoration: none;
+  @include govuk-responsive-padding(2, 'right');
 }
