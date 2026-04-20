@@ -68,10 +68,40 @@ export default class FeatureOverlay extends Overlay {
       console.warn(`[FeatureOverlay] No valid template found for overlayBodyTemplateId="${bodyTemplateId}"`)
     }
 
+    this.attachCopyHandlers()
+
     this.container.hidden = false
     this.setPosition(coordinate)
 
     this.container.dispatchEvent(new CustomEvent('map:overlay:open', { bubbles: true }))
+  }
+
+  private attachCopyHandlers() {
+    const copyLinks = this.content.querySelectorAll<HTMLAnchorElement>('.app-map__copy-link')
+
+    copyLinks.forEach(link => {
+      const el = link
+
+      if (el.dataset.copyBound === 'true') return
+      el.dataset.copyBound = 'true'
+
+      el.addEventListener('click', async event => {
+        event.preventDefault()
+
+        const row = el.closest('.app-map__overlay-row')
+        if (!row) return
+
+        const valueEl = row.querySelector<HTMLElement>('[data-copy-value]')
+        const valueToCopy = valueEl?.dataset.copyValue
+        if (!valueToCopy) return
+
+        try {
+          await navigator.clipboard.writeText(valueToCopy)
+        } catch (err) {
+          console.error('[FeatureOverlay] Copy failed', err)
+        }
+      })
+    })
   }
 
   close() {
