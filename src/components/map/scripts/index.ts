@@ -3,3 +3,5 @@
 import './global'
 
 export { EmMap } from './em-map'
+
+export type { Position, Property } from './core/types/position'
