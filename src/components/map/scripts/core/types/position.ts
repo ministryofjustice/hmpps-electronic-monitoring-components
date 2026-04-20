@@ -23,7 +23,7 @@ type Position = {
       }
   >
 
-  /** Short label for display in overlays. */
+  /** Optional short label for display in overlays. */
   label?: string
 
   /** Optional map marker configuration. */
