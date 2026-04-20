@@ -1,6 +1,23 @@
 import type { MarkerOptions } from '../layers/locations-layer'
 
 /**
+ * Displayable property value for a position.
+ *
+ * Can be a simple string, or an object that separates the displayed value
+ * from the value used when copying (e.g. formatted vs raw).
+ */
+type Property =
+  /** Simple display value. */
+  | string
+  | {
+      /** Value shown in the UI. */
+      value: string
+
+      /** Value used when copied. */
+      copyValue: string
+    }
+
+/**
  * Geographic position associated with a Crime or Electronic Monitoring device.
  */
 type Position = {
@@ -14,14 +31,7 @@ type Position = {
   precision: number
 
   /** Optional metadata for display in overlays. */
-  properties?: Record<
-    string,
-    | string
-    | {
-        value: string
-        copyValue: string
-      }
-  >
+  properties?: Record<string, Property>
 
   /** Optional short label for display in overlays. */
   label?: string
@@ -30,4 +40,4 @@ type Position = {
   marker?: MarkerOptions
 }
 
-export type { Position }
+export type { Position, Property }
