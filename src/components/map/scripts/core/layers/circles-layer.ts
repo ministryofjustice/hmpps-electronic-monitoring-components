@@ -2,7 +2,7 @@ import BaseLayer from 'ol/layer/Base'
 import type { ComposableLayer, LayerStateOptions } from './base'
 import type { MapAdapter } from '../map-adapter'
 import { OLCirclesLayer } from './ol/circles-layer'
-import type { Position, PositionWithPrecision } from '../types/position'
+import type { Position } from '../types/position'
 
 export type CirclesLayerOptions = {
   id?: string
@@ -24,10 +24,6 @@ export type CirclesLayerOptions = {
   positions?: Array<Position>
 }
 
-function hasPrecision(position: Position): position is PositionWithPrecision {
-  return 'precision' in position && typeof position.precision === 'number'
-}
-
 export class CirclesLayer implements ComposableLayer<BaseLayer[]> {
   public readonly id: string
 
@@ -41,12 +37,9 @@ export class CirclesLayer implements ComposableLayer<BaseLayer[]> {
   }
 
   private createLayers(): BaseLayer[] {
-    const allPositions = this.options.positions ?? []
-    const precisePositions = allPositions.filter(hasPrecision)
-
     return [
       new OLCirclesLayer({
-        positions: precisePositions,
+        positions: this.options.positions,
         style: this.options.style,
         title: this.options.title ?? this.id,
         visible: this.options.visible,
