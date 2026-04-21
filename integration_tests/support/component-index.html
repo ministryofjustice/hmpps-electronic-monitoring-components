@@ -43,7 +43,12 @@
       </div>
       <div class="app-map__overlay-row">
         <span class="app-map__overlay-label">Longitude </span>
-        <span class="app-map__overlay-value">{{displayLongitude}}</span>
+        <span class="app-map__overlay-value" data-copy-value="displayLongitude">
+          <span class="app-map__overlay-text">{{displayLongitude}}</span>
+          <a href="#" class="app-map__copy-link" aria-label="Copy latitude">
+            Copy
+          </a>
+        </span>
       </div>
     </template>
 

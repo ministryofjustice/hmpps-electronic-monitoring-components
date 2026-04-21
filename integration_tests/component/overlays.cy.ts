@@ -129,4 +129,38 @@ describe('<em-map> overlays (interaction)', () => {
       })
     })
   })
+
+  it('copies the value of an overlay row when a copy link is clicked', () => {
+    cy.readFile('src/components/map/fixtures/positions.json').then(positions => {
+      cy.get('em-map').then($el => {
+        const el = $el[0] as EmMap
+        const map = el.olMapInstance as Map
+
+        el.addLayer(new LocationsLayer({ title: 'pointsLayer', positions }))
+
+        const pointsLayer = findLayerByTitle(map, 'pointsLayer') as VectorLayer
+        const feature = pointsLayer.getSource()!.getFeatures()[0]
+        const coordinate = feature.getGeometry()!.getCoordinates()
+
+        cy.window().then(win => {
+          cy.stub(win.navigator.clipboard, 'writeText').as('writeText')
+        })
+
+        // wait for render
+        cy.window().then(() => waitForMapRender(map))
+
+        // click feature
+        cy.window().then(() => {
+          triggerPointerEventsAt(coordinate, map)
+        })
+        shouldShowOverlay()
+
+        // click copy link
+        cy.get('em-map').shadow().find('.app-map__copy-link').should('be.visible').click()
+
+        // assert clipboard call
+        cy.get('@writeText').should('have.been.calledWith', 'displayLongitude')
+      })
+    })
+  })
 })
