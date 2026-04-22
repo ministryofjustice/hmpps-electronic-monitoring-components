@@ -102,8 +102,8 @@
 
 .app-map__overlay-label,
 :host::part(app-map__overlay-label) {
-  flex: 0 0 50%;
-  max-width: 50%;
+  flex: 0 0 40%;
+  max-width: 40%;
   overflow-wrap: break-word;
   word-break: break-word;
   text-align: left;
