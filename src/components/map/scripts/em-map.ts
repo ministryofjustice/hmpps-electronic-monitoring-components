@@ -618,7 +618,7 @@ export class EmMap extends HTMLElement {
       return
     }
 
-    const { map } = this.adapter.openlayers!
+    const map = this.olMapInstance!
     const view = map.getView()
 
     const { latitude } = initialViewport

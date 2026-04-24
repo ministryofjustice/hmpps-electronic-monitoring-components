@@ -5,15 +5,23 @@ describe('degreesToOpenLayersRotation', () => {
     expect(degreesToOpenLayersRotation(0)).toBeCloseTo(0)
   })
 
+  it('converts 90 degrees correctly', () => {
+    expect(degreesToOpenLayersRotation(90)).toBeCloseTo(Math.PI / 2)
+  })
+
+  it('converts 180 degrees correctly', () => {
+    expect(degreesToOpenLayersRotation(180)).toBeCloseTo(Math.PI)
+  })
+
   it('converts 270 degrees correctly', () => {
-    expect(degreesToOpenLayersRotation(270)).toBeCloseTo((-3 * Math.PI) / 2)
+    expect(degreesToOpenLayersRotation(270)).toBeCloseTo((3 * Math.PI) / 2)
   })
 
   it('normalises values > 360', () => {
-    expect(degreesToOpenLayersRotation(450)).toBeCloseTo(-Math.PI / 2)
+    expect(degreesToOpenLayersRotation(450)).toBeCloseTo(Math.PI / 2)
   })
 
   it('normalises negative values', () => {
-    expect(degreesToOpenLayersRotation(-90)).toBeCloseTo((-3 * Math.PI) / 2)
+    expect(degreesToOpenLayersRotation(-90)).toBeCloseTo((3 * Math.PI) / 2)
   })
 })
