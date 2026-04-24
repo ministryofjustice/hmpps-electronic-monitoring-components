@@ -1,7 +1,26 @@
 import type { Meta, StoryObj, StoryContext } from '@storybook/web-components-vite'
 import { setupMapDemo } from './setupMapDemo'
 import positions from '../../components/map/fixtures/positions.json'
-import type { EmMap } from '../../components/map/scripts/em-map'
+
+type SetupStoryArgs = {
+  renderer: 'openlayers' | 'maplibre'
+  enable3D: boolean
+  positions: any[]
+  usesInternalOverlays: boolean
+  'controls.zoomSlider': boolean
+  'controls.rotate': 'true' | 'auto-hide' | 'false'
+  'controls.olRotationMode': 'default' | 'right-drag'
+  'controls.olRotateTooltip': boolean
+  'controls.scale': 'bar' | 'line' | 'false'
+  'controls.locationDisplay': 'dms' | 'latlon' | 'false'
+  'controls.grabCursor': boolean
+
+  'query.lat': string
+  'query.lng': string
+  'query.zoom': string
+  'query.rotation': string
+  'query.showInfoBar': boolean
+}
 
 const meta = {
   title: 'Components/Map/Setup',
@@ -23,40 +42,109 @@ const meta = {
       control: 'boolean',
       description: 'Enable click-to-open overlays (injects demo templates automatically)',
     },
-    'controls.zoomSlider': { control: 'boolean' },
-    'controls.rotate': { control: 'select', options: ['true', 'auto-hide', 'false'] },
+
+    'controls.zoomSlider': {
+      control: 'boolean',
+      table: { category: 'Controls' },
+    },
+    'controls.rotate': {
+      control: 'select',
+      options: ['true', 'auto-hide', 'false'],
+      table: { category: 'Controls' },
+    },
     'controls.olRotationMode': {
       control: 'select',
       options: ['default', 'right-drag'],
       description:
         'Rotation gesture mode. "default" = Alt+Shift + left-drag (OpenLayers). "right-drag" = right-drag or Ctrl + left-drag.',
+      table: { category: 'Controls' },
     },
     'controls.olRotateTooltip': {
       control: 'boolean',
       description: 'Show rotate gesture tooltip when rotation control is visible',
+      table: { category: 'Controls' },
     },
-    'controls.scale': { control: 'select', options: ['bar', 'line', 'false'] },
-    'controls.locationDisplay': { control: 'select', options: ['dms', 'latlon', 'false'] },
-    'controls.grabCursor': { control: 'boolean' },
+    'controls.scale': {
+      control: 'select',
+      options: ['bar', 'line', 'false'],
+      table: { category: 'Controls' },
+    },
+    'controls.locationDisplay': {
+      control: 'select',
+      options: ['dms', 'latlon', 'false'],
+      table: { category: 'Controls' },
+    },
+    'controls.grabCursor': {
+      control: 'boolean',
+      table: { category: 'Controls' },
+    },
+
+    'query.lat': {
+      control: 'text',
+      table: { category: 'Query params' },
+      description: 'Initial latitude',
+    },
+    'query.lng': {
+      control: 'text',
+      table: { category: 'Query params' },
+      description: 'Initial longitude',
+    },
+    'query.zoom': {
+      control: 'text',
+      table: { category: 'Query params' },
+      description: 'Initial zoom',
+    },
+    'query.rotation': {
+      control: 'text',
+      table: { category: 'Query params' },
+      description: 'Initial rotation',
+    },
+    'query.showInfoBar': {
+      control: 'boolean',
+      table: { category: 'Query params' },
+      description: 'Show the query string preview bar above the map',
+    },
   },
   render: args => {
+    const storyArgs = args as SetupStoryArgs
+
+    const wrapper = document.createElement('div')
+
+    const info = document.createElement('div')
+    info.className = 'map-demo-info'
+
     const container = document.createElement('div')
     container.classList.add('map-container')
 
-    const mapEl = setupMapDemo({
+    const params = new URLSearchParams()
+
+    if (storyArgs['query.lat']) params.set('lat', storyArgs['query.lat'])
+    if (storyArgs['query.lng']) params.set('lng', storyArgs['query.lng'])
+    if (storyArgs['query.zoom']) params.set('zoom', storyArgs['query.zoom'])
+    if (storyArgs['query.rotation']) params.set('rotation', storyArgs['query.rotation'])
+
+    const queryString = params.toString()
+    const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname
+    window.history.replaceState({}, '', newUrl)
+
+    info.textContent = storyArgs['query.showInfoBar']
+      ? `Query params: ${queryString ? `?${queryString}` : '(none)'}`
+      : ''
+
+    setupMapDemo({
       container,
-      positions: args.positions,
-      renderer: args.renderer,
-      enable3D: args.enable3D,
-      usesInternalOverlays: args.usesInternalOverlays,
+      positions: storyArgs.positions,
+      renderer: storyArgs.renderer,
+      enable3D: storyArgs.enable3D,
+      usesInternalOverlays: storyArgs.usesInternalOverlays,
       controls: {
-        zoomSlider: args['controls.zoomSlider'],
-        rotate: args['controls.rotate'],
-        olRotationMode: args['controls.olRotationMode'],
-        olRotateTooltip: args['controls.olRotateTooltip'],
-        scale: args['controls.scale'],
-        locationDisplay: args['controls.locationDisplay'],
-        grabCursor: args['controls.grabCursor'],
+        zoomSlider: storyArgs['controls.zoomSlider'],
+        rotate: storyArgs['controls.rotate'],
+        olRotationMode: storyArgs['controls.olRotationMode'],
+        olRotateTooltip: storyArgs['controls.olRotateTooltip'],
+        scale: storyArgs['controls.scale'],
+        locationDisplay: storyArgs['controls.locationDisplay'],
+        grabCursor: storyArgs['controls.grabCursor'],
       },
       showPositions: true,
       showTracks: false,
@@ -64,25 +152,17 @@ const meta = {
       showCircles: false,
     })
 
-    mapEl.addEventListener('map:ready', () => {
-      const emMap = mapEl as EmMap
-      const olMap = emMap.olMapInstance
-      if (!olMap) return
+    if (storyArgs['query.showInfoBar']) {
+      wrapper.appendChild(info)
+    }
+    wrapper.appendChild(container)
 
-      // Wait for OL render
-      olMap.once('rendercomplete', () => {
-        emMap.fitToAllLayers({
-          padding: 40,
-        })
-      })
-    })
-
-    return container
+    return wrapper
   },
 } satisfies Meta
 
 export default meta
-type Story = StoryObj
+type Story = StoryObj<SetupStoryArgs>
 
 export const Example: Story = {
   args: {
@@ -90,6 +170,7 @@ export const Example: Story = {
     enable3D: true,
     positions,
     usesInternalOverlays: true,
+
     'controls.zoomSlider': false,
     'controls.rotate': 'false',
     'controls.olRotationMode': 'default',
@@ -97,6 +178,12 @@ export const Example: Story = {
     'controls.scale': 'false',
     'controls.locationDisplay': 'false',
     'controls.grabCursor': true,
+
+    'query.lat': '51.5074',
+    'query.lng': '-0.1278',
+    'query.zoom': '12',
+    'query.rotation': '0',
+    'query.showInfoBar': true,
   },
   parameters: {
     docs: {
@@ -106,7 +193,15 @@ export const Example: Story = {
           const args = context.args as Record<string, any>
           const enable3D = args.renderer === 'maplibre' ? `\n  enable3DBuildings: ${args.enable3D},` : ''
 
-          return `{% from "em-map/macro.njk" import emMap %}
+          const queryParams = new URLSearchParams()
+          if (args['query.lat']) queryParams.set('lat', args['query.lat'])
+          if (args['query.lng']) queryParams.set('lng', args['query.lng'])
+          if (args['query.zoom']) queryParams.set('zoom', args['query.zoom'])
+          if (args['query.rotation']) queryParams.set('rotation', args['query.rotation'])
+
+          const queryPrefix = queryParams.toString() ? `?${queryParams.toString()}\n\n` : ''
+
+          return `${queryPrefix}{% from "em-map/macro.njk" import emMap %}
 
 {# Overlay templates defined elsewhere on the page (required when usesInternalOverlays=true) #}
 <template id="overlay-title-test-location">

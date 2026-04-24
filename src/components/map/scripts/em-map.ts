@@ -4,6 +4,7 @@ import { boundingExtent, extend, isEmpty } from 'ol/extent'
 import type { Extent } from 'ol/extent'
 import { fromLonLat } from 'ol/proj'
 import type BaseLayer from 'ol/layer/Base'
+import { degreesToOpenLayersRotation } from './helpers/viewport'
 import { OLMapInstance, OLMapOptions } from './core/open-layers-map-instance'
 import { MapLibreMapInstance } from './core/maplibre-map-instance'
 import { setupOpenLayersMap } from './core/setup/setup-openlayers-map'
@@ -49,6 +50,13 @@ type FitToOptions = ViewportOptions & {
   targets: FitTarget[]
 }
 
+type InitialViewport = {
+  latitude?: number
+  longitude?: number
+  zoom?: number
+  rotation?: number
+}
+
 export class EmMap extends HTMLElement {
   private mapNonce: string | null = null
 
@@ -77,6 +85,7 @@ export class EmMap extends HTMLElement {
     this.geoJson = this.parseGeoJsonFromSlot()
     this.positionData = this.parsePositionDataFromSlot()
     await this.initialiseMap()
+    this.applyInitialViewportFromQuery()
 
     this.dispatchEvent(
       new CustomEvent('map:ready', {
@@ -562,6 +571,70 @@ export class EmMap extends HTMLElement {
       }
     }
     return []
+  }
+
+  private parseInitialViewportFromQuery(): InitialViewport | null {
+    const params = new URLSearchParams(window.location.search)
+
+    const parseNumber = (value: string | null): number | undefined => {
+      if (value === null || value.trim() === '') return undefined
+
+      const parsed = Number(value)
+      return Number.isFinite(parsed) ? parsed : undefined
+    }
+
+    const latitude = parseNumber(params.get('lat'))
+    const longitude = parseNumber(params.get('lng'))
+    const zoom = parseNumber(params.get('zoom'))
+    const rotation = parseNumber(params.get('rotation'))
+
+    const hasCentre = latitude !== undefined && longitude !== undefined
+    const hasZoom = zoom !== undefined
+    const hasRotation = rotation !== undefined
+
+    if (!hasCentre && !hasZoom && !hasRotation) {
+      return null
+    }
+
+    if ((latitude !== undefined && longitude === undefined) || (latitude === undefined && longitude !== undefined)) {
+      console.warn('[EmMap] Ignoring partial centre from query params. Both lat and lng are required to set centre.')
+    }
+
+    return {
+      latitude,
+      longitude,
+      zoom,
+      rotation,
+    }
+  }
+
+  private applyInitialViewportFromQuery() {
+    const initialViewport = this.parseInitialViewportFromQuery()
+
+    if (!initialViewport || !this.adapter) return
+
+    if (this.adapter.mapLibrary !== 'openlayers') {
+      console.warn('[EmMap] Query param viewport initialisation not implemented for MapLibre yet')
+      return
+    }
+
+    const map = this.olMapInstance!
+    const view = map.getView()
+
+    const { latitude } = initialViewport
+    const { longitude } = initialViewport
+
+    if (latitude !== undefined && longitude !== undefined) {
+      view.setCenter(fromLonLat([longitude, latitude]))
+    }
+
+    if (initialViewport.zoom !== undefined) {
+      view.setZoom(initialViewport.zoom)
+    }
+
+    if (initialViewport.rotation !== undefined) {
+      view.setRotation(degreesToOpenLayersRotation(initialViewport.rotation))
+    }
   }
 
   private async initialiseMap() {
