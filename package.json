@@ -79,7 +79,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/qs": "^6.9.18",
-    "axios": "1.15.0",
+    "axios": "1.16.0",
     "dotenv": "^17.2.0",
     "express": "^4.21.2",
     "maplibre-gl": "^5.7.0",
@@ -87,6 +87,7 @@
     "superagent": "^10.2.0"
   },
   "devDependencies": {
+    "@babel/plugin-transform-modules-systemjs": "7.29.4",
     "@babel/preset-env": "^7.28.3",
     "@babel/preset-typescript": "^7.27.1",
     "@chromatic-com/storybook": "^4.1.2",
