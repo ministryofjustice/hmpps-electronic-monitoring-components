@@ -1,0 +1,25 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": true,
+    "declarationDir": "dist/types",
+    "emitDeclarationOnly": true,
+    "types": ["vite/client"]
+  },
+  "include": ["src/index.ts", "src/components/**/*.ts", "src/types/**/*.d.ts"],
+  "exclude": [
+    "dist",
+    "src/**/*.test.ts",
+    "src/**/*.stories.ts",
+    "src/stories/**",
+    "src/jest.setup.ts",
+    "src/**/fixtures/**",
+    "src/**/tile-cache-test.ts",
+    "tests",
+    "cypress",
+    "integration_tests",
+    ".storybook"
+  ]
+}
