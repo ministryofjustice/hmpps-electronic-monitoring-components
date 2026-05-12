@@ -12,13 +12,13 @@ import {
   calculateInterpolatedCoordinate,
   isCoordinateWithinDistance,
   extendCoordinate,
-  metersToProjectionUnits,
   normalise,
   getNumericProperty,
   toCoordinate,
 } from '../../../helpers/geometry'
 import LineStyle from '../../styles/line'
 import { createLineStringFeatureCollectionFromPositions } from '../../features/line-string'
+import { createGeodesicCirclePolygon } from '../../features/circle'
 import { Position } from '../../types/position'
 import ArrowStyle from '../../styles/arrow'
 
@@ -124,13 +124,74 @@ const getExitVector = (
   return bearingToVector(45, directionUnits)
 }
 
+const getRaySegmentIntersectionDistance = (
+  origin: Coordinate,
+  direction: [number, number],
+  segmentStart: Coordinate,
+  segmentEnd: Coordinate,
+): number | null => {
+  const segmentX = segmentEnd[0] - segmentStart[0]
+  const segmentY = segmentEnd[1] - segmentStart[1]
+  const determinant = direction[0] * segmentY - direction[1] * segmentX
+
+  if (Math.abs(determinant) < Number.EPSILON) {
+    return null
+  }
+
+  const offsetX = segmentStart[0] - origin[0]
+  const offsetY = segmentStart[1] - origin[1]
+
+  const rayDistance = (offsetX * segmentY - offsetY * segmentX) / determinant
+  const segmentDistance = (offsetX * direction[1] - offsetY * direction[0]) / determinant
+
+  if (rayDistance < 0 || segmentDistance < 0 || segmentDistance > 1) {
+    return null
+  }
+
+  return rayDistance
+}
+
+const extendBeyondPolygonBoundary = (
+  coord: Coordinate,
+  direction: [number, number],
+  boundary: Coordinate[],
+  extensionMeters: number,
+): Coordinate => {
+  const boundarySegments = boundary.slice(0, -1)
+  const closestIntersectionDistance = boundarySegments.reduce<number | null>((closest, segmentStart, index) => {
+    const segmentEnd = boundary[index + 1]
+    const intersectionDistance = getRaySegmentIntersectionDistance(coord, direction, segmentStart, segmentEnd)
+
+    if (intersectionDistance === null) {
+      return closest
+    }
+
+    if (closest === null || intersectionDistance < closest) {
+      return intersectionDistance
+    }
+
+    return closest
+  }, null)
+
+  if (closestIntersectionDistance === null) {
+    return extendCoordinate(coord, direction, extensionMeters)
+  }
+
+  const intersection: Coordinate = [
+    coord[0] + direction[0] * closestIntersectionDistance,
+    coord[1] + direction[1] * closestIntersectionDistance,
+  ]
+
+  return extendCoordinate(intersection, direction, extensionMeters)
+}
+
 /**
- * Extends a point in a given direction until it exits a circle,
+ * Extends a point in a given direction until it exits a geodesic perimeter,
  * then continues a bit further.
  *
  * Steps:
  * 1. Treat the direction as a ray starting from `coord`
- * 2. Find where that ray intersects the circle boundary
+ * 2. Find where that ray intersects the perimeter boundary
  * 3. Move to that boundary point, then extend beyond it
  *
  * If no intersection is found, just extend normally.
@@ -138,50 +199,13 @@ const getExitVector = (
 const extendBeyondCircle = (
   coord: Coordinate,
   direction: [number, number],
-  centre: Coordinate,
+  centre: [number, number],
   radiusMeters: number,
   extensionMeters: number,
 ): Coordinate => {
-  const radius = metersToProjectionUnits(coord, radiusMeters)
-  const extension = metersToProjectionUnits(coord, extensionMeters)
+  const boundary = createGeodesicCirclePolygon(centre, radiusMeters).getCoordinates()[0]
 
-  const [directionX, directionY] = direction
-
-  // Vector from circle centre to starting point
-  const offsetX = coord[0] - centre[0]
-  const offsetY = coord[1] - centre[1]
-
-  // Values used to calculate where the ray hits the circle
-  const directionLengthSq = directionX * directionX + directionY * directionY
-  const offsetAlongDirection = 2 * (offsetX * directionX + offsetY * directionY)
-  const distanceFromCentreSqMinusRadiusSq = offsetX * offsetX + offsetY * offsetY - radius * radius
-
-  const intersectionValue =
-    offsetAlongDirection * offsetAlongDirection - 4 * directionLengthSq * distanceFromCentreSqMinusRadiusSq
-
-  // No intersection → just extend forward
-  if (intersectionValue < 0) {
-    return [coord[0] + directionX * extension, coord[1] + directionY * extension]
-  }
-
-  const intersectionDistanceFactor = Math.sqrt(intersectionValue)
-
-  const intersection1 = (-offsetAlongDirection - intersectionDistanceFactor) / (2 * directionLengthSq)
-  const intersection2 = (-offsetAlongDirection + intersectionDistanceFactor) / (2 * directionLengthSq)
-
-  // Only keep intersections in front of the point
-  const forwardIntersections = [intersection1, intersection2].filter(t => t >= 0).sort((a, b) => a - b)
-
-  if (!forwardIntersections.length) {
-    return [coord[0] + directionX * extension, coord[1] + directionY * extension]
-  }
-
-  const distanceToBoundary = forwardIntersections[0]
-
-  // Move to boundary, then extend beyond it
-  const totalDistance = distanceToBoundary + extension
-
-  return [coord[0] + directionX * totalDistance, coord[1] + directionY * totalDistance]
+  return extendBeyondPolygonBoundary(coord, direction, boundary, extensionMeters)
 }
 
 // Apply entry/exit line extensions
@@ -199,7 +223,7 @@ const applyEntryExitToFeatures = (
   const entryVector = getEntryVector(positions, directionProperty, directionUnits)
   const exitVector = getExitVector(positions, directionProperty, directionUnits)
 
-  const centreCoordinates = options.centre ? fromLonLat(options.centre) : undefined
+  const centreCoordinates = options.centre
   const radius = options.radiusMeters
 
   const firstGeom = features[0].getGeometry()
@@ -208,7 +232,7 @@ const applyEntryExitToFeatures = (
     const first = coords[0]
 
     const entry =
-      centreCoordinates && radius
+      centreCoordinates && radius !== undefined
         ? extendBeyondCircle(first, entryVector, centreCoordinates, radius, extensionDistance)
         : extendCoordinate(first, entryVector, extensionDistance)
 
@@ -226,7 +250,7 @@ const applyEntryExitToFeatures = (
     const last = coords[coords.length - 1]
 
     const exit =
-      centreCoordinates && radius
+      centreCoordinates && radius !== undefined
         ? extendBeyondCircle(last, exitVector, centreCoordinates, radius, extensionDistance)
         : extendCoordinate(last, exitVector, extensionDistance)
 

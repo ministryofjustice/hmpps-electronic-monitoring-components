@@ -1,5 +1,6 @@
 import { Style } from 'ol/style'
 import { Point, LineString } from 'ol/geom'
+import { fromLonLat } from 'ol/proj'
 import { Coordinate } from 'ol/coordinate'
 import Feature from 'ol/Feature'
 import ArrowStyle from '../../styles/arrow'
@@ -92,7 +93,11 @@ describe('OLTracksLayer (OpenLayers library)', () => {
     // pick an arrow coordinate to block
     const arrowPoint = arrowStyles[0].getGeometry() as Point
     const avoidPosition = arrowPoint.getCoordinates()
-    const toPosition = (coord: Coordinate) => ({ longitude: coord[0], latitude: coord[1] })
+    const toPosition = (coord: Coordinate) => ({
+      longitude: coord[0],
+      latitude: coord[1],
+      precision: 0,
+    })
 
     // Re-create layer with avoidPositions containing that coordinate
     const avoidLayer = new OLTracksLayer({
@@ -154,24 +159,24 @@ describe('Entry / Exit vector logic', () => {
 })
 
 describe('extendBeyondCircle', () => {
-  it('extends beyond boundary when intersecting', () => {
-    const coord: Coordinate = [1, 0]
+  it('extends beyond geodesic polygon boundary when intersecting', () => {
+    const centre: [number, number] = [0, 0]
+    const coord = fromLonLat([0, 0])
     const direction: [number, number] = [1, 0]
-    const centre: Coordinate = [5, 0]
 
-    const result = extendBeyondCircle(coord, direction, centre, 5, 5)
+    const result = extendBeyondCircle(coord, direction, centre, 100, 5)
 
-    expect(result[0]).toBeGreaterThan(5)
+    expect(result[0]).toBeGreaterThan(coord[0])
   })
 
   it('falls back when no intersection', () => {
-    const coord: Coordinate = [0, 0]
+    const centre: [number, number] = [0, 10]
+    const coord = fromLonLat([0, 0])
     const direction: [number, number] = [1, 0]
-    const centre: Coordinate = [0, 1000]
 
     const result = extendBeyondCircle(coord, direction, centre, 5, 5)
 
-    expect(result[0]).toBeGreaterThan(0)
+    expect(result[0]).toBeGreaterThan(coord[0])
   })
 })
 
