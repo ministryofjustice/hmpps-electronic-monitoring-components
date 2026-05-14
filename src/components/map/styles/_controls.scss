@@ -50,7 +50,7 @@
   background-color: transparent;
   left: 0.5em;
   right: auto;
-  top: 80px;
+  top: 0;
 
   .ol-rotate-reset {
     border-radius: 50%;
@@ -91,6 +91,11 @@
     opacity: 1;
     transform: translateY(-4px);
   }
+}
+
+/* When zoom controls are present, move rotate below the controls */
+:host(.has-zoom-control) .ol-control.ol-rotate {
+  top: 80px;
 }
 
 /* When zoom slider is present, move rotate below the slider */

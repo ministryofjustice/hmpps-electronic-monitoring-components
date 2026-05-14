@@ -85,6 +85,24 @@ describe('EmMapInstance', () => {
     expect(olControl.ZoomSlider).toHaveBeenCalled()
   })
 
+  it('enables default zoom control by default', () => {
+    new OLMapInstance({ target, controls: {} })
+
+    expect(olControl.defaults).toHaveBeenCalledWith({ rotate: false, attribution: false, zoom: true })
+  })
+
+  it('disables default zoom control when zoomControl = false', () => {
+    new OLMapInstance({ target, controls: { zoomControl: false } })
+
+    expect(olControl.defaults).toHaveBeenCalledWith({ rotate: false, attribution: false, zoom: false })
+  })
+
+  it('enables default zoom control when zoomSlider = true and zoomControl = false', () => {
+    new OLMapInstance({ target, controls: { zoomControl: false, zoomSlider: true } })
+
+    expect(olControl.defaults).toHaveBeenCalledWith({ rotate: false, attribution: false, zoom: true })
+  })
+
   it('uses DefaultView', () => {
     new OLMapInstance({ target })
     expect(defaultView.default).toHaveBeenCalled()

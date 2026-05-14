@@ -7,6 +7,7 @@ type SetupStoryArgs = {
   enable3D: boolean
   positions: any[]
   usesInternalOverlays: boolean
+  'controls.zoomControl': boolean
   'controls.zoomSlider': boolean
   'controls.rotate': 'true' | 'auto-hide' | 'false'
   'controls.olRotationMode': 'default' | 'right-drag'
@@ -42,7 +43,10 @@ const meta = {
       control: 'boolean',
       description: 'Enable click-to-open overlays (injects demo templates automatically)',
     },
-
+    'controls.zoomControl': {
+      control: 'boolean',
+      table: { category: 'Controls' },
+    },
     'controls.zoomSlider': {
       control: 'boolean',
       table: { category: 'Controls' },
@@ -138,6 +142,7 @@ const meta = {
       enable3D: storyArgs.enable3D,
       usesInternalOverlays: storyArgs.usesInternalOverlays,
       controls: {
+        zoomControl: storyArgs['controls.zoomControl'],
         zoomSlider: storyArgs['controls.zoomSlider'],
         rotate: storyArgs['controls.rotate'],
         olRotationMode: storyArgs['controls.olRotationMode'],
@@ -171,6 +176,7 @@ export const Example: Story = {
     positions,
     usesInternalOverlays: true,
 
+    'controls.zoomControl': true,
     'controls.zoomSlider': false,
     'controls.rotate': 'false',
     'controls.olRotationMode': 'default',
@@ -230,6 +236,7 @@ export const Example: Story = {
     rotateControl: '${args['controls.rotate']}',
     olRotationMode: '${args['controls.olRotationMode']}',
     olRotateTooltip: ${args['controls.olRotateTooltip']},
+    zoomControl: ${args['controls.zoomControl']},
     zoomSlider: ${args['controls.zoomSlider']},
     grabCursor: ${args['controls.grabCursor']}
   }

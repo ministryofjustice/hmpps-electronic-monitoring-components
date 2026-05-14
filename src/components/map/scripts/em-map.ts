@@ -681,6 +681,8 @@ export class EmMap extends HTMLElement {
     const locationDisplay = (this.getAttribute('location-display') as 'dms' | 'latlon' | null) ?? undefined
     const locationDisplaySource = (this.getAttribute('location-source') as 'centre' | 'pointer' | null) ?? undefined
     const zoomSlider = parseBool('zoom-slider')
+    const zoomControl =
+      zoomSlider || !this.hasAttribute('zoom-control') || this.getAttribute('zoom-control') !== 'false'
     const grabCursor = parseBool('grab-cursor')
     let scaleControl: 'bar' | 'line' | undefined
 
@@ -706,6 +708,7 @@ export class EmMap extends HTMLElement {
     }
 
     this.classList.toggle('has-rotate-control', rotateButtonOpt !== false)
+    this.classList.toggle('has-zoom-control', zoomControl)
     this.classList.toggle('has-zoom-slider', zoomSlider)
     this.classList.toggle('has-scale-control', !!scaleControl)
     this.classList.toggle('has-location-dms', locationDisplay === 'dms')
@@ -717,6 +720,7 @@ export class EmMap extends HTMLElement {
       rotate: rotateButtonOpt,
       olRotateTooltip,
       olRotationMode,
+      zoomControl,
       zoomSlider,
       scaleControl,
       locationDisplay,
