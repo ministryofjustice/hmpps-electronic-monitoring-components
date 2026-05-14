@@ -21,6 +21,7 @@ export interface OLMapOptions {
     olRotationMode?: 'default' | 'right-drag'
     olRotateTooltip?: boolean
     zoomSlider?: boolean
+    zoomControl?: boolean
     scaleControl?: 'bar' | 'line'
     locationDisplay?: 'dms' | 'latlon'
     locationDisplaySource?: 'centre' | 'pointer'
@@ -33,7 +34,13 @@ export class OLMapInstance extends Map {
     const layers = options.layers || []
     const controlOptions = options.controls || {}
 
-    const controls = defaultControls({ rotate: false, attribution: false })
+    const zoomControl = controlOptions.zoomSlider || controlOptions.zoomControl !== false
+
+    const controls = defaultControls({
+      rotate: false,
+      attribution: false,
+      zoom: zoomControl,
+    })
 
     // Rotate control
     if (controlOptions.rotate !== false) {

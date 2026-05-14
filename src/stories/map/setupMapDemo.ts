@@ -24,6 +24,7 @@ interface MapDemoOptions {
   renderer?: 'openlayers' | 'maplibre'
   enable3D?: boolean
   controls?: {
+    zoomControl?: boolean
     zoomSlider?: boolean
     rotate?: 'true' | 'auto-hide' | 'false'
     olRotationMode?: 'default' | 'right-drag'
@@ -196,6 +197,7 @@ export function setupMapDemo({
     rotate: 'true',
     olRotationMode: 'default',
     olRotateTooltip: true,
+    zoomControl: true,
     zoomSlider: true,
   },
   showPositions = true,
@@ -232,6 +234,7 @@ export function setupMapDemo({
   if (controls.olRotationMode) map.setAttribute('ol-rotation-mode', controls.olRotationMode)
   if (typeof controls.olRotateTooltip === 'boolean')
     map.setAttribute('ol-rotate-tooltip', String(controls.olRotateTooltip))
+  if (typeof controls.zoomControl === 'boolean') map.setAttribute('zoom-control', String(controls.zoomControl))
   if (typeof controls.zoomSlider === 'boolean') map.setAttribute('zoom-slider', String(controls.zoomSlider))
   if (typeof controls.grabCursor === 'boolean') map.setAttribute('grab-cursor', String(controls.grabCursor))
 

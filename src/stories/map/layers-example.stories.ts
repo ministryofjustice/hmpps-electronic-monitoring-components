@@ -50,6 +50,7 @@ const meta = {
       enable3D: args.enable3D,
       markerMode: args.markerMode,
       controls: {
+        zoomControl: true,
         zoomSlider: true,
         rotate: 'auto-hide',
         scale: 'bar',
@@ -118,6 +119,7 @@ export const Example: Story = {
     scaleControl: 'bar',
     locationDisplay: 'latlon',
     rotateControl: 'auto-hide',
+    zoomControl: true,
     zoomSlider: true
   }
 }) }}`

@@ -6,6 +6,7 @@
     {% if params.apiKey %}api-key="{{ params.apiKey }}"{% endif %}
     {% if params.renderer %}renderer="{{ params.renderer }}"{% endif %}
     {% if params.controls.scaleControl %}scale-control="{{ params.controls.scaleControl }}"{% endif %}
+    {% if params.controls.zoomControl %}zoom-control{% endif %}
     {% if params.controls.zoomSlider %}zoom-slider{% endif %}
     {% if params.controls.rotateControl is defined %}
     {% if params.controls.rotateControl === 'auto-hide' %}
