@@ -1,6 +1,6 @@
 {
   "name": "@ministryofjustice/hmpps-electronic-monitoring-components",
-  "version": "0.2.15-beta.1",
+  "version": "0.2.16-beta.1",
   "description": "HMPPS Electronic Monitoring Frontend Components",
   "repository": {
     "type": "git",
@@ -31,7 +31,7 @@
     "vite": "vite",
     "build:css": "set -e; for file in src/components/**/styles/[!_]*.scss; do sass --no-source-map --quiet-deps --load-path=node_modules \"$file\" \"${file%.scss}.raw.css\"; done",
     "watch:css": "chokidar --glob \"src/components/**/styles/**/*.scss\" -c \"npm run build:css --silent\"",
-    "build": "rm -rf dist && rm -rf dist && npm run build:css && vite build && tsc -p tsconfig.build.json -p tsconfig.build.json",
+    "build": "rm -rf dist && npm run build:css && vite build && tsc -p tsconfig.build.json",
     "start-feature": "npm run build:css && storybook dev -p 6006",
     "build-storybook": "npm run build:css && storybook build",
     "setup": "npm ci && hmpps-npm-script-run-allowlist"
@@ -160,7 +160,6 @@
     "qs": "^6.14.2",
     "flatted": "^3.4.1",
     "immutable": "^5.1.5",
-    "systeminformation": "^5.30.8",
     "path-to-regexp": "0.1.13"
   }
 }
