@@ -1,9 +1,17 @@
 import { Layer } from 'ol/layer'
+import { Style } from 'ol/style'
 import { TracksLayer } from './tracks-layer'
 import makeOpenLayersAdapter from '../../../../../../tests/utils/openlayers-adapter'
 import { Position } from '../types/position'
 
 const samplePositions: Array<Position> = []
+
+const timeGapsPositions: Array<Position> = [
+  { latitude: 51.5, longitude: -0.1, precision: 10, timestamp: '2024-01-01T12:00:00Z' } as unknown as Position,
+  { latitude: 51.6, longitude: -0.1, precision: 10, timestamp: '2024-01-01T12:10:00Z' } as unknown as Position,
+  { latitude: 51.7, longitude: -0.1, precision: 10, timestamp: '2024-01-01T12:11:00Z' } as unknown as Position,
+  { latitude: 51.8, longitude: -0.1, precision: 10, timestamp: '2024-01-01T12:15:00Z' } as unknown as Position,
+]
 
 describe('TracksLayer (OpenLayers library)', () => {
   beforeEach(() => {
@@ -42,5 +50,78 @@ describe('TracksLayer (OpenLayers library)', () => {
     layer.detach(adapter)
 
     expect(olMapMock.removeLayer).toHaveBeenCalledWith(added)
+  })
+
+  it('applies dashed line to gap segments and solid line to normal segments when time gaps are enabled', () => {
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+    const layer = new TracksLayer({
+      positions: timeGapsPositions,
+      style: {
+        stroke: {
+          color: 'red',
+        },
+        timeGap: {
+          enabled: true,
+          lineDash: [8, 6],
+        },
+      },
+    })
+
+    layer.attach(adapter)
+
+    const added = olMapMock.addLayer.mock.calls[0][0]
+    const styleFunction = added.getStyleFunction()!
+    const features = added.getSource().getFeatures()
+
+    // segment 0→1: 10 min gap → dashed
+    const gapFeature = features[0]
+    expect(gapFeature.get('isTimeGap')).toBe(true)
+    const gapStyles = styleFunction(gapFeature, 1) as Style[]
+    expect(gapStyles[0].getStroke()?.getLineDash()).toEqual([8, 6])
+
+    // segment 1→2: 1 min gap → solid
+    const solidFeature = features[1]
+    expect(solidFeature.get('isTimeGap')).toBe(false)
+    const solidStyles = styleFunction(solidFeature, 1) as Style[]
+    expect(solidStyles[0].getStroke()?.getLineDash()).toBeNull()
+
+    expect(gapStyles[0].getStroke()?.getColor()).toBe('red')
+    expect(solidStyles[0].getStroke()?.getColor()).toBe('red')
+  })
+
+  it('should not apply dashed line to gap segments when timeGap is not enabled', () => {
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+    const layer = new TracksLayer({
+      positions: timeGapsPositions,
+      style: {
+        stroke: {
+          color: 'red',
+        },
+        timeGap: {
+          enabled: false,
+          lineDash: [8, 6],
+        },
+      },
+    })
+
+    layer.attach(adapter)
+
+    const added = olMapMock.addLayer.mock.calls[0][0]
+    const styleFunction = added.getStyleFunction()!
+    const features = added.getSource().getFeatures()
+
+    // gap segment — but timeGap disabled, so no dashes
+    const gapFeature = features[0]
+    const gapStyles = styleFunction(gapFeature, 1) as Style[]
+    expect(gapStyles[0].getStroke()?.getLineDash()).toBeNull()
+
+    // solid segment — also no dashes
+    const solidFeature = features[1]
+    const solidStyles = styleFunction(solidFeature, 1) as Style[]
+    expect(solidStyles[0].getStroke()?.getLineDash()).toBeNull()
+
+
+    expect(gapStyles[0].getStroke()?.getColor()).toBe('red')
+    expect(solidStyles[0].getStroke()?.getColor()).toBe('red')
   })
 })

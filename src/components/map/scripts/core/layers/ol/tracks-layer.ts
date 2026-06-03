@@ -27,6 +27,11 @@ type DirectionUnits = 'degrees' | 'radians'
 type OLTracksLayerStyle = {
   stroke: {
     color: string
+    lineDash?: number[]
+  }
+  timeGap?: {
+    enabled: boolean
+    lineDash?: number[]
   }
 }
 
@@ -316,8 +321,11 @@ const createStyleFunction =
     const end = coords[1]
     const rotation = -calculateAngleOfInclination(start, end) + Math.PI / 2
 
+    const isGapSegment = style.timeGap?.enabled && (feature as Feature).get('isTimeGap') === true
+    const lineDash = isGapSegment ? (style.timeGap?.lineDash ?? [8, 6]) : undefined
+
     return [
-      new LineStyle(style.stroke.color, resolution),
+      new LineStyle(style.stroke.color, resolution, lineDash),
       ...getArrowStyles(start, rotation, magnitude, resolution, avoidCoordinates),
     ]
   }

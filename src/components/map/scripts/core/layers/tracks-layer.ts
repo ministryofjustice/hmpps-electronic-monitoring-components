@@ -14,6 +14,11 @@ export type TracksLayerOptions = {
   style?: {
     stroke: {
       color: string
+      lineDash?: number[]
+    }
+    timeGap?: {
+      enabled: boolean
+      lineDash?: number[]
     }
   }
   avoidPositions?: Array<Position>
