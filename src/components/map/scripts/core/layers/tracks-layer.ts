@@ -1,7 +1,7 @@
 import BaseLayer from 'ol/layer/Base'
 import type { ComposableLayer, LayerStateOptions } from './base'
 import type { MapAdapter } from '../map-adapter'
-import { OLTracksLayer } from './ol/tracks-layer'
+import { OLTracksLayer, SegmentStyleContext, SegmentStyleResult } from './ol/tracks-layer'
 import { Position } from '../types/position'
 
 export type DirectionUnits = 'degrees' | 'radians'
@@ -16,14 +16,10 @@ export type TracksLayerOptions = {
       color: string
       lineDash?: number[]
     }
-    timeGap?: {
-      enabled: boolean
-      lineDash?: number[]
-    }
   }
   avoidPositions?: Array<Position>
   positions: Array<Position>
-
+  segmentStyle?: (context: SegmentStyleContext) => SegmentStyleResult
   entryExit?: {
     enabled?: boolean
     extensionDistanceMeters?: number
@@ -58,6 +54,7 @@ export class TracksLayer implements ComposableLayer<BaseLayer[]> {
         zIndex: this.options.zIndex,
         avoidPositions: this.options.avoidPositions,
         entryExit: this.options.entryExit,
+        segmentStyle: this.options.segmentStyle,
       }),
     ]
   }

@@ -13,6 +13,15 @@ const timeGapsPositions: Array<Position> = [
   { latitude: 51.8, longitude: -0.1, precision: 10, timestamp: '2024-01-01T12:15:00Z' } as unknown as Position,
 ]
 
+const FIVE_MINUTES_MS = 5 * 60 * 1000
+
+const shouldDash = (from: Position, to: Position): boolean => {
+  const t1 = from.timestamp ? new Date(from.timestamp).getTime() : null
+  const t2 = to.timestamp ? new Date(to.timestamp).getTime() : null
+  if (t1 === null || t2 === null) return false
+  return t2 - t1 >= FIVE_MINUTES_MS
+}
+
 describe('TracksLayer (OpenLayers library)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -56,15 +65,12 @@ describe('TracksLayer (OpenLayers library)', () => {
     const { adapter, olMapMock } = makeOpenLayersAdapter()
     const layer = new TracksLayer({
       positions: timeGapsPositions,
-      style: {
+      style: { stroke: { color: 'red' } },
+      segmentStyle: ({ positions: [from, to] }) => ({
         stroke: {
-          color: 'red',
+          lineDash: shouldDash(from, to) ? [8, 6] : undefined,
         },
-        timeGap: {
-          enabled: true,
-          lineDash: [8, 6],
-        },
-      },
+      }),
     })
 
     layer.attach(adapter)
@@ -75,13 +81,11 @@ describe('TracksLayer (OpenLayers library)', () => {
 
     // segment 0→1: 10 min gap → dashed
     const gapFeature = features[0]
-    expect(gapFeature.get('isTimeGap')).toBe(true)
     const gapStyles = styleFunction(gapFeature, 1) as Style[]
     expect(gapStyles[0].getStroke()?.getLineDash()).toEqual([8, 6])
 
     // segment 1→2: 1 min gap → solid
     const solidFeature = features[1]
-    expect(solidFeature.get('isTimeGap')).toBe(false)
     const solidStyles = styleFunction(solidFeature, 1) as Style[]
     expect(solidStyles[0].getStroke()?.getLineDash()).toBeNull()
 
@@ -96,10 +100,6 @@ describe('TracksLayer (OpenLayers library)', () => {
       style: {
         stroke: {
           color: 'red',
-        },
-        timeGap: {
-          enabled: false,
-          lineDash: [8, 6],
         },
       },
     })
