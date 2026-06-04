@@ -120,7 +120,6 @@ describe('TracksLayer (OpenLayers library)', () => {
     const solidStyles = styleFunction(solidFeature, 1) as Style[]
     expect(solidStyles[0].getStroke()?.getLineDash()).toBeNull()
 
-
     expect(gapStyles[0].getStroke()?.getColor()).toBe('red')
     expect(solidStyles[0].getStroke()?.getColor()).toBe('red')
   })
