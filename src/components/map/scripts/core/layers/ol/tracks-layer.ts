@@ -27,6 +27,7 @@ type DirectionUnits = 'degrees' | 'radians'
 type OLTracksLayerStyle = {
   stroke: {
     color: string
+    lineDash?: number[]
   }
 }
 
@@ -331,14 +332,14 @@ const createStyleFunction =
     const end = coords[1]
     const rotation = -calculateAngleOfInclination(start, end) + Math.PI / 2
 
-    let lineDash: number[] | undefined
+    let { lineDash } = style.stroke
     let { color } = style.stroke
 
     if (segmentStyle) {
       const from = (feature as Feature).get('fromPosition') as Position
       const to = (feature as Feature).get('toPosition') as Position
       const result = segmentStyle({ positions: [from, to] })
-      lineDash = result.stroke?.lineDash
+      lineDash = result.stroke?.lineDash ?? lineDash
       color = result.stroke?.color ?? color
     }
 
