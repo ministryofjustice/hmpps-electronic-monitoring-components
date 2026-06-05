@@ -27,6 +27,18 @@ type DirectionUnits = 'degrees' | 'radians'
 type OLTracksLayerStyle = {
   stroke: {
     color: string
+    lineDash?: number[]
+  }
+}
+
+export type SegmentStyleContext = {
+  positions: [Position, Position]
+}
+
+export type SegmentStyleResult = {
+  stroke?: {
+    lineDash?: number[]
+    color?: string
   }
 }
 
@@ -37,7 +49,7 @@ type OLTracksLayerOptions = {
   visible?: boolean
   zIndex?: number
   avoidPositions?: Array<Position>
-
+  segmentStyle?: (context: SegmentStyleContext) => SegmentStyleResult
   entryExit?: {
     enabled?: boolean
     extensionDistanceMeters?: number
@@ -307,7 +319,11 @@ const getArrowStyles = (
 }
 
 const createStyleFunction =
-  (style: OLTracksLayerStyle, avoidCoordinates?: Array<Coordinate>) =>
+  (
+    style: OLTracksLayerStyle,
+    segmentStyle?: (ctx: SegmentStyleContext) => SegmentStyleResult,
+    avoidCoordinates?: Array<Coordinate>,
+  ) =>
   (feature: FeatureLike, resolution: number): Array<Style> => {
     const geometry = (feature as Feature<LineString>).getGeometry()!
     const coords = geometry.getCoordinates()
@@ -316,8 +332,19 @@ const createStyleFunction =
     const end = coords[1]
     const rotation = -calculateAngleOfInclination(start, end) + Math.PI / 2
 
+    let { lineDash } = style.stroke
+    let { color } = style.stroke
+
+    if (segmentStyle) {
+      const from = (feature as Feature).get('fromPosition') as Position
+      const to = (feature as Feature).get('toPosition') as Position
+      const result = segmentStyle({ positions: [from, to] })
+      lineDash = result.stroke?.lineDash ?? lineDash
+      color = result.stroke?.color ?? color
+    }
+
     return [
-      new LineStyle(style.stroke.color, resolution),
+      new LineStyle(color, resolution, lineDash),
       ...getArrowStyles(start, rotation, magnitude, resolution, avoidCoordinates),
     ]
   }
@@ -336,6 +363,7 @@ export class OLTracksLayer extends VectorLayer<VectorSource<Feature<LineString>>
     zIndex,
     avoidPositions,
     entryExit,
+    segmentStyle,
   }: OLTracksLayerOptions) {
     // If avoidPositions array has been passed, merge with position data
     const allPositions = [...positions, ...(avoidPositions ?? [])]
@@ -361,7 +389,7 @@ export class OLTracksLayer extends VectorLayer<VectorSource<Feature<LineString>>
     super({
       properties: { title },
       source: new VectorSource({ features }),
-      style: createStyleFunction(style, avoid),
+      style: createStyleFunction(style, segmentStyle, avoid),
       visible,
       zIndex,
     })

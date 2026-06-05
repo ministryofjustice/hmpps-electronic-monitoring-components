@@ -1,9 +1,26 @@
 import { Layer } from 'ol/layer'
+import { Style } from 'ol/style'
 import { TracksLayer } from './tracks-layer'
 import makeOpenLayersAdapter from '../../../../../../tests/utils/openlayers-adapter'
 import { Position } from '../types/position'
 
 const samplePositions: Array<Position> = []
+
+const timeGapsPositions: Array<Position> = [
+  { latitude: 51.5, longitude: -0.1, precision: 10, timestamp: '2024-01-01T12:00:00Z' } as unknown as Position,
+  { latitude: 51.6, longitude: -0.1, precision: 10, timestamp: '2024-01-01T12:10:00Z' } as unknown as Position,
+  { latitude: 51.7, longitude: -0.1, precision: 10, timestamp: '2024-01-01T12:11:00Z' } as unknown as Position,
+  { latitude: 51.8, longitude: -0.1, precision: 10, timestamp: '2024-01-01T12:15:00Z' } as unknown as Position,
+]
+
+const FIVE_MINUTES_MS = 5 * 60 * 1000
+
+const shouldDash = (from: Position, to: Position): boolean => {
+  const t1 = from.timestamp ? new Date(from.timestamp).getTime() : null
+  const t2 = to.timestamp ? new Date(to.timestamp).getTime() : null
+  if (t1 === null || t2 === null) return false
+  return t2 - t1 >= FIVE_MINUTES_MS
+}
 
 describe('TracksLayer (OpenLayers library)', () => {
   beforeEach(() => {
@@ -42,5 +59,118 @@ describe('TracksLayer (OpenLayers library)', () => {
     layer.detach(adapter)
 
     expect(olMapMock.removeLayer).toHaveBeenCalledWith(added)
+  })
+
+  it('applies per-segment styles when segmentStyle callback is provided', () => {
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+    const layer = new TracksLayer({
+      positions: timeGapsPositions,
+      style: { stroke: { color: 'red' } },
+      segmentStyle: ({ positions: [from, to] }) => ({
+        stroke: {
+          lineDash: shouldDash(from, to) ? [8, 6] : undefined,
+        },
+      }),
+    })
+
+    layer.attach(adapter)
+
+    const added = olMapMock.addLayer.mock.calls[0][0]
+    const styleFunction = added.getStyleFunction()!
+    const features = added.getSource().getFeatures()
+
+    // segment 0→1: 10 min gap → dashed
+    const gapFeature = features[0]
+    const gapStyles = styleFunction(gapFeature, 1) as Style[]
+    expect(gapStyles[0].getStroke()?.getLineDash()).toEqual([8, 6])
+
+    // segment 1→2: 1 min gap → solid
+    const solidFeature = features[1]
+    const solidStyles = styleFunction(solidFeature, 1) as Style[]
+    expect(solidStyles[0].getStroke()?.getLineDash()).toBeNull()
+
+    expect(gapStyles[0].getStroke()?.getColor()).toBe('red')
+    expect(solidStyles[0].getStroke()?.getColor()).toBe('red')
+  })
+
+  it('applies uniform style to all segments when no segmentStyle callback is provided', () => {
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+    const layer = new TracksLayer({
+      positions: timeGapsPositions,
+      style: {
+        stroke: {
+          color: 'red',
+        },
+      },
+    })
+
+    layer.attach(adapter)
+
+    const added = olMapMock.addLayer.mock.calls[0][0]
+    const styleFunction = added.getStyleFunction()!
+    const features = added.getSource().getFeatures()
+
+    // all segments get base style — no segmentStyle callback, so no per-segment overrides
+    const gapFeature = features[0]
+    const gapStyles = styleFunction(gapFeature, 1) as Style[]
+    expect(gapStyles[0].getStroke()?.getLineDash()).toBeNull()
+
+    // solid segment — also no dashes
+    const solidFeature = features[1]
+    const solidStyles = styleFunction(solidFeature, 1) as Style[]
+    expect(solidStyles[0].getStroke()?.getLineDash()).toBeNull()
+
+    expect(gapStyles[0].getStroke()?.getColor()).toBe('red')
+    expect(solidStyles[0].getStroke()?.getColor()).toBe('red')
+  })
+
+  it('applies global lineDash to all segments when set on stroke style', () => {
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+    const layer = new TracksLayer({
+      positions: timeGapsPositions,
+      style: { stroke: { color: 'red', lineDash: [8, 6] } },
+    })
+
+    layer.attach(adapter)
+
+    const added = olMapMock.addLayer.mock.calls[0][0]
+    const styleFunction = added.getStyleFunction()!
+    const features = added.getSource().getFeatures()
+
+    const firstSegment = features[0]
+    const secondSegment = features[1]
+
+    const firstStyles = styleFunction(firstSegment, 1) as Style[]
+    const secondStyles = styleFunction(secondSegment, 1) as Style[]
+
+    expect(firstStyles[0].getStroke()?.getLineDash()).toEqual([8, 6])
+    expect(secondStyles[0].getStroke()?.getLineDash()).toEqual([8, 6])
+  })
+
+  it('segmentStyle lineDash overrides global stroke lineDash', () => {
+    const { adapter, olMapMock } = makeOpenLayersAdapter()
+    const layer = new TracksLayer({
+      positions: timeGapsPositions,
+      style: { stroke: { color: 'red', lineDash: [4, 4] } }, // global default
+      segmentStyle: ({ positions: [from, to] }) => ({
+        stroke: {
+          lineDash: shouldDash(from, to) ? [8, 6] : undefined, // override for gap segments only
+        },
+      }),
+    })
+
+    layer.attach(adapter)
+
+    const added = olMapMock.addLayer.mock.calls[0][0]
+    const styleFunction = added.getStyleFunction()!
+    const features = added.getSource().getFeatures()
+
+    // gap segment: segmentStyle overrides global
+    const gapStyles = styleFunction(features[0], 1) as Style[]
+    expect(gapStyles[0].getStroke()?.getLineDash()).toEqual([8, 6])
+
+    // non-gap segment: segmentStyle returns undefined, falls back to global
+    const solidStyles = styleFunction(features[1], 1) as Style[]
+    expect(solidStyles[0].getStroke()?.getLineDash()).toEqual([4, 4])
   })
 })

@@ -35,7 +35,7 @@ type Position = {
 
   /** Optional short label for display in overlays. */
   label?: string
-
+  timestamp?: string
   /** Optional map marker configuration. */
   marker?: MarkerOptions
 }

@@ -9,6 +9,8 @@ const createLineStringFeatureFromPosition = (position: Position, nextPosition: P
       fromLonLat([position.longitude, position.latitude]),
       fromLonLat([nextPosition.longitude, nextPosition.latitude]),
     ]),
+    fromPosition: position,
+    toPosition: nextPosition,
   })
 }
 
