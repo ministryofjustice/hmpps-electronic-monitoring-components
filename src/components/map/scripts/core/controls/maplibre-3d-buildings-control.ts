@@ -67,8 +67,7 @@ class Buildings3DControl implements maplibregl.IControl {
     if (!this.map || this.map.getLayer(this.LAYER_ID)) return
 
     const fillColor = (this.map.getPaintProperty('OS/TopographicArea_2/Building/1', 'fill-color') ?? '#aaa') as
-      | maplibregl.ExpressionSpecification
-      | string
+      maplibregl.ExpressionSpecification | string
 
     this.map.addLayer({
       id: this.LAYER_ID,
