@@ -1,6 +1,6 @@
 {
   "name": "@ministryofjustice/hmpps-electronic-monitoring-components",
-  "version": "0.2.19-beta.1",
+  "version": "0.2.20",
   "description": "HMPPS Electronic Monitoring Frontend Components",
   "repository": {
     "type": "git",
@@ -80,7 +80,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/qs": "^6.9.18",
-    "axios": "1.16.0",
+    "axios": "1.18.1",
     "dotenv": "^17.2.0",
     "express": "^4.21.2",
     "maplibre-gl": "^5.7.0",
