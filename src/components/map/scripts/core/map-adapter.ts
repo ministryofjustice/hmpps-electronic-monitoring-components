@@ -57,16 +57,17 @@ function sanitizeAttributionHtml(input: string): string {
       }
 
       const text = anchor.textContent ?? ''
-      const replacement = document.createElement('a')
-      replacement.textContent = text
-
       if (safeHref) {
+        const replacement = document.createElement('a')
+        replacement.textContent = text
         replacement.setAttribute('href', safeHref)
         replacement.setAttribute('target', '_blank')
         replacement.setAttribute('rel', 'noopener noreferrer')
+        anchor.replaceWith(replacement)
+      } else {
+        const textNode = document.createTextNode(text)
+        anchor.replaceWith(textNode)
       }
-
-      anchor.replaceWith(replacement)
     } else {
       const textNode = document.createTextNode(element.textContent ?? '')
       element.replaceWith(textNode)

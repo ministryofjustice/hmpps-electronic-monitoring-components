@@ -69,7 +69,8 @@ describe('createOpenLayersAdapter', () => {
 
     const attribution = target.querySelector('.em-map__attribution') as HTMLElement
     expect(attribution.innerHTML).toContain('x')
-    expect(attribution.innerHTML).toContain('<a>bad</a>')
+    expect(attribution.textContent).toContain('bad')
+    expect(attribution.querySelector('a')).toBeNull()
     expect(attribution.innerHTML).not.toContain('ftp:')
   })
 
