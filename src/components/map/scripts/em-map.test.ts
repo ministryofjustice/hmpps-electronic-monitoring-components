@@ -3,6 +3,9 @@ import * as dom from './helpers/dom'
 import { setupOpenLayersMap } from './core/setup/setup-openlayers-map'
 import { setupMapLibreMap } from './core/setup/setup-maplibre-map'
 
+const mockOlTargetElement = document.createElement('div')
+const mockMapLibreContainer = document.createElement('div')
+
 jest.mock('./helpers/dom', () => ({
   createMapDOM: jest.fn(),
   createScopedStyle: jest.fn(),
@@ -33,6 +36,7 @@ jest.mock('./core/setup/setup-openlayers-map', () => {
   const mockMap = {
     getView: () => mockView,
     getSize: jest.fn(() => [800, 600]),
+    getTargetElement: jest.fn(() => mockOlTargetElement),
     getLayers: jest.fn(() => ({
       getArray: jest.fn(() => []),
     })),
@@ -45,7 +49,9 @@ jest.mock('./core/setup/setup-openlayers-map', () => {
 })
 
 jest.mock('./core/setup/setup-maplibre-map', () => ({
-  setupMapLibreMap: jest.fn().mockResolvedValue({ addLayer: jest.fn() }),
+  setupMapLibreMap: jest
+    .fn()
+    .mockResolvedValue({ addLayer: jest.fn(), getContainer: jest.fn(() => mockMapLibreContainer) }),
 }))
 
 jest.mock('maplibre-gl', () => ({
@@ -62,6 +68,8 @@ describe('EmMap', () => {
   beforeEach(() => {
     document.body.innerHTML = ''
     jest.clearAllMocks()
+    mockOlTargetElement.innerHTML = ''
+    mockMapLibreContainer.innerHTML = ''
 
     const getMapNonceMock = dom.getMapNonce as jest.Mock
     getMapNonceMock.mockReturnValue('test-nonce')
@@ -163,7 +171,7 @@ describe('EmMap', () => {
 
     // Remove by ID
     const fakeLayerById = { id: 'test', attach, detach }
-    emMap.addLayer(fakeLayerById)
+    emMap.addLayer(fakeLayerById as any)
     expect(attach).toHaveBeenCalledTimes(1)
     expect(attach.mock.calls[0][0]).toHaveProperty('mapLibrary', 'openlayers')
 
@@ -179,7 +187,7 @@ describe('EmMap', () => {
       options: { title: 'tracksLayer' },
     }
 
-    emMap.addLayer(fakeLayerByTitle)
+    emMap.addLayer(fakeLayerByTitle as any)
     emMap.removeLayer('tracksLayer')
     expect(detach).toHaveBeenCalledTimes(2) // Called twice for ID and title
   })
@@ -284,8 +292,8 @@ describe('EmMap', () => {
         {
           type: 'points',
           points: [
-            { latitude: 0, longitude: 0 },
-            { latitude: 1, longitude: 1 },
+            { latitude: 0, longitude: 0, precision: 0 },
+            { latitude: 1, longitude: 1, precision: 0 },
           ],
         },
       ],
@@ -328,7 +336,7 @@ describe('EmMap', () => {
     const animateSpy = jest.spyOn(view, 'animate')
 
     emMap.fitTo({
-      targets: [{ type: 'points', points: [{ latitude: 1, longitude: 1 }] }],
+      targets: [{ type: 'points', points: [{ latitude: 1, longitude: 1, precision: 0 }] }],
     })
 
     expect(animateSpy).toHaveBeenCalledTimes(1)
@@ -356,8 +364,8 @@ describe('EmMap', () => {
         {
           type: 'points',
           points: [
-            { latitude: 0, longitude: 0 },
-            { latitude: 1, longitude: 1 },
+            { latitude: 0, longitude: 0, precision: 0 },
+            { latitude: 1, longitude: 1, precision: 0 },
           ],
         },
       ],
@@ -388,8 +396,8 @@ describe('EmMap', () => {
         {
           type: 'points',
           points: [
-            { latitude: 0, longitude: 0 },
-            { latitude: 1, longitude: 1 },
+            { latitude: 0, longitude: 0, precision: 0 },
+            { latitude: 1, longitude: 1, precision: 0 },
           ],
         },
       ],
@@ -447,5 +455,58 @@ describe('EmMap', () => {
     })
 
     expect(fitSpy).not.toHaveBeenCalled()
+  })
+
+  it('setAttribution applies runtime text attribution for OpenLayers', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+
+    await new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+      document.body.appendChild(emMap)
+    })
+
+    emMap.setAttribution('Map data provider')
+
+    const attribution = mockOlTargetElement.querySelector('.em-map__attribution') as HTMLElement
+    expect(attribution).toBeTruthy()
+    expect(attribution.textContent).toBe('Map data provider')
+    expect(attribution.hidden).toBe(false)
+  })
+
+  it('setAttribution queues value before map is ready', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+
+    emMap.setAttribution('Queued attribution')
+
+    await new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+      document.body.appendChild(emMap)
+    })
+
+    const attribution = mockOlTargetElement.querySelector('.em-map__attribution') as HTMLElement
+    expect(attribution.textContent).toBe('Queued attribution')
+  })
+
+  it('setAttribution allows safe hyperlink HTML for MapLibre', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    emMap.setAttribute('renderer', 'maplibre')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+
+    await new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+      document.body.appendChild(emMap)
+    })
+
+    emMap.setAttribution('<a href="https://example.test">OS Attribution</a>', { allowHtml: true })
+
+    const attribution = mockMapLibreContainer.querySelector('.em-map__attribution') as HTMLElement
+    const anchor = attribution.querySelector('a') as HTMLAnchorElement
+    expect(anchor).toBeTruthy()
+    expect(anchor.getAttribute('href')).toBe('https://example.test/')
+    expect(anchor.textContent).toBe('OS Attribution')
   })
 })

@@ -12,7 +12,13 @@ import { setupMapLibreMap } from './core/setup/setup-maplibre-map'
 import { createMapDOM, createScopedStyle, getMapNonce } from './helpers/dom'
 import FeatureOverlay from './core/overlays/feature-overlay'
 import type { ComposableLayer, LayerStateOptions } from './core/layers/base'
-import { type MapAdapter, type MapLibrary, createOpenLayersAdapter, createMapLibreAdapter } from './core/map-adapter'
+import {
+  type AttributionOptions,
+  type MapAdapter,
+  type MapLibrary,
+  createOpenLayersAdapter,
+  createMapLibreAdapter,
+} from './core/map-adapter'
 import styles from '../styles/em-map.raw.css?raw'
 import { Position } from './core/types/position'
 import config from './core/config'
@@ -73,6 +79,8 @@ export class EmMap extends HTMLElement {
   private positionData: Array<Position> = []
 
   private mapInstance!: OLMapInstance | MapLibreMapInstance
+
+  private pendingAttribution?: { value: string; options?: AttributionOptions }
 
   constructor() {
     super()
@@ -232,6 +240,14 @@ export class EmMap extends HTMLElement {
 
   public closeOverlay() {
     this.featureOverlay?.close()
+  }
+
+  public setAttribution(value: string, options?: AttributionOptions): void {
+    this.pendingAttribution = { value, options }
+
+    if (!this.adapter) return
+
+    this.adapter.setAttribution(value, options)
   }
 
   public setLayerVisibility(idOrTitle: string, visible: boolean): void {
@@ -661,6 +677,10 @@ export class EmMap extends HTMLElement {
 
       const withOverlay: OLMapInstanceWithOverlay = this.mapInstance as OLMapInstanceWithOverlay
       this.featureOverlay = withOverlay.featureOverlay
+    }
+
+    if (this.pendingAttribution) {
+      this.adapter.setAttribution(this.pendingAttribution.value, this.pendingAttribution.options)
     }
   }
 

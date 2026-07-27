@@ -195,3 +195,19 @@
   color: govuk-colour('mid-grey');
   outline: none;
 }
+
+:host .em-map__attribution {
+  position: absolute;
+  right: govuk-spacing(2);
+  bottom: govuk-spacing(2);
+  z-index: 10;
+  background: rgba(govuk-colour('white'), 0.92);
+  border: 1px solid govuk-colour('mid-grey');
+  padding: govuk-spacing(1) govuk-spacing(2);
+  @include govuk-font(14);
+  line-height: 1.3;
+}
+
+:host .em-map__attribution a {
+  color: govuk-colour('blue');
+}
