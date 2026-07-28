@@ -39,6 +39,7 @@ type EmMapOptions = {
   usesInternalOverlays: boolean
   overlayBodyTemplateId?: string
   overlayTitleTemplateId?: string
+  attribution?: { value: string; options?: AttributionOptions }
 }
 
 type OLMapInstanceWithOverlay = OLMapInstance & { featureOverlay?: FeatureOverlay }
@@ -555,6 +556,9 @@ export class EmMap extends HTMLElement {
 
     const vectorAttr = this.getAttribute('vector-url') || this.getAttribute('vector-test-url')
     const vectorUrl = vectorAttr && vectorAttr.trim() ? vectorAttr : config.tiles.urls.localVectorStyleUrl
+    const attributionValue = this.getAttribute('attribution')?.trim() || ''
+    const attributionAllowHtml =
+      this.hasAttribute('attribution-allow-html') && this.getAttribute('attribution-allow-html') !== 'false'
 
     return {
       renderer,
@@ -562,6 +566,12 @@ export class EmMap extends HTMLElement {
       usesInternalOverlays: this.hasAttribute('uses-internal-overlays'),
       overlayBodyTemplateId: this.getAttribute('overlay-body-template-id') || undefined,
       overlayTitleTemplateId: this.getAttribute('overlay-title-template-id') || undefined,
+      attribution: attributionValue
+        ? {
+            value: attributionValue,
+            options: { allowHtml: attributionAllowHtml },
+          }
+        : undefined,
     }
   }
 
@@ -657,6 +667,10 @@ export class EmMap extends HTMLElement {
     const options = this.parseAttributes()
     const mapContainer = this.shadow.querySelector('#map') as HTMLElement
     const overlayEl = (this.shadow.querySelector('.app-map__overlay') as HTMLElement) ?? null
+
+    if (!this.pendingAttribution && options.attribution) {
+      this.pendingAttribution = options.attribution
+    }
 
     if (options.renderer === 'maplibre') {
       this.mapInstance = await setupMapLibreMap(

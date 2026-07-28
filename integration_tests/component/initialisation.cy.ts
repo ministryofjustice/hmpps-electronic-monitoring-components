@@ -27,4 +27,20 @@ describe('<em-map> initialisation', () => {
       })
     })
   })
+
+  it('renders declarative attribution and sanitizes unsafe links', () => {
+    cy.mountEmMap({
+      attrs: {
+        'csp-nonce': 'x',
+        attribution: '<a href="https://example.test">Safe</a> <a href="javascript:alert(1)">Unsafe</a>',
+        'attribution-allow-html': '',
+      },
+    })
+    cy.wait('@stubMapStyle')
+
+    cy.get('em-map').shadow().find('.em-map__attribution').should('be.visible')
+    cy.get('em-map').shadow().find('.em-map__attribution a').should('have.length', 1)
+    cy.get('em-map').shadow().find('.em-map__attribution a').first().should('have.attr', 'href').and('include', 'https://example.test')
+    cy.get('em-map').shadow().find('.em-map__attribution').should('contain.text', 'Unsafe')
+  })
 })

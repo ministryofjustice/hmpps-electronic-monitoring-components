@@ -7,6 +7,8 @@ type SetupStoryArgs = {
   enable3D: boolean
   positions: any[]
   usesInternalOverlays: boolean
+  attribution: string
+  attributionAllowHtml: boolean
   'controls.zoomControl': boolean
   'controls.zoomSlider': boolean
   'controls.rotate': 'true' | 'auto-hide' | 'false'
@@ -42,6 +44,16 @@ const meta = {
     usesInternalOverlays: {
       control: 'boolean',
       description: 'Enable click-to-open overlays (injects demo templates automatically)',
+    },
+    attribution: {
+      control: 'text',
+      table: { category: 'Attribution' },
+      description: 'Declarative attribution text or sanitized HTML',
+    },
+    attributionAllowHtml: {
+      control: 'boolean',
+      table: { category: 'Attribution' },
+      description: 'Allow sanitized HTML links in attribution',
     },
     'controls.zoomControl': {
       control: 'boolean',
@@ -141,6 +153,8 @@ const meta = {
       renderer: storyArgs.renderer,
       enable3D: storyArgs.enable3D,
       usesInternalOverlays: storyArgs.usesInternalOverlays,
+      attribution: storyArgs.attribution,
+      attributionAllowHtml: storyArgs.attributionAllowHtml,
       controls: {
         zoomControl: storyArgs['controls.zoomControl'],
         zoomSlider: storyArgs['controls.zoomSlider'],
@@ -175,6 +189,8 @@ export const Example: Story = {
     enable3D: true,
     positions,
     usesInternalOverlays: true,
+    attribution: "<a href='https://example.test'>© Ordnance Survey</a>",
+    attributionAllowHtml: true,
 
     'controls.zoomControl': true,
     'controls.zoomSlider': false,
@@ -198,6 +214,7 @@ export const Example: Story = {
         transform: (_src: string, context: StoryContext) => {
           const args = context.args as Record<string, any>
           const enable3D = args.renderer === 'maplibre' ? `\n  enable3DBuildings: ${args.enable3D},` : ''
+          const attribution = String(args.attribution || '').replaceAll("'", "\\\\'")
 
           const queryParams = new URLSearchParams()
           if (args['query.lat']) queryParams.set('lat', args['query.lat'])
@@ -230,6 +247,8 @@ export const Example: Story = {
   positions: positions,
   renderer: '${args.renderer}',${enable3D}
   usesInternalOverlays: ${args.usesInternalOverlays},
+  attribution: '${attribution}',
+  attributionAllowHtml: ${args.attributionAllowHtml},
   controls: {
     scaleControl: '${args['controls.scale']}',
     locationDisplay: '${args['controls.locationDisplay']}',

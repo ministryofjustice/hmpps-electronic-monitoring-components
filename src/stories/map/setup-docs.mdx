@@ -221,6 +221,51 @@ From there, you can:
 
 ---
 
+### Attribution
+
+You can add map attribution either declaratively via attributes (including Nunjucks macro params) or at runtime in JavaScript.
+
+Declarative HTML:
+
+```html
+<em-map attribution="© Crown copyright"></em-map>
+```
+
+Allow sanitized links:
+
+```html
+<em-map
+  attribution="&lt;a href='https://example.test'&gt;© Ordnance Survey&lt;/a&gt;"
+  attribution-allow-html
+></em-map>
+```
+
+Nunjucks macro params:
+
+```njk
+{{ emMap({
+  cspNonce: cspNonce,
+  attribution: "© Crown copyright"
+}) }}
+```
+
+```njk
+{{ emMap({
+  cspNonce: cspNonce,
+  attribution: "<a href='https://example.test'>© Ordnance Survey</a>",
+  attributionAllowHtml: true
+}) }}
+```
+
+Runtime JavaScript:
+
+```js
+const emMap = document.querySelector('em-map')
+emMap.setAttribution('© Crown copyright')
+```
+
+---
+
 ### Layers
 
 Layers represent sets of features rendered on top of the base map - for example, locations, tracks, text, or circles showing GPS confidence.  

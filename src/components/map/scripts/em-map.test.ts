@@ -509,4 +509,73 @@ describe('EmMap', () => {
     expect(anchor.getAttribute('href')).toBe('https://example.test/')
     expect(anchor.textContent).toBe('OS Attribution')
   })
+
+  it('applies attribution from HTML attributes on initialization', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+    emMap.setAttribute('attribution', 'Crown copyright')
+
+    await new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+      document.body.appendChild(emMap)
+    })
+
+    const attribution = mockOlTargetElement.querySelector('.em-map__attribution') as HTMLElement
+    expect(attribution).toBeTruthy()
+    expect(attribution.textContent).toBe('Crown copyright')
+    expect(attribution.hidden).toBe(false)
+  })
+
+  it('applies HTML attribution from attributes when allow flag is present', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    emMap.setAttribute('renderer', 'maplibre')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+    emMap.setAttribute('attribution', '<a href="https://example.test">OS Link</a>')
+    emMap.setAttribute('attribution-allow-html', '')
+
+    await new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+      document.body.appendChild(emMap)
+    })
+
+    const attribution = mockMapLibreContainer.querySelector('.em-map__attribution') as HTMLElement
+    const anchor = attribution.querySelector('a') as HTMLAnchorElement
+    expect(anchor).toBeTruthy()
+    expect(anchor.getAttribute('href')).toBe('https://example.test/')
+    expect(anchor.textContent).toBe('OS Link')
+  })
+
+  it('does not show attribution when only attribution-allow-html is set', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+    emMap.setAttribute('attribution-allow-html', '')
+
+    await new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+      document.body.appendChild(emMap)
+    })
+
+    const attribution = mockOlTargetElement.querySelector('.em-map__attribution')
+    expect(attribution).toBeNull()
+  })
+
+  it('treats attribution-allow-html="false" as plain text', async () => {
+    const emMap = document.createElement('em-map') as EmMap
+    emMap.setAttribute('renderer', 'openlayers')
+    emMap.setAttribute('vector-url', 'https://test-vector')
+    emMap.setAttribute('attribution', '<a href="https://example.test">OS Link</a>')
+    emMap.setAttribute('attribution-allow-html', 'false')
+
+    await new Promise<void>(resolve => {
+      emMap.addEventListener('map:ready', () => resolve(), { once: true })
+      document.body.appendChild(emMap)
+    })
+
+    const attribution = mockOlTargetElement.querySelector('.em-map__attribution') as HTMLElement
+    const anchor = attribution.querySelector('a')
+    expect(anchor).toBeNull()
+    expect(attribution.textContent).toContain('OS Link')
+  })
 })

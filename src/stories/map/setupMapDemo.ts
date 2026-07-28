@@ -46,6 +46,8 @@ interface MapDemoOptions {
     }
   }
   usesInternalOverlays?: boolean
+  attribution?: string
+  attributionAllowHtml?: boolean
   markerMode?: 'default' | 'pin' | 'pin-with-icon' | 'image' | 'mixed'
   includeViewportDemoLayers?: boolean
 }
@@ -205,6 +207,8 @@ export function setupMapDemo({
   showText = false,
   showCircles = false,
   usesInternalOverlays = true,
+  attribution,
+  attributionAllowHtml = false,
   markerMode = 'default',
   includeViewportDemoLayers = false,
   entryExit,
@@ -237,6 +241,9 @@ export function setupMapDemo({
   if (typeof controls.zoomControl === 'boolean') map.setAttribute('zoom-control', String(controls.zoomControl))
   if (typeof controls.zoomSlider === 'boolean') map.setAttribute('zoom-slider', String(controls.zoomSlider))
   if (typeof controls.grabCursor === 'boolean') map.setAttribute('grab-cursor', String(controls.grabCursor))
+
+  if (attribution) map.setAttribute('attribution', attribution)
+  if (attributionAllowHtml) map.setAttribute('attribution-allow-html', '')
 
   // Positions data
   const positionData = positions ?? defaultPositions
