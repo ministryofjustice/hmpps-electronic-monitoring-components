@@ -12,7 +12,13 @@ import { setupMapLibreMap } from './core/setup/setup-maplibre-map'
 import { createMapDOM, createScopedStyle, getMapNonce } from './helpers/dom'
 import FeatureOverlay from './core/overlays/feature-overlay'
 import type { ComposableLayer, LayerStateOptions } from './core/layers/base'
-import { type MapAdapter, type MapLibrary, createOpenLayersAdapter, createMapLibreAdapter } from './core/map-adapter'
+import {
+  type AttributionOptions,
+  type MapAdapter,
+  type MapLibrary,
+  createOpenLayersAdapter,
+  createMapLibreAdapter,
+} from './core/map-adapter'
 import styles from '../styles/em-map.raw.css?raw'
 import { Position } from './core/types/position'
 import config from './core/config'
@@ -33,6 +39,7 @@ type EmMapOptions = {
   usesInternalOverlays: boolean
   overlayBodyTemplateId?: string
   overlayTitleTemplateId?: string
+  attribution?: { value: string; options?: AttributionOptions }
 }
 
 type OLMapInstanceWithOverlay = OLMapInstance & { featureOverlay?: FeatureOverlay }
@@ -73,6 +80,8 @@ export class EmMap extends HTMLElement {
   private positionData: Array<Position> = []
 
   private mapInstance!: OLMapInstance | MapLibreMapInstance
+
+  private pendingAttribution?: { value: string; options?: AttributionOptions }
 
   constructor() {
     super()
@@ -232,6 +241,14 @@ export class EmMap extends HTMLElement {
 
   public closeOverlay() {
     this.featureOverlay?.close()
+  }
+
+  public setAttribution(value: string, options?: AttributionOptions): void {
+    this.pendingAttribution = { value, options }
+
+    if (!this.adapter) return
+
+    this.adapter.setAttribution(value, options)
   }
 
   public setLayerVisibility(idOrTitle: string, visible: boolean): void {
@@ -539,6 +556,9 @@ export class EmMap extends HTMLElement {
 
     const vectorAttr = this.getAttribute('vector-url') || this.getAttribute('vector-test-url')
     const vectorUrl = vectorAttr && vectorAttr.trim() ? vectorAttr : config.tiles.urls.localVectorStyleUrl
+    const attributionValue = this.getAttribute('attribution')?.trim() || ''
+    const attributionAllowHtml =
+      this.hasAttribute('attribution-allow-html') && this.getAttribute('attribution-allow-html') !== 'false'
 
     return {
       renderer,
@@ -546,6 +566,12 @@ export class EmMap extends HTMLElement {
       usesInternalOverlays: this.hasAttribute('uses-internal-overlays'),
       overlayBodyTemplateId: this.getAttribute('overlay-body-template-id') || undefined,
       overlayTitleTemplateId: this.getAttribute('overlay-title-template-id') || undefined,
+      attribution: attributionValue
+        ? {
+            value: attributionValue,
+            options: { allowHtml: attributionAllowHtml },
+          }
+        : undefined,
     }
   }
 
@@ -642,6 +668,10 @@ export class EmMap extends HTMLElement {
     const mapContainer = this.shadow.querySelector('#map') as HTMLElement
     const overlayEl = (this.shadow.querySelector('.app-map__overlay') as HTMLElement) ?? null
 
+    if (!this.pendingAttribution && options.attribution) {
+      this.pendingAttribution = options.attribution
+    }
+
     if (options.renderer === 'maplibre') {
       this.mapInstance = await setupMapLibreMap(
         mapContainer,
@@ -661,6 +691,10 @@ export class EmMap extends HTMLElement {
 
       const withOverlay: OLMapInstanceWithOverlay = this.mapInstance as OLMapInstanceWithOverlay
       this.featureOverlay = withOverlay.featureOverlay
+    }
+
+    if (this.pendingAttribution) {
+      this.adapter.setAttribution(this.pendingAttribution.value, this.pendingAttribution.options)
     }
   }
 
