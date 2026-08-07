@@ -4,6 +4,19 @@
 
 :host {
   --em-scale-bar-bottom: #{govuk-spacing(4)};
+  --em-attribution-right: #{govuk-spacing(1)};
+  --em-attribution-bottom: #{govuk-spacing(1)};
+  --em-attribution-z-index: 10;
+  --em-attribution-box-sizing: border-box;
+  --em-attribution-max-width: 33.3%;
+  --em-attribution-background: #{rgba(govuk-colour('white'), 0.5)};
+  --em-attribution-padding: #{govuk-spacing(0)} #{govuk-spacing(1)};
+  --em-attribution-color: #{govuk-colour('black')};
+  --em-attribution-line-height: 1.3;
+  --em-attribution-white-space: normal;
+  --em-attribution-overflow-wrap: anywhere;
+  --em-attribution-word-break: break-word;
+  --em-attribution-link-color: #{govuk-colour('blue')};
 }
 
 :host[type='button']:not(:disabled),
@@ -198,23 +211,23 @@
 
 :host .em-map__attribution {
   position: absolute;
-  right: govuk-spacing(1);
-  bottom: govuk-spacing(1);
-  z-index: 10;
-  box-sizing: border-box;
-  max-width: 40%;
-  background: rgba(govuk-colour('white'), 0.5);
-  padding: govuk-spacing(0) govuk-spacing(1);
-  color: govuk-colour('black');
+  right: var(--em-attribution-right);
+  bottom: var(--em-attribution-bottom);
+  z-index: var(--em-attribution-z-index);
+  box-sizing: var(--em-attribution-box-sizing);
+  max-width: var(--em-attribution-max-width);
+  background: var(--em-attribution-background);
+  padding: var(--em-attribution-padding);
+  color: var(--em-attribution-color);
   @include govuk-font(16);
-  line-height: 1.3;
-  white-space: normal;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  line-height: var(--em-attribution-line-height);
+  white-space: var(--em-attribution-white-space);
+  overflow-wrap: var(--em-attribution-overflow-wrap);
+  word-break: var(--em-attribution-word-break);
 }
 
 :host .em-map__attribution a {
-  color: govuk-colour('blue');
-  overflow-wrap: anywhere;
-  word-break: break-word;
+  color: var(--em-attribution-link-color);
+  overflow-wrap: var(--em-attribution-overflow-wrap);
+  word-break: var(--em-attribution-word-break);
 }

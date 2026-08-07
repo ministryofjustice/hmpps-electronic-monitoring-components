@@ -264,6 +264,29 @@ const emMap = document.querySelector('em-map')
 emMap.setAttribution('© Crown copyright')
 ```
 
+Style customization:
+
+```css
+/* Stable shadow parts for downstream CSS */
+em-map::part(app-map__attribution) {
+  border: 1px solid #0b0c0c;
+  border-radius: 4px;
+}
+
+em-map::part(app-map__attribution-link) {
+  text-decoration: underline;
+}
+
+/* CSS custom properties for spacing/colors/layout */
+em-map {
+  --em-attribution-right: 12px;
+  --em-attribution-bottom: 12px;
+  --em-attribution-max-width: 40%;
+  --em-attribution-background: rgba(255, 255, 255, 0.85);
+  --em-attribution-link-color: #003078;
+}
+```
+
 ---
 
 ### Layers
