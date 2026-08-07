@@ -94,9 +94,9 @@ function getAttributionContainer(root: HTMLElement): HTMLElement {
 
 function applyAttributionLinkParts(container: HTMLElement): void {
   const anchors = container.querySelectorAll('a')
-  for (const anchor of anchors) {
+  anchors.forEach(anchor => {
     anchor.setAttribute('part', 'app-map__attribution-link')
-  }
+  })
 }
 
 function setContainerAttribution(
