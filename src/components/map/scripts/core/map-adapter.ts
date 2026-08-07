@@ -79,13 +79,24 @@ function sanitizeAttributionHtml(input: string): string {
 
 function getAttributionContainer(root: HTMLElement): HTMLElement {
   const existing = root.querySelector('.em-map__attribution')
-  if (existing instanceof HTMLElement) return existing
+  if (existing instanceof HTMLElement) {
+    existing.setAttribute('part', 'app-map__attribution')
+    return existing
+  }
 
   const el = document.createElement('div')
   el.className = 'em-map__attribution'
+  el.setAttribute('part', 'app-map__attribution')
   el.hidden = true
   root.appendChild(el)
   return el
+}
+
+function applyAttributionLinkParts(container: HTMLElement): void {
+  const anchors = container.querySelectorAll('a')
+  for (const anchor of anchors) {
+    anchor.setAttribute('part', 'app-map__attribution-link')
+  }
 }
 
 function setContainerAttribution(
@@ -103,6 +114,7 @@ function setContainerAttribution(
 
   if (options?.allowHtml) {
     container.innerHTML = sanitizeAttributionHtml(value)
+    applyAttributionLinkParts(container)
   } else {
     container.textContent = value
   }
