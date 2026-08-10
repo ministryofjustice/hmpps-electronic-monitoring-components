@@ -56,6 +56,7 @@ describe('createOpenLayersAdapter', () => {
     expect(attribution).toBeTruthy()
     expect(attribution.hidden).toBe(false)
     expect(attribution.textContent).toBe('Copyright map provider')
+    expect(attribution.getAttribute('part')).toBe('app-map__attribution')
   })
 
   it('sanitizes attribution HTML to safe links only', () => {
@@ -105,5 +106,7 @@ describe('createMapLibreAdapter', () => {
     expect(anchor.getAttribute('href')).toBe('https://example.test/')
     expect(anchor.getAttribute('target')).toBe('_blank')
     expect(anchor.getAttribute('rel')).toBe('noopener noreferrer')
+    expect(attribution.getAttribute('part')).toBe('app-map__attribution')
+    expect(anchor.getAttribute('part')).toBe('app-map__attribution-link')
   })
 })
