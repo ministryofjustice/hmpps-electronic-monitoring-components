@@ -4,6 +4,7 @@ const commonProjectSettings = {
   },
   transformIgnorePatterns: ['node_modules/(?!ol|rbush|quickselect)/'],
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
+  setupFiles: ['<rootDir>/src/jest.polyfills.ts'],
   setupFilesAfterEnv: ['<rootDir>/src/jest.setup.ts'],
   moduleNameMapper: {
     '^ol/(.*)$': '<rootDir>/node_modules/ol/$1',
