@@ -120,7 +120,7 @@
     "jest-html-reporter": "^4.4.0",
     "jest-junit": "17.0.0",
     "jest-transform-stub": "^2.0.0",
-    "lint-staged": "^16.4.0",
+    "lint-staged": "^17.3.0",
     "lit": "^3.3.3",
     "npm-run-all2": "^5.0.2",
     "ol": "10.10.0",
