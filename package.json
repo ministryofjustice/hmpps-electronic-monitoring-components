@@ -113,7 +113,7 @@
     "eslint": "^9.39.5",
     "eslint-plugin-storybook": "^10.5.7",
     "fast-glob": "^3.3.3",
-    "govuk-frontend": "^5.14.0",
+    "govuk-frontend": "^6.4.0",
     "husky": "^9.1.7",
     "jest": "^30.4.2",
     "jest-environment-jsdom": "^30.4.1",
@@ -139,7 +139,7 @@
     "vitest": "4.1.10"
   },
   "peerDependencies": {
-    "govuk-frontend": ">=5.14.0",
+    "govuk-frontend": ">=6.4.0",
     "ol": "10.8.x || 10.10.x"
   },
   "peerDependenciesMeta": {
