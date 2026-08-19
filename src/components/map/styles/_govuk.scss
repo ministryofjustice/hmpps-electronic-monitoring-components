@@ -1,2 +1,5 @@
 $govuk-fonts-path: 'fonts/';
-@import 'govuk-frontend/dist/govuk/base';
+
+@import 'govuk-frontend/dist/govuk/settings';
+@import 'govuk-frontend/dist/govuk/tools';
+@import 'govuk-frontend/dist/govuk/helpers';

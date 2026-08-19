@@ -11,7 +11,13 @@ const config: StorybookConfig = {
       },
     },
   },
-  staticDirs: ['public'],
+  staticDirs: [
+    'public',
+    {
+      from: '../node_modules/govuk-frontend/dist/govuk/assets/fonts',
+      to: '/fonts',
+    },
+  ],
   viteFinal: async viteConfig => {
     return {
       ...viteConfig,

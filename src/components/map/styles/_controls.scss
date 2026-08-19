@@ -1,6 +1,6 @@
-@import 'govuk-frontend/dist/govuk/settings/all';
-@import 'govuk-frontend/dist/govuk/tools/all';
-@import 'govuk-frontend/dist/govuk/helpers/all';
+@import 'govuk-frontend/dist/govuk/settings';
+@import 'govuk-frontend/dist/govuk/tools';
+@import 'govuk-frontend/dist/govuk/helpers';
 
 :host {
   --em-scale-bar-bottom: #{govuk-spacing(4)};
@@ -158,7 +158,8 @@
 }
 
 :host .ol-scale-step-text {
-  @include govuk-font(14);
+  @include govuk-font($size: false);
+  font-size: govuk-px-to-rem(14px);
   color: govuk-colour('black');
 }
 
@@ -183,29 +184,29 @@
 
 // Active state (extrusion toggled on)
 :host .maplibregl-ctrl button.active {
-  background-color: govuk-colour('mid-grey');
+  background-color: govuk-colour('black', $variant: 'tint-80');
   color: govuk-colour('white');
 }
 
 :host .maplibregl-ctrl button.active:hover,
 :host .maplibregl-ctrl button.active:focus {
-  background-color: govuk-colour('dark-grey');
+  background-color: govuk-colour('black', $variant: 'tint-25');
   color: govuk-colour('white');
   outline: 1px solid govuk-colour('white');
 }
 
 // Disabled state
 :host .maplibregl-ctrl button:disabled {
-  background-color: govuk-colour('light-grey');
-  color: govuk-colour('mid-grey');
-  border-color: govuk-colour('mid-grey');
+  background-color: govuk-colour('black', $variant: 'tint-95');
+  color: govuk-colour('black', $variant: 'tint-80');
+  border-color: govuk-colour('black', $variant: 'tint-80');
   cursor: not-allowed;
 }
 
 :host .maplibregl-ctrl button:disabled:hover,
 :host .maplibregl-ctrl button:disabled:focus {
-  background-color: govuk-colour('light-grey');
-  color: govuk-colour('mid-grey');
+  background-color: govuk-colour('black', $variant: 'tint-95');
+  color: govuk-colour('black', $variant: 'tint-80');
   outline: none;
 }
 
