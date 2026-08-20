@@ -54,13 +54,17 @@ jest.mock('./core/setup/setup-maplibre-map', () => ({
     .mockResolvedValue({ addLayer: jest.fn(), getContainer: jest.fn(() => mockMapLibreContainer) }),
 }))
 
-jest.mock('maplibre-gl', () => ({
-  Map: jest.fn().mockImplementation(() => ({
-    addControl: jest.fn(),
-    addLayer: jest.fn(),
-    on: jest.fn(),
-  })),
-}))
+jest.mock(
+  'maplibre-gl',
+  () => ({
+    Map: jest.fn().mockImplementation(() => ({
+      addControl: jest.fn(),
+      addLayer: jest.fn(),
+      on: jest.fn(),
+    })),
+  }),
+  { virtual: true },
+)
 
 const { getMockView } = jest.requireMock('./core/setup/setup-openlayers-map')
 
