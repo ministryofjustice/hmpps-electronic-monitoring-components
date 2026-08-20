@@ -60,10 +60,11 @@
 :host::part(app-map__overlay-close) {
   background: none;
   border: none;
-  @include govuk-font($size: 27);
+  @include govuk-font($size: false);
+  font-size: govuk-px-to-rem(27px);
   line-height: 1;
   cursor: pointer;
-  color: govuk-colour('dark-grey');
+  color: govuk-colour('black', $variant: 'tint-25');
 
   &:hover {
     color: govuk-colour('black');
@@ -72,7 +73,9 @@
 
 .app-map__overlay-body,
 :host::part(app-map__overlay-body) {
-  @include govuk-font($size: 16);
+  @include govuk-font($size: false);
+  font-size: govuk-px-to-rem(16px);
+  line-height: 1.25;
   max-height: 400px;
   overflow-y: auto;
   @include govuk-responsive-padding(2, 'bottom');
@@ -97,7 +100,7 @@
 }
 
 .app-map__overlay-row:nth-child(even) {
-  background-color: govuk-colour('light-grey');
+  background-color: govuk-colour('black', $variant: 'tint-95');
 }
 
 .app-map__overlay-label,
