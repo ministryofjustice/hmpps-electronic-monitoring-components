@@ -100,7 +100,7 @@
     "@storybook/addon-vitest": "^10.5.7",
     "@storybook/builder-vite": "10.5.7",
     "@storybook/web-components-vite": "^10.5.7",
-    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/jest-dom": "^7.0.1",
     "@types/express": "^5.0.6",
     "@types/jest": "^30.0.0",
     "@types/superagent": "^8.1.11",
