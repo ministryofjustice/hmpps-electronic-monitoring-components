@@ -1,6 +1,9 @@
-import maplibregl from 'maplibre-gl'
+import * as maplibregl from 'maplibre-gl'
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import { MapLibreMapInstance } from '../maplibre-map-instance'
 import config from '../config'
+
+maplibregl.setWorkerUrl(workerUrl)
 
 export async function setupMapLibreMap(
   target: HTMLElement,

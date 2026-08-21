@@ -1,4 +1,4 @@
-import maplibregl from 'maplibre-gl'
+import * as maplibregl from 'maplibre-gl'
 
 export function add3DBuildingsControl(map: maplibregl.Map): void {
   map.addControl(new Buildings3DControl(), 'top-right')

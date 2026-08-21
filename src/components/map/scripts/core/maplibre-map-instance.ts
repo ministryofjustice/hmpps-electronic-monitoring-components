@@ -1,4 +1,4 @@
-import maplibregl from 'maplibre-gl'
+import * as maplibregl from 'maplibre-gl'
 
 export interface MapLibreMapOptions extends Omit<maplibregl.MapOptions, 'container' | 'style'> {
   target: HTMLElement
