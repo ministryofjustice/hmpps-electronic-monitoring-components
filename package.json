@@ -80,7 +80,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/qs": "^6.15.1",
-    "axios": "1.19.0",
+    "axios": "1.20.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "maplibre-gl": "^6.3.0",
