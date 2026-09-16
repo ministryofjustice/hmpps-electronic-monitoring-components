@@ -12,6 +12,7 @@ import {
   extendBeyondCircle,
   applyEntryExitToFeatures,
 } from './tracks-layer'
+import { bearingToVector } from '../../../helpers/geometry'
 import positions from '../../../../fixtures/positions.json'
 
 describe('OLTracksLayer (OpenLayers library)', () => {
@@ -191,6 +192,27 @@ describe('Entry / Exit vector logic', () => {
     const result = getExitVector(testPositions)
 
     expect(result![0]).toBeCloseTo(1)
+  })
+
+  it('getEntryVector falls back to North West 315° for a single position with no direction property', () => {
+    const testPositions = [{ longitude: 0, latitude: 0 }] as any
+    const [expectedX, expectedY] = bearingToVector(315, 'degrees')
+
+    const result = getEntryVector(testPositions)
+
+    // Entry vector points away from the fallback bearing, i.e. reversed
+    expect(result![0]).toBeCloseTo(-expectedX)
+    expect(result![1]).toBeCloseTo(-expectedY)
+  })
+
+  it('getExitVector falls back to North East 45° for a single position with no direction property', () => {
+    const testPositions = [{ longitude: 0, latitude: 0 }] as any
+    const [expectedX, expectedY] = bearingToVector(45, 'degrees')
+
+    const result = getExitVector(testPositions)
+
+    expect(result![0]).toBeCloseTo(expectedX)
+    expect(result![1]).toBeCloseTo(expectedY)
   })
 })
 
