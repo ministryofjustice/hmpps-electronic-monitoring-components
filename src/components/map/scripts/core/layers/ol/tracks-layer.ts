@@ -87,6 +87,8 @@ const MIN_SEGMENT_RENDERED_PX = 3 * ARROW_SIZE_PX // must have a least one arrow
  * - If direction.property is set AND first point has a numeric direction, use first point direction, reversed
  * - Otherwise fallback to first segment direction, reversed
  * - If only one point: fallback to entry from the North West 315°
+ * Note: for a single-position track, direction.property can be given as { entry, exit } so the
+ * one position supplies distinct bearings for getEntryVector and getExitVector.
  */
 const getEntryVector = (
   positions: Position[],
@@ -124,6 +126,8 @@ const getEntryVector = (
  *   use last point direction as-is
  * - Otherwise fallback to last segment direction
  * - If only one point: fallback to exit from the North East 45°
+ * Note: for a single-position track, direction.property can be given as { entry, exit } so the
+ * one position supplies distinct bearings for getEntryVector and getExitVector.
  */
 const getExitVector = (
   positions: Position[],
@@ -242,7 +246,7 @@ const applyEntryExitToFeatures = (
   positions: Position[],
   options?: OLTracksLayerOptions['entryExit'],
 ) => {
-  if (!options?.enabled || !positions.length || !features.length) return
+  if (!options?.enabled || !positions.length) return
 
   const extensionDistance = options.extensionDistanceMeters ?? 50
   const entryProperty = resolveDirectionProperty(options.direction?.property, 'entry')
@@ -255,38 +259,41 @@ const applyEntryExitToFeatures = (
   const centreCoordinates = options.centre
   const radius = options.radiusMeters
 
-  const firstGeom = features[0].getGeometry()
-  if (entryVector && firstGeom) {
-    const coords = firstGeom.getCoordinates()
-    const first = coords[0]
+  // Determine the first and last coordinates of the track, falling back to
+  // the projected position if necessary.
+  const firstPosition = positions[0]
+  const firstCoordinate =
+    features[0]?.getGeometry()?.getCoordinates()[0] ?? fromLonLat([firstPosition.longitude, firstPosition.latitude])
 
+  const lastPosition = positions[positions.length - 1]
+  const lastSegmentCoordinates = features[features.length - 1]?.getGeometry()?.getCoordinates()
+  const lastCoordinate =
+    lastSegmentCoordinates?.[lastSegmentCoordinates.length - 1] ??
+    fromLonLat([lastPosition.longitude, lastPosition.latitude])
+
+  if (entryVector) {
     const entry =
       centreCoordinates && radius !== undefined
-        ? extendBeyondCircle(first, entryVector, centreCoordinates, radius, extensionDistance)
-        : extendCoordinate(first, entryVector, extensionDistance)
+        ? extendBeyondCircle(firstCoordinate, entryVector, centreCoordinates, radius, extensionDistance)
+        : extendCoordinate(firstCoordinate, entryVector, extensionDistance)
 
     features.unshift(
       new Feature({
-        geometry: new LineString([entry, first]),
+        geometry: new LineString([entry, firstCoordinate]),
         trackSegmentType: 'entry',
       }),
     )
   }
 
-  const lastFeature = features[features.length - 1]
-  const lastGeom = lastFeature.getGeometry()
-  if (exitVector && lastGeom) {
-    const coords = lastGeom.getCoordinates()
-    const last = coords[coords.length - 1]
-
+  if (exitVector) {
     const exit =
       centreCoordinates && radius !== undefined
-        ? extendBeyondCircle(last, exitVector, centreCoordinates, radius, extensionDistance)
-        : extendCoordinate(last, exitVector, extensionDistance)
+        ? extendBeyondCircle(lastCoordinate, exitVector, centreCoordinates, radius, extensionDistance)
+        : extendCoordinate(lastCoordinate, exitVector, extensionDistance)
 
     features.push(
       new Feature({
-        geometry: new LineString([last, exit]),
+        geometry: new LineString([lastCoordinate, exit]),
         trackSegmentType: 'exit',
       }),
     )
