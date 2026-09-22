@@ -1,12 +1,16 @@
 import type OLMap from 'ol/Map'
 import type View from 'ol/View'
-import type { Coordinate } from 'ol/coordinate'
+import { add, type Coordinate } from 'ol/coordinate'
 import type { MapAdapter } from '../../src/components/map/scripts/core/map-adapter'
 
 export default function makeOpenLayersAdapter() {
   const olMapMock = {
     addLayer: jest.fn(),
     removeLayer: jest.fn(),
+    addOverlay: jest.fn(),
+    removeOverlay: jest.fn(),
+    getInteractions: jest.fn(),
+    getTargetElement: jest.fn(),
     on: jest.fn((event: string, handler: (...args: unknown[]) => void) => {
       if (event === 'moveend') {
         handler({})

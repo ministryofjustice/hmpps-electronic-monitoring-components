@@ -3,6 +3,9 @@ import { fromLonLat } from 'ol/proj'
 import { boundingExtent } from 'ol/extent'
 import type { Extent } from 'ol/extent'
 import VectorLayer from 'ol/layer/Vector'
+import Overlay from 'ol/Overlay'
+import type Map from 'ol/Map'
+import { Interaction } from 'ol/interaction'
 import { supportsWebGL } from '../../helpers/browser'
 import { OLLocationsLayer } from './ol/locations-layer'
 import { OLWebGLCircleLayer } from './ol/locations-layer-webgl'
@@ -12,6 +15,11 @@ import type { MapAdapter } from '../map-adapter'
 import { Position } from '../types/position'
 
 export type MarkerType = 'point' | 'pin' | 'image'
+
+export type PositionWithDisplayNumber = Position & { displayPointNumber?: number }
+
+export const getDisplayPointNumber = (position: Position, index: number): number =>
+  (position as PositionWithDisplayNumber).displayPointNumber ?? index + 1
 
 export type MarkerOptions = {
   type?: MarkerType
@@ -44,6 +52,12 @@ export type MarkerOptions = {
   }
 }
 
+type OverlayInteraction = Interaction & {
+  overlay?: {
+    showAtCoordinate?: (coords: number[], properties?: Record<string, unknown>) => void
+  }
+}
+
 export type LocationsLayerOptions = {
   id?: string
   title?: string
@@ -52,6 +66,10 @@ export type LocationsLayerOptions = {
 
   // Layer Renderer selection
   renderer?: 'auto' | 'vector' | 'webgl'
+
+  accessibleMarkers?: boolean
+
+  markerLabel?: (position: Position, index: number, total: number) => string
 
   style?: {
     radius?: number
@@ -93,6 +111,8 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
 
   private olLayers: BaseLayer[] = []
 
+  private markerOverlays: Overlay[] = []
+
   constructor(options: LocationsLayerOptions) {
     this.options = options
     this.id = options.id ?? 'locations'
@@ -133,6 +153,80 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
         },
       },
     }
+  }
+
+  private createMarkerOverlays(map: Map, visible: boolean): void {
+    const positions = this.options.positions ?? []
+    if (positions.length === 0) return
+
+    const target = map.getTargetElement() as HTMLElement | null
+    const buildLabel =
+      this.options.markerLabel ??
+      ((position: Position, index: number, total: number) => {
+        return `Location point ${getDisplayPointNumber(position, index)} of ${total}`
+      })
+
+    positions.forEach((position, index) => {
+      const displayPointNumber = getDisplayPointNumber(position, index)
+      const button = document.createElement('button')
+      button.className = 'map-marker-interaction'
+      button.type = 'button'
+      button.setAttribute('aria-label', buildLabel(position, index, positions.length))
+      button.dataset.markerIndex = String(index)
+      button.dataset.layerId = this.id
+
+      const coordinate = fromLonLat([position.longitude, position.latitude])
+
+      const overlay = new Overlay({
+        element: button,
+        position: coordinate,
+        positioning: 'center-center',
+        stopEvent: true,
+      })
+
+      button.addEventListener('click', () => {
+        const clickInteraction = map
+          .getInteractions()
+          .getArray()
+          .find((interaction: OverlayInteraction) => interaction.overlay?.showAtCoordinate)
+
+        if (clickInteraction) {
+          ;(clickInteraction as OverlayInteraction).overlay!.showAtCoordinate!(coordinate, {
+            ...position,
+            displayPointNumber,
+          })
+        }
+
+        target?.dispatchEvent(
+          new CustomEvent('em-map:marker:select', {
+            bubbles: true,
+            composed: true,
+            detail: { position, index, layerId: this.id, coordinate },
+          }),
+        )
+      })
+
+      if (!visible) {
+        button.style.display = 'none'
+      }
+
+      map.addOverlay(overlay)
+      this.markerOverlays.push(overlay)
+    })
+  }
+
+  private removeMarkerOverlays(map: Map): void {
+    this.markerOverlays.forEach(overlay => map.removeOverlay(overlay))
+    this.markerOverlays = []
+  }
+
+  public setMarkerOverlaysVisible(visible: boolean): void {
+    this.markerOverlays.forEach(overlay => {
+      const element = overlay.getElement() as HTMLElement | undefined
+      if (element) {
+        element.style.display = visible ? '' : 'none'
+      }
+    })
   }
 
   // Create OL layers with the provided options.
@@ -256,10 +350,17 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
 
       map.addLayer(layer)
     })
+   
+    if (this.options.accessibleMarkers !== false) {
+      this.removeMarkerOverlays(map)
+      this.createMarkerOverlays(map, visible)
+    }
+    this.setMarkerOverlaysVisible(visible)
   }
 
   public detach(adapter: MapAdapter): void {
     if (adapter.mapLibrary === 'openlayers') {
+      this.removeMarkerOverlays(adapter.openlayers!.map)
       this.getLayers().forEach(layer => {
         adapter.openlayers!.map.removeLayer(layer)
       })
