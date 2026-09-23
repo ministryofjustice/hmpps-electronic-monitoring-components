@@ -350,7 +350,6 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
 
       map.addLayer(layer)
     })
-   
     if (this.options.accessibleMarkers !== false) {
       this.removeMarkerOverlays(map)
       this.createMarkerOverlays(map, visible)
