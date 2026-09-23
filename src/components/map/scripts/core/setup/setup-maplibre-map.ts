@@ -1,5 +1,5 @@
 import * as maplibregl from 'maplibre-gl'
-// eslint-disable-next-line import/no-unresolved, import/extensions
+// eslint-disable-next-line import/extensions
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import { MapLibreMapInstance } from '../maplibre-map-instance'
 import config from '../config'
