@@ -306,9 +306,9 @@ describe('LocationLayer (OpenLayers library)', () => {
       expect(overlay.getPositioning()).toBe('center-center')
     })
 
-    it('labels each button using displayPointNumber when present, else index + 1', () => {
+    it('labels each button using displayPointLabel when present, else index + 1', () => {
       const { adapter, olMapMock } = makeOpenLayersAdapter()
-      const withDisplayNumber = [{ ...positions[0], displayPointNumber: 42 }, { ...positions[1] }]
+      const withDisplayNumber = [{ ...positions[0], displayPointLabel: '42' }, { ...positions[1] }]
       const layer = new LocationsLayer({ positions: withDisplayNumber, renderer: 'vector' })
 
       layer.attach(adapter)

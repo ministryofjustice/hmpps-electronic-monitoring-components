@@ -16,10 +16,10 @@ import { Position } from '../types/position'
 
 export type MarkerType = 'point' | 'pin' | 'image'
 
-export type PositionWithDisplayNumber = Position & { displayPointNumber?: number }
+export type PositionWithDisplayLabel = Position & { displayPointLabel?: string }
 
-export const getDisplayPointNumber = (position: Position, index: number): number =>
-  (position as PositionWithDisplayNumber).displayPointNumber ?? index + 1
+export const getDisplayPointLabel = (position: Position, index: number): string =>
+  (position as PositionWithDisplayLabel).displayPointLabel ?? String(index + 1)
 
 export type MarkerOptions = {
   type?: MarkerType
@@ -163,11 +163,11 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
     const buildLabel =
       this.options.markerLabel ??
       ((position: Position, index: number, total: number) => {
-        return `Location point ${getDisplayPointNumber(position, index)} of ${total}`
+        return `Location point ${getDisplayPointLabel(position, index)} of ${total}`
       })
 
     positions.forEach((position, index) => {
-      const displayPointNumber = getDisplayPointNumber(position, index)
+      const displayPointLabel = getDisplayPointLabel(position, index)
       const button = document.createElement('button')
       button.className = 'map-marker-interaction'
       button.type = 'button'
@@ -193,7 +193,7 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
         if (clickInteraction) {
           ;(clickInteraction as OverlayInteraction).overlay!.showAtCoordinate!(coordinate, {
             ...position,
-            displayPointNumber,
+            displayPointLabel,
           })
         }
 
