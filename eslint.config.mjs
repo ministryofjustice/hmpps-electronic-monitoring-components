@@ -26,11 +26,11 @@ export default [...hmppsConfig({
     process.env.NODE_ENV === 'production'
       ? ['error', { allow: ['warn', 'error'] }]
       : 'off',
-    // Ignore unresolved errors for Vite raw imports like '?raw'
+    // Ignore unresolved errors for Vite raw/worker imports like '?raw' and '?worker&url'
     'import/no-unresolved': [
       'error',
       {
-        ignore: ['\\?raw$'],
+       ignore: ['\\?raw$', '\\?worker&url$'],
       },
     ],
   },

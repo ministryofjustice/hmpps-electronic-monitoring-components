@@ -1,4 +1,5 @@
 import * as maplibregl from 'maplibre-gl'
+
 import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
 import { MapLibreMapInstance } from '../maplibre-map-instance'
 import config from '../config'

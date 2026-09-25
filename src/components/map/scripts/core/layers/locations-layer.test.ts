@@ -4,6 +4,7 @@ import WebGLVectorLayer from 'ol/layer/WebGLVector'
 import VectorSource from 'ol/source/Vector'
 import type Feature from 'ol/Feature'
 import type Geometry from 'ol/geom/Geometry'
+import Overlay from 'ol/Overlay'
 import { Style } from 'ol/style'
 import * as browserHelpers from '../../helpers/browser'
 import { LocationsLayer, MarkerOptions } from './locations-layer'
@@ -268,5 +269,140 @@ describe('LocationLayer (OpenLayers library)', () => {
     layer.detach(adapter)
 
     expect(olMapMock.removeLayer).toHaveBeenCalledTimes(addedLayers.length)
+  })
+
+  describe('LocationsLayer marker overlays', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
+    it('creates one overlay per position by default', () => {
+      const { adapter, olMapMock } = makeOpenLayersAdapter()
+      const layer = new LocationsLayer({ positions, renderer: 'vector' })
+
+      layer.attach(adapter)
+
+      expect(olMapMock.addOverlay).toHaveBeenCalledTimes(positions.length)
+    })
+
+    it('does not create marker overlays when accessibleMarkers is false', () => {
+      const { adapter, olMapMock } = makeOpenLayersAdapter()
+      const layer = new LocationsLayer({ positions, renderer: 'vector', accessibleMarkers: false })
+
+      layer.attach(adapter)
+
+      expect(olMapMock.addOverlay).not.toHaveBeenCalled()
+    })
+
+    it('creates a button element with stopEvent and center-center positioning', () => {
+      const { adapter, olMapMock } = makeOpenLayersAdapter()
+      const layer = new LocationsLayer({ positions, renderer: 'vector' })
+
+      layer.attach(adapter)
+
+      const overlay = olMapMock.addOverlay.mock.calls[0][0]
+      expect(overlay.getElement().tagName).toBe('BUTTON')
+      expect(overlay.getElement().className).toBe('map-marker-interaction')
+      expect(overlay.getPositioning()).toBe('center-center')
+    })
+
+    it('labels each button using displayPointLabel when present, else index + 1', () => {
+      const { adapter, olMapMock } = makeOpenLayersAdapter()
+      const withDisplayNumber = [{ ...positions[0], displayPointLabel: '42' }, { ...positions[1] }]
+      const layer = new LocationsLayer({ positions: withDisplayNumber, renderer: 'vector' })
+
+      layer.attach(adapter)
+
+      const firstButton = olMapMock.addOverlay.mock.calls[0][0].getElement()
+      const secondButton = olMapMock.addOverlay.mock.calls[1][0].getElement()
+
+      expect(firstButton.getAttribute('aria-label')).toBe('Location point 42 of 2')
+      expect(secondButton.getAttribute('aria-label')).toBe('Location point 2 of 2')
+    })
+
+    it('uses a custom markerLabel function when provided', () => {
+      const { adapter, olMapMock } = makeOpenLayersAdapter()
+      const markerLabel = jest.fn(() => 'Custom label')
+      const layer = new LocationsLayer({ positions, renderer: 'vector', markerLabel })
+
+      layer.attach(adapter)
+
+      expect(markerLabel).toHaveBeenCalledTimes(positions.length)
+      const firstButton = olMapMock.addOverlay.mock.calls[0][0].getElement()
+      expect(firstButton.getAttribute('aria-label')).toBe('Custom label')
+    })
+
+    it('hides marker buttons when the layer is attached with visible: false', () => {
+      const { adapter, olMapMock } = makeOpenLayersAdapter()
+      const layer = new LocationsLayer({ positions, renderer: 'vector' })
+
+      layer.attach(adapter, { visible: false })
+
+      const button = olMapMock.addOverlay.mock.calls[0][0].getElement()
+      expect(button.style.display).toBe('none')
+    })
+
+    it('does not duplicate overlays when attach is called twice', () => {
+      const { adapter, olMapMock } = makeOpenLayersAdapter()
+      const layer = new LocationsLayer({ positions, renderer: 'vector' })
+
+      layer.attach(adapter)
+      layer.attach(adapter)
+
+      // one removeOverlay call per position (from the second attach's cleanup),
+      // and two full sets of addOverlay calls (one per attach)
+      expect(olMapMock.removeOverlay).toHaveBeenCalledTimes(positions.length)
+      expect(olMapMock.addOverlay).toHaveBeenCalledTimes(positions.length * 2)
+    })
+
+    it('removes all marker overlays on detach', () => {
+      const { adapter, olMapMock } = makeOpenLayersAdapter()
+      const layer = new LocationsLayer({ positions, renderer: 'vector' })
+
+      layer.attach(adapter)
+      const addedOverlays = olMapMock.addOverlay.mock.calls.map((call: any) => call[0])
+
+      layer.detach(adapter)
+
+      expect(olMapMock.removeOverlay).toHaveBeenCalledTimes(positions.length)
+      addedOverlays.forEach((overlay: Overlay) => {
+        expect(olMapMock.removeOverlay).toHaveBeenCalledWith(overlay)
+      })
+    })
+
+    it('invokes the map click interaction and dispatches a custom event on button click', () => {
+      const { adapter, olMapMock } = makeOpenLayersAdapter()
+
+      const showAtCoordinate = jest.fn()
+      olMapMock.getInteractions.mockReturnValue({
+        getArray: () => [{ overlay: { showAtCoordinate } }],
+      })
+
+      const target = document.createElement('div')
+      olMapMock.getTargetElement.mockReturnValue(target)
+
+      const dispatchSpy = jest.spyOn(target, 'dispatchEvent')
+
+      const layer = new LocationsLayer({ positions, renderer: 'vector' })
+      layer.attach(adapter)
+
+      const button = olMapMock.addOverlay.mock.calls[0][0].getElement() as HTMLButtonElement
+      button.click()
+
+      expect(showAtCoordinate).toHaveBeenCalledTimes(1)
+      expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'em-map:marker:select' }))
+    })
+
+    it('does not throw when clicked and no click interaction exists on the map', () => {
+      const { adapter, olMapMock } = makeOpenLayersAdapter()
+      olMapMock.getInteractions.mockReturnValue({ getArray: () => [] })
+
+      const layer = new LocationsLayer({ positions, renderer: 'vector' })
+      layer.attach(adapter)
+
+      const button = olMapMock.addOverlay.mock.calls[0][0].getElement() as HTMLButtonElement
+
+      expect(() => button.click()).not.toThrow()
+    })
   })
 })
