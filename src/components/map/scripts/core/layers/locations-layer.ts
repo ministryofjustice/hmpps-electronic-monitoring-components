@@ -97,9 +97,11 @@ function focusOverlayControl(
   attemptsLeft = 10,
 ): void {
   const root = opener.getRootNode() as Document | ShadowRoot
-  
-  const control = 
-    (root.nodeType === Node.ELEMENT_NODE ? (root as unknown as HTMLElement).querySelector<HTMLElement>(OVERLAY_CONTAINER_SELECTOR) : null) ||
+
+  const control =
+    (root.nodeType === Node.ELEMENT_NODE
+      ? (root as unknown as HTMLElement).querySelector<HTMLElement>(OVERLAY_CONTAINER_SELECTOR)
+      : null) ||
     root.querySelector?.<HTMLElement>(OVERLAY_CONTAINER_SELECTOR) ||
     document.querySelector<HTMLElement>(OVERLAY_CONTAINER_SELECTOR)
 
@@ -116,7 +118,6 @@ function focusOverlayControl(
     requestAnimationFrame(() => focusOverlayControl(opener, onFocused, attemptsLeft - 1))
   }
 }
-
 
 function isWebGLCompatible(style?: LocationsLayerOptions['style']): boolean {
   if (!style) return true
@@ -228,8 +229,8 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
 
         focusOverlayControl(button, (_control, root) => {
           root
-              .querySelector<HTMLElement>('.app-map__overlay-close')
-              ?.addEventListener('click', () => button.focus(), { once: true })
+            .querySelector<HTMLElement>('.app-map__overlay-close')
+            ?.addEventListener('click', () => button.focus(), { once: true })
         })
 
         target?.dispatchEvent(

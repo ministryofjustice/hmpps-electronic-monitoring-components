@@ -471,7 +471,6 @@ describe('LocationLayer (OpenLayers library)', () => {
       closeButton.className = 'app-map__overlay-close'
       overlayContainer.appendChild(closeButton)
 
-
       button.click()
       closeButton.click()
 
@@ -484,7 +483,7 @@ describe('LocationLayer (OpenLayers library)', () => {
       document.body.appendChild(targetElement)
       olMapMock.getTargetElement.mockReturnValue(targetElement)
       olMapMock.getInteractions.mockReturnValue({ getArray: () => [] })
-      
+
       const layer = new LocationsLayer({ positions, renderer: 'vector' })
       layer.attach(adapter)
 
