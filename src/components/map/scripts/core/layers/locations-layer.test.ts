@@ -15,19 +15,15 @@ import type { Position } from '../types/position'
 type OLVecSrc = VectorSource<Feature<Geometry>>
 type OLVecLayer = VectorLayer<OLVecSrc>
 
-// Extend Position for tests to support marker
 type PositionWithMarker = Position & {
   marker?: MarkerOptions
 }
-
-// Helper function to extract the style for testing purposes
 function getStyle(layer: OLVecLayer): Style {
   const styleFn = layer.getStyle() as any
   const feature = layer.getSource()!.getFeatures()[0]
   return styleFn(feature, 1)
 }
 
-// Helper for multi-layer support
 function getAddedLayers(mock: any): BaseLayer[] {
   return mock.addLayer.mock.calls.map((call: any) => call[0])
 }
@@ -387,6 +383,7 @@ describe('LocationLayer (OpenLayers library)', () => {
       layer.attach(adapter)
 
       const button = olMapMock.addOverlay.mock.calls[0][0].getElement() as HTMLButtonElement
+      target.appendChild(button)
       button.click()
 
       expect(showAtCoordinate).toHaveBeenCalledTimes(1)
@@ -403,6 +400,98 @@ describe('LocationLayer (OpenLayers library)', () => {
       const button = olMapMock.addOverlay.mock.calls[0][0].getElement() as HTMLButtonElement
 
       expect(() => button.click()).not.toThrow()
+    })
+  })
+
+  describe('LocationsLayer overlay focus management', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+      document.body.innerHTML = ''
+      jest.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback) => {
+        cb(0)
+        return 0
+      })
+    })
+
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    const setupWithOverlayContainer = () => {
+      const { adapter, olMapMock } = makeOpenLayersAdapter()
+      const targetElement = document.createElement('div')
+      document.body.appendChild(targetElement)
+      olMapMock.getTargetElement.mockReturnValue(targetElement)
+
+      olMapMock.getInteractions.mockReturnValue({
+        getArray: () => [{ overlay: { showAtCoordinate: jest.fn() } }],
+      })
+
+      const overlayContainer = document.createElement('div')
+      overlayContainer.className = 'app-map__overlay'
+      targetElement.appendChild(overlayContainer)
+
+      const layer = new LocationsLayer({ positions, renderer: 'vector' })
+      layer.attach(adapter)
+
+      const button = olMapMock.addOverlay.mock.calls[0][0].getElement() as HTMLButtonElement
+      targetElement.appendChild(button)
+
+      return { overlayContainer, button }
+    }
+
+    it('moves focus to the overlay container after a marker button is clicked', () => {
+      const { overlayContainer, button } = setupWithOverlayContainer()
+
+      button.click()
+
+      expect(document.activeElement).toBe(overlayContainer)
+    })
+
+    it('sets tabindex="-1" on the overlay container if not already present', () => {
+      const { overlayContainer, button } = setupWithOverlayContainer()
+
+      button.click()
+
+      expect(overlayContainer.getAttribute('tabindex')).toBe('-1')
+    })
+
+    it('does not overwrite an existing tabindex on the overlay container', () => {
+      const { overlayContainer, button } = setupWithOverlayContainer()
+      overlayContainer.setAttribute('tabindex', '0')
+
+      button.click()
+
+      expect(overlayContainer.getAttribute('tabindex')).toBe('0')
+    })
+
+    it('returns focus to the marker button when the close button is clicked', () => {
+      const { overlayContainer, button } = setupWithOverlayContainer()
+      const closeButton = document.createElement('button')
+      closeButton.className = 'app-map__overlay-close'
+      overlayContainer.appendChild(closeButton)
+
+      button.click()
+      closeButton.click()
+
+      expect(document.activeElement).toBe(button)
+    })
+
+    it('gives up without throwing if the overlay container never appears', () => {
+      const { adapter, olMapMock } = makeOpenLayersAdapter()
+      const targetElement = document.createElement('div')
+      document.body.appendChild(targetElement)
+      olMapMock.getTargetElement.mockReturnValue(targetElement)
+      olMapMock.getInteractions.mockReturnValue({ getArray: () => [] })
+
+      const layer = new LocationsLayer({ positions, renderer: 'vector' })
+      layer.attach(adapter)
+
+      const button = olMapMock.addOverlay.mock.calls[0][0].getElement() as HTMLButtonElement
+      targetElement.appendChild(button)
+
+      expect(() => button.click()).not.toThrow()
+      expect(document.activeElement).not.toBe(button)
     })
   })
 })

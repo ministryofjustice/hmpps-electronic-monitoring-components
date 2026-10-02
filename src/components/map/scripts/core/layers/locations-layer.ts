@@ -89,6 +89,36 @@ export type LocationsLayerOptions = {
   positions?: Array<Position>
 }
 
+const OVERLAY_CONTAINER_SELECTOR = '.app-map__overlay'
+
+function focusOverlayControl(
+  opener: HTMLElement,
+  onFocused?: (control: HTMLElement, root: Document | ShadowRoot) => void,
+  attemptsLeft = 10,
+): void {
+  const root = opener.getRootNode() as Document | ShadowRoot
+
+  const control =
+    (root.nodeType === Node.ELEMENT_NODE
+      ? (root as unknown as HTMLElement).querySelector<HTMLElement>(OVERLAY_CONTAINER_SELECTOR)
+      : null) ||
+    root.querySelector?.<HTMLElement>(OVERLAY_CONTAINER_SELECTOR) ||
+    document.querySelector<HTMLElement>(OVERLAY_CONTAINER_SELECTOR)
+
+  if (control) {
+    if (!control.hasAttribute('tabindex')) {
+      control.setAttribute('tabindex', '-1')
+    }
+    control.focus()
+    const finalRoot = control.getRootNode() as Document | ShadowRoot
+    onFocused?.(control, finalRoot)
+    return
+  }
+  if (attemptsLeft > 0) {
+    requestAnimationFrame(() => focusOverlayControl(opener, onFocused, attemptsLeft - 1))
+  }
+}
+
 function isWebGLCompatible(style?: LocationsLayerOptions['style']): boolean {
   if (!style) return true
 
@@ -196,6 +226,12 @@ export class LocationsLayer implements ComposableLayer<BaseLayer[]> {
             displayPointLabel,
           })
         }
+
+        focusOverlayControl(button, (_control, root) => {
+          root
+            .querySelector<HTMLElement>('.app-map__overlay-close')
+            ?.addEventListener('click', () => button.focus(), { once: true })
+        })
 
         target?.dispatchEvent(
           new CustomEvent('em-map:marker:select', {
