@@ -2,7 +2,7 @@
 
 <em-map
   {% if params.usesInternalOverlays %}uses-internal-overlays{% endif %}
-  csp-nonce="{{ params.cspNonce }}"
+  {% if params.cspNonce %}csp-nonce="{{ params.cspNonce }}"{% endif %}
     {% if params.apiKey %}api-key="{{ params.apiKey }}"{% endif %}
     {% if params.renderer %}renderer="{{ params.renderer }}"{% endif %}
     {% if params.controls.scaleControl %}scale-control="{{ params.controls.scaleControl }}"{% endif %}

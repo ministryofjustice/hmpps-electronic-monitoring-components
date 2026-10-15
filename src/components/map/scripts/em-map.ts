@@ -768,9 +768,10 @@ export class EmMap extends HTMLElement {
   }
 
   render() {
-    if (this.mapNonce === null) {
-      console.warn('Warning: No CSP nonce provided. Styles may not be applied correctly.')
-      return
+    if (!this.mapNonce) {
+      console.warn(
+        '<em-map>: no csp-nonce attribute provided. If your Content Security Policy uses a nonce-based style-src, component styles may be blocked. Pass csp-nonce to fix this.',
+      )
     }
 
     this.shadow.innerHTML = ''

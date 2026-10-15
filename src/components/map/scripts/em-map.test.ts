@@ -196,6 +196,55 @@ describe('EmMap', () => {
     expect(detach).toHaveBeenCalledTimes(2) // Called twice for ID and title
   })
 
+  describe('csp-nonce', () => {
+    const getMapNonceMock = dom.getMapNonce as jest.Mock
+
+    const mountAndWait = async (emMap: EmMap) => {
+      emMap.setAttribute('renderer', 'openlayers')
+      emMap.setAttribute('vector-url', 'https://test-vector')
+      await new Promise<void>(resolve => {
+        emMap.addEventListener('map:ready', () => resolve(), { once: true })
+        document.body.appendChild(emMap)
+      })
+    }
+
+    it('renders the map container and initialises the map without a nonce', async () => {
+      getMapNonceMock.mockReturnValue(null)
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      const emMap = document.createElement('em-map') as EmMap
+
+      await mountAndWait(emMap)
+
+      expect(emMap.shadowRoot?.querySelector('#map')).not.toBeNull()
+      expect(emMap.olMapInstance?.getTargetElement()).not.toBeNull()
+      expect(dom.createScopedStyle).toHaveBeenCalledWith(expect.anything(), null)
+      warnSpy.mockRestore()
+    })
+
+    it('warns when no nonce is provided', async () => {
+      getMapNonceMock.mockReturnValue(null)
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+
+      await mountAndWait(document.createElement('em-map') as EmMap)
+
+      expect(warnSpy).toHaveBeenCalledTimes(1)
+      expect(warnSpy.mock.calls[0][0]).toContain('no csp-nonce attribute provided')
+      warnSpy.mockRestore()
+    })
+
+    it('does not warn when a nonce is provided', async () => {
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+      const emMap = document.createElement('em-map') as EmMap
+
+      await mountAndWait(emMap)
+
+      expect(warnSpy).not.toHaveBeenCalled()
+      expect(emMap.shadowRoot?.querySelector('#map')).not.toBeNull()
+      expect(dom.createScopedStyle).toHaveBeenCalledWith(expect.anything(), 'test-nonce')
+      warnSpy.mockRestore()
+    })
+  })
+
   it('closeOverlay delegates to featureOverlay.close()', () => {
     const emMap = new EmMap()
     const closeFn = jest.fn()

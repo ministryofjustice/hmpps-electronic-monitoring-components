@@ -25,7 +25,7 @@ export function createMapDOM(): DocumentFragment {
   return fragment
 }
 
-export function createScopedStyle(styles: string, nonce?: string): HTMLStyleElement {
+export function createScopedStyle(styles: string, nonce?: string | null): HTMLStyleElement {
   const styleEl = document.createElement('style')
   if (nonce) {
     styleEl.setAttribute('nonce', nonce)

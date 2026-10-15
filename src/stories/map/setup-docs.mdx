@@ -118,6 +118,8 @@ Render the element with its macro:
 }) }}
 ```
 
+`cspNonce` (the `csp-nonce` attribute) is **optional**. It is only needed when your page's CSP uses a nonce-based `style-src`. The bare `<em-map></em-map>` tag works without it, but a console warning is logged as a reminder.
+
 Click the Show code button on the map example above for a full Nunjucks implementation.
 
 Ensure the host container has a **non-zero height**, otherwise OpenLayers will log:
@@ -324,7 +326,7 @@ See the [**Overlays Story**](?path=/docs/components-map-overlays-docs--docs) for
   Ensure the host container has an explicit height (e.g. `450px`).
 
 - **CSP errors**  
-  Ensure you pass a `cspNonce` and include `'nonce-<value>'` in `style-src`.
+  `csp-nonce` is optional. If your `style-src` is nonce-based and component styles are blocked (or the console shows the "no csp-nonce attribute provided" warning), pass a `cspNonce` and include `'nonce-<value>'` in `style-src`.
 
 - **Vector tiles not loading**  
   Confirm the server middleware is mounted and OS credentials are set. The UI talks to the local proxy automatically.
