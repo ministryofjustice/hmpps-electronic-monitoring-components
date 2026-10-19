@@ -8,6 +8,10 @@ export default class MapPointerInteraction extends PointerInteraction {
 
   handleEvent(event: MapBrowserEvent<PointerEvent>): boolean {
     const viewport = event.map.getViewport()
+    if (!viewport) {
+      console.error('Viewport is undefined, unable to set cursor style')
+      return true
+    }
 
     if (event.type === 'pointerdown') {
       // Only change to 'grabbing' if the current cursor isn't already 'pointer'
