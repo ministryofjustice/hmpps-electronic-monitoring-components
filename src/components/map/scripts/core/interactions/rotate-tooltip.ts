@@ -14,7 +14,7 @@ export function attachRotateTooltip(
 ) {
   if (controls.rotateTooltip === false) return
 
-  const rotateEl = map.getViewport().querySelector('.ol-rotate') as HTMLElement | null
+  const rotateEl = map.getViewport()?.querySelector('.ol-rotate') as HTMLElement | null
   if (!rotateEl) return
 
   // Remove default browser tooltip

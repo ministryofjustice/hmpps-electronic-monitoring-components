@@ -45,7 +45,13 @@ export default class FeaturePointerInteraction extends PointerInteraction {
         if (event.dragging) return true
         const feature = this.getIntersectingFeature(event)
         // Only this interaction is allowed to set 'pointer'
-        if (feature) viewport.style.cursor = 'pointer'
+        if (feature) {
+          if (viewport) {
+            viewport.style.cursor = 'pointer'
+          } else {
+            console.error('Viewport is undefined, unable to set cursor style')
+          }
+        }
         // Do NOT reset to '' here; MapPointerInteraction will set 'grab'
         break
       }

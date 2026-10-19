@@ -4,6 +4,10 @@ import DragPan from 'ol/interaction/DragPan'
 // Ctrl + left drag and Right-click drag (mouse or trackpad “secondary”) to rotate the map
 export function attachDragRotate(map: Map): void {
   const viewport = map.getViewport()
+  if (!viewport) {
+    console.error('Viewport is undefined, unable to attach drag rotate interaction')
+    return
+  }
 
   let rotating = false
   let lastAngle = 0

@@ -67,7 +67,11 @@ export async function setupOpenLayersMap(
     const viewportEl = map.getViewport()
 
     // Set initial cursor
-    viewportEl.style.cursor = 'grab'
+    if (viewportEl) {
+      viewportEl.style.cursor = 'grab'
+    } else {
+      console.error('Viewport is undefined, unable to set initial cursor style')
+    }
   }
 
   return map
