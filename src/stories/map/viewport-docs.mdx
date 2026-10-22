@@ -79,9 +79,27 @@ Fits the map to all layers currently added to the map.
 
 ---
 
+## Return value
+
+The `fitTo*` methods return `true` if the view was fitted, and `false` if there was nothing to fit
+(for example an unknown layer id, or no points).
+
+```ts
+if (!map.fitToLayer('locations-green')) {
+  // nothing to fit
+}
+```
+
+If the map has not finished initialising, the fit is deferred and `false` is returned.
+Wait for `map:ready` first if you need the result.
+
+A single point is fitted at zoom 16, capped by `maxZoom`.
+
+---
+
 ## Animation
 
-Viewport methods animate by default.
+Viewport methods animate by default. Pass `animate: false` to fit immediately.
 
 ### Default animation
 
