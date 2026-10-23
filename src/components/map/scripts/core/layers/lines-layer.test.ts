@@ -16,6 +16,15 @@ describe('LinesLayer', () => {
     expect(layer.getNativeLayer()).toBe(olLayer)
   })
 
+  it('is visible by default', () => {
+    const { adapter } = makeOpenLayersAdapter()
+    const layer = new LinesLayer({ positions })
+
+    layer.attach(adapter)
+
+    expect(layer.getNativeLayer()!.getVisible()).toBe(true)
+  })
+
   it('respects visible and zIndex options', () => {
     const { adapter } = makeOpenLayersAdapter()
     const layer = new LinesLayer({
