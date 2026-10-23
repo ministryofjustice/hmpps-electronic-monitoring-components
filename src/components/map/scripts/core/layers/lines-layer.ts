@@ -61,7 +61,7 @@ export class LinesLayer implements ComposableLayer<OLVecLayer> {
       positions: this.options.positions,
       style: this.options.style,
       title: this.options.title ?? this.id,
-      visible: layerStateOptions?.visible ?? this.options.visible,
+      visible: layerStateOptions?.visible ?? this.options.visible ?? true,
       zIndex: layerStateOptions?.zIndex ?? this.options.zIndex,
     })
 

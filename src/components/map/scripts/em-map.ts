@@ -57,6 +57,9 @@ type FitToOptions = ViewportOptions & {
   targets: FitTarget[]
 }
 
+const DEFAULT_MAX_ZOOM = 18
+const SINGLE_POINT_ZOOM = 16
+
 type InitialViewport = {
   latitude?: number
   longitude?: number
@@ -267,15 +270,17 @@ export class EmMap extends HTMLElement {
   }
 
   // Fits the map view to the given targets (layers or points), with options for padding, max zoom, and animation.
-  public fitTo(options: FitToOptions) {
+  // Returns true if the view was fitted, or false if there was nothing to fit (e.g. unknown layer ids or empty
+  // extents), or the map is not OpenLayers. If the map is not initialised yet, the fit is deferred and false is returned.
+  public fitTo(options: FitToOptions): boolean {
     if (!this.adapter) {
       requestAnimationFrame(() => this.fitTo(options))
-      return
+      return false
     }
 
     if (this.adapter.mapLibrary !== 'openlayers') {
       console.warn('[EmMap] fitTo not implemented for MapLibre yet')
-      return
+      return false
     }
 
     const { map } = this.adapter.openlayers!
@@ -291,10 +296,10 @@ export class EmMap extends HTMLElement {
 
       if (target.type === 'layer') {
         const layer = this.layers.get(target.layerId)
-        const extent = layer?.getExtent?.()
+        const layerExtent = layer ? this.getComposableLayerExtent(layer) : null
 
-        if (extent) {
-          extents.push(extent)
+        if (layerExtent) {
+          extents.push(layerExtent)
         } else {
           const nativeLayers = this.findNativeLayersByIdOrTitle(target.layerId)
           nativeLayers.forEach(nativeLayer => {
@@ -305,74 +310,38 @@ export class EmMap extends HTMLElement {
       }
     }
 
-    if (!extents.length) return
+    if (!extents.length) return false
 
     const merged: Extent = extents.reduce((acc, ext) => extend(acc, ext))
 
-    if (isEmpty(merged)) return
+    if (isEmpty(merged)) return false
 
-    // Handle single-point edge case
-    const width = merged[2] - merged[0]
-    const height = merged[3] - merged[1]
+    const maxZoom = options.maxZoom ?? DEFAULT_MAX_ZOOM
+    const isSinglePoint = merged[2] - merged[0] === 0 && merged[3] - merged[1] === 0
 
-    const isSinglePoint = width === 0 && height === 0
-
-    if (isSinglePoint) {
-      const center: [number, number] = [(merged[0] + merged[2]) / 2, (merged[1] + merged[3]) / 2]
-
-      view.animate({
-        center,
-        zoom: Math.min(options.maxZoom ?? 18, 16),
-        duration: options.animate === false ? 0 : (options.durationMs ?? 500),
-      })
-
-      return
-    }
-
-    // If no animation, set view immediately and return
-    if (options.animate === false) {
-      const size = map.getSize()
-      if (!size) return
-
-      const padding = this.normalizePadding(options.padding ?? 40)
-
-      // Adjust size for padding
-      const paddedSize: [number, number] = [
-        size[0] - padding[1] - padding[3], // width - left - right
-        size[1] - padding[0] - padding[2], // height - top - bottom
-      ]
-
-      const resolution = view.getResolutionForExtent(merged, paddedSize)
-
-      view.setCenter([(merged[0] + merged[2]) / 2, (merged[1] + merged[3]) / 2])
-
-      if (resolution) {
-        view.setResolution(resolution)
-      }
-
-      return
-    }
-
+    // A zero-size extent is fitted at the maximum zoom allowed
     view.fit(merged, {
       padding: this.normalizePadding(options.padding ?? 40),
-      maxZoom: options.maxZoom ?? 18,
-      duration: options.durationMs ?? 500,
+      maxZoom: isSinglePoint ? Math.min(maxZoom, SINGLE_POINT_ZOOM) : maxZoom,
+      duration: options.animate === false ? 0 : (options.durationMs ?? 500),
     })
+
+    return true
   }
 
   // Fits the map view to points from a specific layer, with options for padding, max zoom, and animation.
-  public fitToLayer(layerOrId: string | ComposableLayer, options?: ViewportOptions) {
+  public fitToLayer(layerOrId: string | ComposableLayer, options?: ViewportOptions): boolean {
     const layerId = typeof layerOrId === 'string' ? layerOrId : layerOrId.id
 
-    this.fitTo({
+    return this.fitTo({
       ...options,
       targets: [{ type: 'layer', layerId }],
     })
   }
 
   // Fits the map view to points from specific layers, with options for padding, max zoom, and animation.
-  public fitToLayers(layerIds: Array<string | ComposableLayer>, options?: ViewportOptions) {
-    this.fitTo({
+  public fitToLayers(layerIds: Array<string | ComposableLayer>, options?: ViewportOptions): boolean {
+    return this.fitTo({
       ...options,
       targets: layerIds.map(layer => ({
         type: 'layer',
@@ -382,20 +351,20 @@ export class EmMap extends HTMLElement {
   }
 
   // Fits the map view to specific points, with options for padding, max zoom, and animation.
-  public fitToPoints(points: Position[], options?: ViewportOptions) {
-    this.fitTo({
+  public fitToPoints(points: Position[], options?: ViewportOptions): boolean {
+    return this.fitTo({
       ...options,
       targets: [{ type: 'points', points }],
     })
   }
 
   // Fits the map view to points from the position data slot, with options for padding, max zoom, and animation.
-  public fitToPositions(options?: ViewportOptions) {
-    this.fitToPoints(this.positionData, options)
+  public fitToPositions(options?: ViewportOptions): boolean {
+    return this.fitToPoints(this.positionData, options)
   }
 
   // Fits the map view to all layers currently on the map, with options for padding, max zoom, and animation.
-  public fitToAllLayers(options?: ViewportOptions) {
+  public fitToAllLayers(options?: ViewportOptions): boolean {
     const layerIds = new Set<string>(Array.from(this.layers.keys()))
 
     if (this.adapter?.mapLibrary === 'openlayers') {
@@ -425,7 +394,7 @@ export class EmMap extends HTMLElement {
         .forEach(layer => visit(layer))
     }
 
-    this.fitToLayers(Array.from(layerIds), options)
+    return this.fitToLayers(Array.from(layerIds), options)
   }
 
   // Focuses the map view on a specific point, with options for zoom level, animation, and animation duration.
@@ -517,6 +486,22 @@ export class EmMap extends HTMLElement {
       .getArray()
       .forEach(layer => visit(layer))
     return matches
+  }
+
+  // Resolves a registered layer's extent from the layer itself, or from its native layers. This does not depend on the
+  // native layer title matching the layer id.
+  private getComposableLayerExtent(layer: ComposableLayer<unknown>): Extent | null {
+    const extent = layer.getExtent?.()
+    if (extent && !isEmpty(extent)) return extent
+
+    const native = layer.getNativeLayer() as BaseLayer | BaseLayer[] | undefined
+    const nativeLayers = (Array.isArray(native) ? native : [native]).filter((item): item is BaseLayer => !!item)
+
+    const extents = nativeLayers
+      .map(nativeLayer => this.getNativeLayerExtent(nativeLayer))
+      .filter((nativeExtent): nativeExtent is Extent => !!nativeExtent)
+
+    return extents.length ? extents.reduce((acc, ext) => extend(acc, ext)) : null
   }
 
   private getNativeLayerExtent(layer: BaseLayer): Extent | null {

@@ -375,7 +375,7 @@ describe('EmMap', () => {
     expect(fitSpy).not.toHaveBeenCalled()
   })
 
-  it('fitTo uses view.animate for a single-point extent', async () => {
+  const mountMap = async () => {
     const emMap = document.createElement('em-map') as EmMap
     emMap.setAttribute('renderer', 'openlayers')
     emMap.setAttribute('vector-url', 'https://test-vector')
@@ -385,48 +385,82 @@ describe('EmMap', () => {
       document.body.appendChild(emMap)
     })
 
-    const view = getMockView()
-    const animateSpy = jest.spyOn(view, 'animate')
+    return emMap
+  }
 
-    emMap.fitTo({
-      targets: [{ type: 'points', points: [{ latitude: 1, longitude: 1, precision: 0 }] }],
-    })
+  const twoPoints = [
+    { latitude: 0, longitude: 0, precision: 0 },
+    { latitude: 1, longitude: 1, precision: 0 },
+  ]
+  const onePoint = [{ latitude: 1, longitude: 1, precision: 0 }]
 
-    expect(animateSpy).toHaveBeenCalledTimes(1)
+  it('fitTo fits a single-point extent with view.fit at zoom 16, honouring padding and maxZoom', async () => {
+    const emMap = await mountMap()
+    const fitSpy = jest.spyOn(getMockView(), 'fit')
+
+    const result = emMap.fitTo({ targets: [{ type: 'points', points: onePoint }], padding: [10, 20, 30, 40] })
+    emMap.fitTo({ targets: [{ type: 'points', points: onePoint }], maxZoom: 12 })
+
+    expect(result).toBe(true)
+    expect(fitSpy.mock.calls[0][1]).toMatchObject({ padding: [10, 20, 30, 40], maxZoom: 16, duration: 500 })
+    expect(fitSpy.mock.calls[1][1]).toMatchObject({ maxZoom: 12 })
   })
 
-  it('fitTo with animate=false sets center and resolution directly', async () => {
-    const emMap = document.createElement('em-map') as EmMap
-    emMap.setAttribute('renderer', 'openlayers')
-    emMap.setAttribute('vector-url', 'https://test-vector')
-
-    await new Promise<void>(resolve => {
-      emMap.addEventListener('map:ready', () => resolve(), { once: true })
-      document.body.appendChild(emMap)
-    })
-
+  it('fitTo with animate=false uses view.fit with zero duration, maxZoom and padding', async () => {
+    const emMap = await mountMap()
     const view = getMockView()
-
-    const setCenterSpy = jest.spyOn(view, 'setCenter')
-    const setResolutionSpy = jest.spyOn(view, 'setResolution')
     const fitSpy = jest.spyOn(view, 'fit')
+    const setCenterSpy = jest.spyOn(view, 'setCenter')
 
-    emMap.fitTo({
+    const result = emMap.fitTo({
       animate: false,
-      targets: [
-        {
-          type: 'points',
-          points: [
-            { latitude: 0, longitude: 0, precision: 0 },
-            { latitude: 1, longitude: 1, precision: 0 },
-          ],
-        },
-      ],
+      maxZoom: 10,
+      padding: [0, 0, 0, 100],
+      targets: [{ type: 'points', points: twoPoints }],
     })
 
-    expect(fitSpy).not.toHaveBeenCalled()
-    expect(setCenterSpy).toHaveBeenCalled()
-    expect(setResolutionSpy).toHaveBeenCalled()
+    expect(result).toBe(true)
+    expect(fitSpy).toHaveBeenCalledTimes(1)
+    expect(fitSpy.mock.calls[0][1]).toMatchObject({ duration: 0, maxZoom: 10, padding: [0, 0, 0, 100] })
+    expect(setCenterSpy).not.toHaveBeenCalled()
+  })
+
+  it('fitTo returns false when there is nothing to fit', async () => {
+    const emMap = await mountMap()
+
+    expect(emMap.fitTo({ targets: [{ type: 'points', points: [] }] })).toBe(false)
+    expect(emMap.fitToLayer('does-not-exist')).toBe(false)
+  })
+
+  it('fitTo resolves extents from a registered layer whose title differs from its id', async () => {
+    const emMap = await mountMap()
+    const fitSpy = jest.spyOn(getMockView(), 'fit')
+
+    const nativeLayer = { getSource: () => ({ getExtent: () => [0, 0, 100, 100] }) }
+    emMap.addLayer({
+      id: 'my-layer',
+      attach: jest.fn(),
+      detach: jest.fn(),
+      getNativeLayer: () => [nativeLayer],
+      getPrimaryLayer: jest.fn(),
+    } as any)
+
+    expect(emMap.fitToLayer('my-layer')).toBe(true)
+    expect(fitSpy.mock.calls[0][0]).toEqual([0, 0, 100, 100])
+  })
+
+  it('fitTo resolves extents from a registered layer that exposes a single native layer', async () => {
+    const emMap = await mountMap()
+
+    emMap.addLayer({
+      id: 'single',
+      attach: jest.fn(),
+      detach: jest.fn(),
+      getNativeLayer: () => ({ getSource: () => ({ getExtent: () => [1, 1, 2, 2] }) }),
+      getPrimaryLayer: jest.fn(),
+    } as any)
+
+    expect(emMap.fitToLayer('single')).toBe(true)
   })
 
   it('fitTo passes duration when animate=true', async () => {
