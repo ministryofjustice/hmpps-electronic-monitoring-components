@@ -84,7 +84,7 @@
     "dotenv": "^18.0.8",
     "express": "^5.3.0",
     "maplibre-gl": "^6.14.0",
-    "ol-mapbox-style": "^13.7.1",
+    "ol-mapbox-style": "^13.8.0",
     "superagent": "^10.4.1"
   },
   "devDependencies": {
@@ -111,7 +111,7 @@
     "babel-jest": "^30.5.2",
     "chokidar-cli": "^3.0.0",
     "cypress": "^16.2.0",
-    "eslint": "^10.12.0",
+    "eslint": "^10.13.0",
     "eslint-import-resolver-typescript": "4.4.5",
     "eslint-plugin-storybook": "^10.6.2",
     "fast-glob": "^3.3.3",
