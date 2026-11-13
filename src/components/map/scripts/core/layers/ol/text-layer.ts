@@ -44,6 +44,7 @@ type OLTextLayerOptions = {
   title: string
   visible?: boolean
   zIndex?: number
+  declutter?: boolean
 }
 
 const DEFAULT_FONT = 'bold 14px "GDS Transport", system-ui, sans-serif'
@@ -147,6 +148,7 @@ export class OLTextLayer extends VectorLayer<VectorSource<Feature<Point>>> {
     title,
     visible = DEFAULT_VISIBILITY,
     zIndex,
+    declutter = true,
   }: OLTextLayerOptions) {
     super({
       properties: {
@@ -156,6 +158,9 @@ export class OLTextLayer extends VectorLayer<VectorSource<Feature<Point>>> {
         features: createPointFeatureCollectionFromPositions(positions),
       }),
       style: createStyleFunction(style, textProperty),
+      // Hides labels that overlap one already drawn; earlier positions take priority.
+      // A per-layer group keeps this independent of other decluttered layers.
+      declutter: declutter ? `text-layer-${title}` : false,
       visible,
       zIndex,
     })

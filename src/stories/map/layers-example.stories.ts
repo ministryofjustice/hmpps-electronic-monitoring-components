@@ -3,6 +3,14 @@ import { setupMapDemo } from './setupMapDemo'
 import positions from '../../components/map/fixtures/positions.json'
 import type { EmMap } from '../../components/map/scripts/em-map'
 
+// Stationary pings close together so their labels overlap at the default zoom
+const clusteredPositions = Array.from({ length: 12 }, (_, i) => ({
+  latitude: 53.4796 + (i % 4) * 0.00002 - (Math.floor(i / 4) % 3) * 0.00002,
+  longitude: -2.2444 + (Math.floor(i / 4) % 3) * 0.00003 + (i % 2) * 0.00001,
+  precision: 5,
+  sequenceNumber: i + 5,
+}))
+
 const meta = {
   title: 'Components/Map/Layers',
   parameters: {
@@ -26,6 +34,11 @@ const meta = {
     showLocations: { control: 'boolean', description: 'Show Locations layer' },
     showCircles: { control: 'boolean', description: 'Show Circles layer' },
     showText: { control: 'boolean', description: 'Show Text layer' },
+    declutterText: {
+      control: 'boolean',
+      if: { arg: 'showText', eq: true },
+      description: 'Hide Text layer labels that overlap one already drawn (earlier positions win)',
+    },
     showTracks: { control: 'boolean', description: 'Show Tracks layer' },
     useDirectionProperty: {
       control: 'boolean',
@@ -58,6 +71,7 @@ const meta = {
       showPositions: args.showLocations,
       showCircles: args.showCircles,
       showText: args.showText,
+      declutterText: args.declutterText,
       showTracks: args.showTracks,
       entryExit: {
         enabled: args.entryExitEnabled,
@@ -94,11 +108,12 @@ type Story = StoryObj
 export const Example: Story = {
   args: {
     enable3D: false,
-    positions,
+    positions: [...positions, ...clusteredPositions],
     showLocations: true,
     showTracks: false,
     showCircles: false,
     showText: false,
+    declutterText: true,
     markerMode: 'default',
     entryExitEnabled: false,
     entryExitDistance: 50,
