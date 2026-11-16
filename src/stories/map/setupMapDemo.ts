@@ -36,6 +36,7 @@ interface MapDemoOptions {
   }
   showPositions?: boolean
   showText?: boolean
+  declutterText?: boolean
   showCircles?: boolean
   showTracks?: boolean
   entryExit?: {
@@ -206,6 +207,7 @@ export function setupMapDemo({
   showPositions = true,
   showTracks = false,
   showText = false,
+  declutterText,
   showCircles = false,
   usesInternalOverlays = true,
   attribution,
@@ -335,6 +337,7 @@ export function setupMapDemo({
         id: 'text',
         title: 'textLayer',
         visible: showText,
+        declutter: declutterText,
         zIndex: 3,
       }),
     )

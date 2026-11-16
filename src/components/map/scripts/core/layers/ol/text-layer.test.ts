@@ -46,6 +46,18 @@ describe('OLTextLayer (OpenLayers library)', () => {
     expect(featureStyles[6][0].getText()?.getText()).toBe('2')
   })
 
+  it('should declutter overlapping labels in a per-layer group', () => {
+    const layer = new OLTextLayer({ positions, title: 'labels', textProperty: 'sequenceNumber' })
+
+    expect(layer.getDeclutter()).toBe('text-layer-labels')
+  })
+
+  it('should not declutter labels when declutter is disabled', () => {
+    const layer = new OLTextLayer({ positions, title: 'labels', textProperty: 'sequenceNumber', declutter: false })
+
+    expect(layer.getDeclutter()).toBeFalsy()
+  })
+
   it('should use the default style by default', () => {
     const layer = new OLTextLayer({
       positions,

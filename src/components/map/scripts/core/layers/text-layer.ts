@@ -9,6 +9,8 @@ export type TextLayerOptions = {
   title?: string
   visible?: boolean
   zIndex?: number
+  /** Hide labels that overlap one already drawn (earlier positions win). Defaults to true. */
+  declutter?: boolean
   style?: {
     fill?: string | CanvasPattern | CanvasGradient
     font?: string
@@ -68,6 +70,7 @@ export class TextLayer implements ComposableLayer<BaseLayer[]> {
         title: this.options.title ?? this.id,
         visible: this.options.visible,
         zIndex: this.options.zIndex,
+        declutter: this.options.declutter,
       }),
     ]
   }
