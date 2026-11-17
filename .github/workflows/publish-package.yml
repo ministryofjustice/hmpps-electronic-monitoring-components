@@ -67,9 +67,6 @@ jobs:
           scope: '@ministryofjustice'
           cache: npm
 
-      - name: Update npm to latest
-        run: npm install -g npm@latest
-
       - name: Install npm 12
         run: npm install -g npm@12
 
