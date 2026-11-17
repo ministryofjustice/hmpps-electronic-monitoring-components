@@ -48,6 +48,9 @@ jobs:
         with:
           node-version-file: .nvmrc
 
+      - name: Install npm 12
+        run: npm install -g npm@12
+
       - name: Install dependencies
         run: npm run setup
 
